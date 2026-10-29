@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Activity } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { BUSY, liveBusy, minutesAgo, type BusyLevel } from "@/lib/community";
 import { useNow } from "@/lib/live";
+import { Button } from "@/components/ui/button";
 
 const WAITS = [0, 10, 20, 30, 45, 60];
 
@@ -122,6 +123,55 @@ export function FreeBanner({ freeUntil }: { freeUntil: string | null }) {
         No fees on pickup orders, drops, last-call deals or promotions. {days}{" "}
         {days === 1 ? "day" : "days"} left.
       </p>
+    </section>
+  );
+}
+
+export function OwnerForward({
+  restaurantId,
+  enabled,
+}: {
+  restaurantId: string;
+  enabled: boolean;
+}) {
+  const qc = useQueryClient();
+  const [busy, setBusy] = useState(false);
+  const counts = useQuery({
+    queryKey: ["forward-counts"],
+    enabled,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("forward_counts");
+      if (error) throw error;
+      return new Map((data ?? []).map((r) => [r.restaurant_id, r]));
+    },
+  });
+  if (!enabled) return null;
+  const c = counts.data?.get(restaurantId);
+  const give = async () => {
+    setBusy(true);
+    const { data, error } = await supabase.rpc("give_forward", { p_restaurant_id: restaurantId });
+    setBusy(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(`Gave away ${String(data).toLowerCase()} 💛`);
+    qc.invalidateQueries({ queryKey: ["forward-counts"] });
+  };
+  return (
+    <section className="flex items-center gap-3 rounded-2xl bg-amber-50 p-4 dark:bg-amber-950/30">
+      <span className="text-3xl">💛</span>
+      <div className="min-w-0 flex-1">
+        <p className="font-bold">
+          {c?.waiting ?? 0} paid-forward {c?.waiting === 1 ? "meal" : "meals"} waiting
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {c?.given ?? 0} given so far. Tap when you hand one out.
+        </p>
+      </div>
+      <Button className="h-11" disabled={busy || !c?.waiting} onClick={give}>
+        Gave one
+      </Button>
     </section>
   );
 }

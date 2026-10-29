@@ -23,7 +23,7 @@ function Setup() {
   const [f, setF] = useState({
     name: "", category: "Coffee", description: "", address: "", neighbourhood: NEIGHBOURHOODS[0], phone: "",
     logo_url: null as string | null, cover_url: null as string | null, hours: defaultHours,
-    lat: null as number | null, lng: null as number | null,
+    lat: null as number | null, lng: null as number | null, pay_it_forward: false,
   });
   const [busy, setBusy] = useState(false);
   useEffect(() => {
@@ -32,7 +32,7 @@ function Setup() {
         name: r.name, category: r.category, description: r.description ?? "", address: r.address ?? "",
         neighbourhood: r.neighbourhood ?? NEIGHBOURHOODS[0], phone: r.phone ?? "",
         logo_url: r.logo_url, cover_url: r.cover_url, hours: { ...defaultHours, ...(r.hours as Hours) },
-        lat: r.lat, lng: r.lng,
+        lat: r.lat, lng: r.lng, pay_it_forward: r.pay_it_forward,
       });
   }, [r]);
   const set = (k: keyof typeof f, v: unknown) => setF((p) => ({ ...p, [k]: v }));
@@ -95,6 +95,20 @@ function Setup() {
           );
         })}
       </div>
+      <label className="flex items-start gap-3 rounded-2xl bg-amber-50 p-4 dark:bg-amber-950/30">
+        <input
+          type="checkbox"
+          className="mt-1 size-5 accent-[var(--primary)]"
+          checked={f.pay_it_forward}
+          onChange={(e) => set("pay_it_forward", e.target.checked)}
+        />
+        <span>
+          <span className="block font-semibold">💛 Accept pay-it-forward meals</span>
+          <span className="block text-sm text-muted-foreground">
+            Customers can buy a coffee or meal for someone in need. You hand them out at the counter, no questions asked.
+          </span>
+        </span>
+      </label>
       <Button type="submit" size="xl" className="w-full" disabled={busy}>{busy ? "Saving…" : "Save"}</Button>
     </form>
   );

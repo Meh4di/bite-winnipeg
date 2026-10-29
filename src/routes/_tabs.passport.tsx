@@ -182,7 +182,8 @@ function Passport() {
       {(passport.data?.rescued ?? 0) > 0 && (
         <p className="flex items-center gap-3 rounded-2xl bg-success/15 p-4 font-semibold text-success">
           <span className="text-2xl">♻️</span>
-          You've rescued {passport.data?.rescued} {passport.data?.rescued === 1 ? "meal" : "meals"} from the bin.
+          You've rescued {passport.data?.rescued} {passport.data?.rescued === 1 ? "meal" : "meals"}{" "}
+          from the bin.
         </p>
       )}
 
@@ -206,6 +207,19 @@ function Passport() {
           </Button>
         )}
       </section>
+
+      <Link
+        to="/crawls"
+        className="flex items-center gap-3 rounded-2xl bg-secondary p-4 active:scale-[0.99]"
+      >
+        <span className="text-3xl">🗺️</span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-bold">Food crawls</span>
+          <span className="block text-sm text-muted-foreground">
+            Finish a route for a reward and the Crawl Champ badge
+          </span>
+        </span>
+      </Link>
 
       <section>
         <h2 className="mb-3 text-xl font-bold">Punch cards</h2>

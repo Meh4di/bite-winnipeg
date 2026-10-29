@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Home, Zap, Stamp, Dices, User } from "lucide-react";
+import { useVortex } from "@/lib/weather";
 
 const TABS = [
   { to: "/", label: "Home", icon: Home },
@@ -10,8 +11,9 @@ const TABS = [
 ] as const;
 
 export function TabBar() {
+  useVortex(); // keeps Polar Vortex mode in sync on every screen
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-[430px] border-t bg-card/90 backdrop-blur-xl pb-safe">
+    <nav className="fixed inset-x-0 bottom-0 z-[700] mx-auto max-w-[430px] border-t bg-background/95 backdrop-blur-xl pb-safe">
       <ul className="grid grid-cols-5">
         {TABS.map(({ to, label, icon: Icon }) => (
           <li key={to}>
@@ -20,10 +22,15 @@ export function TabBar() {
               activeOptions={{ exact: true }}
               className="group flex h-16 flex-col items-center justify-center gap-1 text-muted-foreground transition-colors data-[status=active]:text-primary"
             >
-              <span className="grid h-8 w-14 place-items-center rounded-full transition-all group-data-[status=active]:bg-primary-soft group-active:scale-90">
-                <Icon className="size-[22px]" strokeWidth={2.2} />
+              <span className="grid h-8 w-14 place-items-center transition-all group-active:scale-90">
+                <Icon
+                  className="size-[23px] group-data-[status=active]:fill-primary/15"
+                  strokeWidth={2.2}
+                />
               </span>
-              <span className="text-[11px] font-semibold">{label}</span>
+              <span className="text-[11px] font-semibold group-data-[status=active]:font-extrabold">
+                {label}
+              </span>
             </Link>
           </li>
         ))}

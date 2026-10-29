@@ -1,10 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { VortexDealsList, useVortexDeals } from "@/components/bite/Vortex";
 import { useState } from "react";
 import { DropCard } from "@/components/bite/DropCard";
 import { PromoCard } from "@/components/bite/PromoCard";
 import { dropState, useDrops, useNow, usePromotions } from "@/lib/live";
 
+type Seg = "drops" | "leftover" | "deals" | "vortex";
+
 export const Route = createFileRoute("/_tabs/drops")({
+  validateSearch: (s: Record<string, unknown>): { tab?: Seg } => {
+    const t = s["tab"];
+    return t === "drops" || t === "leftover" || t === "deals" || t === "vortex" ? { tab: t } : {};
+  },
   head: () => ({
     meta: [
       { title: "Drops — Bite" },
@@ -19,17 +28,30 @@ export const Route = createFileRoute("/_tabs/drops")({
   component: Drops,
 });
 
-const SEGMENTS = [
+const SEGMENTS: { key: Seg; label: string }[] = [
   { key: "drops", label: "🔥 Drops" },
-  { key: "leftover", label: "♻️ Save food" },
+  { key: "leftover", label: "♻️ Save" },
   { key: "deals", label: "📣 Deals" },
-] as const;
+  { key: "vortex", label: "🥶 Vortex" },
+];
 
 function Drops() {
-  const [seg, setSeg] = useState<(typeof SEGMENTS)[number]["key"]>("drops");
+  const { tab } = Route.useSearch();
   const now = useNow(1000);
   const drops = useDrops();
   const promos = usePromotions();
+  const [seg, setSeg] = useState<Seg>(tab ?? "drops");
+  const vortexDeals = useVortexDeals();
+  const impact = useQuery({
+    queryKey: ["city-impact"],
+    staleTime: 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("city_impact");
+      if (error) throw error;
+      return data?.[0] ?? null;
+    },
+  });
+  const deals = (promos.data ?? []).filter((p) => !p.vortex_only);
 
   const kind = seg === "leftover" ? "leftover" : "drop";
   const list = (drops.data ?? []).filter((d) => d.kind === kind);
@@ -38,27 +60,29 @@ function Drops() {
   const gone = list.filter((d) => ["soldout", "ended"].includes(dropState(d, now)));
   const count = (k: string) =>
     k === "deals"
-      ? (promos.data?.length ?? 0)
-      : (drops.data ?? []).filter(
-          (d) =>
-            d.kind === (k === "leftover" ? "leftover" : "drop") && dropState(d, now) === "live",
-        ).length;
+      ? deals.length
+      : k === "vortex"
+        ? vortexDeals.unlocked.length
+        : (drops.data ?? []).filter(
+            (d) =>
+              d.kind === (k === "leftover" ? "leftover" : "drop") && dropState(d, now) === "live",
+          ).length;
 
   return (
     <div className="animate-screen px-5 pt-[max(env(safe-area-inset-top),1.25rem)]">
       <h1 className="text-[2rem] font-extrabold leading-tight">Drops</h1>
       <p className="text-sm text-muted-foreground">
-        Limited runs, last-call deals and promos. First come, first served.
+        Limited runs, food rescue deals, promos and cold-weather specials.
       </p>
 
-      <div className="mt-4 grid grid-cols-3 gap-1 rounded-2xl bg-muted p-1" role="tablist">
+      <div className="mt-4 grid grid-cols-4 gap-1 rounded-2xl bg-muted p-1" role="tablist">
         {SEGMENTS.map((s) => (
           <button
             key={s.key}
             role="tab"
             aria-selected={seg === s.key}
             onClick={() => setSeg(s.key)}
-            className={`relative h-11 rounded-xl text-sm font-bold transition-all ${
+            className={`relative h-11 rounded-xl text-[13px] font-bold transition-all ${
               seg === s.key ? "bg-card text-foreground shadow-card" : "text-muted-foreground"
             }`}
           >
@@ -72,13 +96,36 @@ function Drops() {
         ))}
       </div>
 
-      {seg === "deals" ? (
+      {seg === "leftover" &&
+        impact.data &&
+        impact.data.meals_rescued + impact.data.meals_donated > 0 && (
+          <div className="mt-4 grid grid-cols-3 gap-2 rounded-2xl bg-success/10 p-3 text-center text-success">
+            <div>
+              <p className="text-xl font-extrabold">{impact.data.meals_rescued}</p>
+              <p className="text-[11px] font-semibold">meals rescued</p>
+            </div>
+            <div>
+              <p className="text-xl font-extrabold">{impact.data.meals_donated}</p>
+              <p className="text-[11px] font-semibold">donated</p>
+            </div>
+            <div>
+              <p className="text-xl font-extrabold">{impact.data.meals_paid_forward}</p>
+              <p className="text-[11px] font-semibold">paid forward</p>
+            </div>
+          </div>
+        )}
+
+      {seg === "vortex" ? (
+        <div className="mt-5">
+          <VortexDealsList />
+        </div>
+      ) : seg === "deals" ? (
         <div className="mt-5 space-y-4">
           {promos.isLoading && <div className="h-48 animate-pulse rounded-3xl bg-muted" />}
-          {promos.data?.map((p) => (
+          {deals.map((p) => (
             <PromoCard key={p.id} p={p} />
           ))}
-          {!promos.isLoading && !promos.data?.length && (
+          {!promos.isLoading && !deals.length && (
             <Empty
               emoji="📣"
               title="No deals running"

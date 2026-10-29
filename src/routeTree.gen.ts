@@ -14,6 +14,8 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as OwnerRouteImport } from './routes/owner'
 import { Route as TabsIndexRouteImport } from './routes/_tabs.index'
+import { Route as TabsBestRouteImport } from './routes/_tabs.best'
+import { Route as TabsCrawlsRouteImport } from './routes/_tabs.crawls'
 import { Route as TabsDecideRouteImport } from './routes/_tabs.decide'
 import { Route as TabsDropsRouteImport } from './routes/_tabs.drops'
 import { Route as TabsMapRouteImport } from './routes/_tabs.map'
@@ -27,6 +29,7 @@ import { Route as OwnerOrdersRouteImport } from './routes/owner.orders'
 import { Route as OwnerSetupRouteImport } from './routes/owner.setup'
 import { Route as OwnerStampsRouteImport } from './routes/owner.stamps'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
+import { Route as TabsCrawlsSlugRouteImport } from './routes/_tabs.crawls_.$slug'
 import { Route as TabsDecideCodeRouteImport } from './routes/_tabs.decide_.$code'
 import { Route as StampSlugCodeRouteImport } from './routes/stamp.$slug.$code'
 
@@ -52,6 +55,16 @@ const OwnerRoute = OwnerRouteImport.update({
 const TabsIndexRoute = TabsIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => TabsRoute,
+} as any)
+const TabsBestRoute = TabsBestRouteImport.update({
+  id: '/best',
+  path: '/best',
+  getParentRoute: () => TabsRoute,
+} as any)
+const TabsCrawlsRoute = TabsCrawlsRouteImport.update({
+  id: '/crawls',
+  path: '/crawls',
   getParentRoute: () => TabsRoute,
 } as any)
 const TabsDecideRoute = TabsDecideRouteImport.update({
@@ -119,6 +132,11 @@ const RSlugRoute = RSlugRouteImport.update({
   path: '/r/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TabsCrawlsSlugRoute = TabsCrawlsSlugRouteImport.update({
+  id: '/crawls_/$slug',
+  path: '/crawls/$slug',
+  getParentRoute: () => TabsRoute,
+} as any)
 const TabsDecideCodeRoute = TabsDecideCodeRouteImport.update({
   id: '/decide_/$code',
   path: '/decide/$code',
@@ -135,6 +153,8 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/owner': typeof OwnerRouteWithChildren
+  '/best': typeof TabsBestRoute
+  '/crawls': typeof TabsCrawlsRoute
   '/decide': typeof TabsDecideRoute
   '/drops': typeof TabsDropsRoute
   '/map': typeof TabsMapRoute
@@ -148,12 +168,15 @@ export interface FileRoutesByFullPath {
   '/owner/stamps': typeof OwnerStampsRoute
   '/r/$slug': typeof RSlugRoute
   '/owner/': typeof OwnerIndexRoute
+  '/crawls/$slug': typeof TabsCrawlsSlugRoute
   '/decide/$code': typeof TabsDecideCodeRoute
   '/stamp/$slug/$code': typeof StampSlugCodeRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
+  '/best': typeof TabsBestRoute
+  '/crawls': typeof TabsCrawlsRoute
   '/decide': typeof TabsDecideRoute
   '/drops': typeof TabsDropsRoute
   '/map': typeof TabsMapRoute
@@ -168,6 +191,7 @@ export interface FileRoutesByTo {
   '/r/$slug': typeof RSlugRoute
   '/': typeof TabsIndexRoute
   '/owner': typeof OwnerIndexRoute
+  '/crawls/$slug': typeof TabsCrawlsSlugRoute
   '/decide/$code': typeof TabsDecideCodeRoute
   '/stamp/$slug/$code': typeof StampSlugCodeRoute
 }
@@ -177,6 +201,8 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/owner': typeof OwnerRouteWithChildren
+  '/_tabs/best': typeof TabsBestRoute
+  '/_tabs/crawls': typeof TabsCrawlsRoute
   '/_tabs/decide': typeof TabsDecideRoute
   '/_tabs/drops': typeof TabsDropsRoute
   '/_tabs/map': typeof TabsMapRoute
@@ -191,6 +217,7 @@ export interface FileRoutesById {
   '/r/$slug': typeof RSlugRoute
   '/_tabs/': typeof TabsIndexRoute
   '/owner/': typeof OwnerIndexRoute
+  '/_tabs/crawls_/$slug': typeof TabsCrawlsSlugRoute
   '/_tabs/decide_/$code': typeof TabsDecideCodeRoute
   '/stamp/$slug/$code': typeof StampSlugCodeRoute
 }
@@ -201,6 +228,8 @@ export interface FileRouteTypes {
     | '/auth'
     | '/checkout'
     | '/owner'
+    | '/best'
+    | '/crawls'
     | '/decide'
     | '/drops'
     | '/map'
@@ -214,12 +243,15 @@ export interface FileRouteTypes {
     | '/owner/stamps'
     | '/r/$slug'
     | '/owner/'
+    | '/crawls/$slug'
     | '/decide/$code'
     | '/stamp/$slug/$code'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
     | '/checkout'
+    | '/best'
+    | '/crawls'
     | '/decide'
     | '/drops'
     | '/map'
@@ -234,6 +266,7 @@ export interface FileRouteTypes {
     | '/r/$slug'
     | '/'
     | '/owner'
+    | '/crawls/$slug'
     | '/decide/$code'
     | '/stamp/$slug/$code'
   id:
@@ -242,6 +275,8 @@ export interface FileRouteTypes {
     | '/auth'
     | '/checkout'
     | '/owner'
+    | '/_tabs/best'
+    | '/_tabs/crawls'
     | '/_tabs/decide'
     | '/_tabs/drops'
     | '/_tabs/map'
@@ -256,6 +291,7 @@ export interface FileRouteTypes {
     | '/r/$slug'
     | '/_tabs/'
     | '/owner/'
+    | '/_tabs/crawls_/$slug'
     | '/_tabs/decide_/$code'
     | '/stamp/$slug/$code'
   fileRoutesById: FileRoutesById
@@ -305,6 +341,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof TabsIndexRouteImport
+      parentRoute: typeof TabsRoute
+    }
+    '/_tabs/best': {
+      id: '/_tabs/best'
+      path: '/best'
+      fullPath: '/best'
+      preLoaderRoute: typeof TabsBestRouteImport
+      parentRoute: typeof TabsRoute
+    }
+    '/_tabs/crawls': {
+      id: '/_tabs/crawls'
+      path: '/crawls'
+      fullPath: '/crawls'
+      preLoaderRoute: typeof TabsCrawlsRouteImport
       parentRoute: typeof TabsRoute
     }
     '/_tabs/decide': {
@@ -398,6 +448,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_tabs/crawls_/$slug': {
+      id: '/_tabs/crawls_/$slug'
+      path: '/crawls/$slug'
+      fullPath: '/crawls/$slug'
+      preLoaderRoute: typeof TabsCrawlsSlugRouteImport
+      parentRoute: typeof TabsRoute
+    }
     '/_tabs/decide_/$code': {
       id: '/_tabs/decide_/$code'
       path: '/decide/$code'
@@ -416,22 +473,28 @@ declare module '@tanstack/react-router' {
 }
 
 interface TabsRouteChildren {
+  TabsBestRoute: typeof TabsBestRoute
+  TabsCrawlsRoute: typeof TabsCrawlsRoute
   TabsDecideRoute: typeof TabsDecideRoute
   TabsDropsRoute: typeof TabsDropsRoute
   TabsMapRoute: typeof TabsMapRoute
   TabsPassportRoute: typeof TabsPassportRoute
   TabsProfileRoute: typeof TabsProfileRoute
   TabsIndexRoute: typeof TabsIndexRoute
+  TabsCrawlsSlugRoute: typeof TabsCrawlsSlugRoute
   TabsDecideCodeRoute: typeof TabsDecideCodeRoute
 }
 
 const TabsRouteChildren: TabsRouteChildren = {
+  TabsBestRoute: TabsBestRoute,
+  TabsCrawlsRoute: TabsCrawlsRoute,
   TabsDecideRoute: TabsDecideRoute,
   TabsDropsRoute: TabsDropsRoute,
   TabsMapRoute: TabsMapRoute,
   TabsPassportRoute: TabsPassportRoute,
   TabsProfileRoute: TabsProfileRoute,
   TabsIndexRoute: TabsIndexRoute,
+  TabsCrawlsSlugRoute: TabsCrawlsSlugRoute,
   TabsDecideCodeRoute: TabsDecideCodeRoute,
 }
 

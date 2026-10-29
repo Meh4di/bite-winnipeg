@@ -6,6 +6,9 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { emojiFor } from "@/lib/bite";
 import { OrderHistory } from "@/components/bite/OrderHistory";
+import { useEffect, useState } from "react";
+import { Moon, Snowflake, Sun, SunMoon, Trophy, Footprints } from "lucide-react";
+import { getVortexPreview, setVortexPreview, useTheme, type ThemeChoice } from "@/lib/theme";
 
 export const Route = createFileRoute("/_tabs/profile")({
   head: () => ({
@@ -51,10 +54,15 @@ function Profile() {
       <div className="flex min-h-[80vh] flex-col items-center justify-center px-8 text-center animate-screen">
         <div className="text-6xl">🍩</div>
         <h1 className="mt-4 text-3xl font-extrabold">Join Bite</h1>
-        <p className="mt-2 text-muted-foreground">Follow your favourite spots and start collecting stamps.</p>
+        <p className="mt-2 text-muted-foreground">
+          Follow your favourite spots and start collecting stamps.
+        </p>
         <Button asChild size="xl" className="mt-6 w-full">
           <Link to="/auth">Sign in or create account</Link>
         </Button>
+        <div className="w-full text-left">
+          <Settings />
+        </div>
       </div>
     );
   }
@@ -112,7 +120,11 @@ function Profile() {
               className="flex items-center gap-3 rounded-2xl bg-card p-3 shadow-card active:scale-[0.98]"
             >
               {f.restaurants.logo_url ? (
-                <img src={f.restaurants.logo_url} alt="" className="size-12 rounded-xl object-cover" />
+                <img
+                  src={f.restaurants.logo_url}
+                  alt=""
+                  className="size-12 rounded-xl object-cover"
+                />
               ) : (
                 <div className="grid size-12 place-items-center rounded-xl bg-primary-soft text-xl">
                   {emojiFor(f.restaurants.category)}
@@ -120,7 +132,9 @@ function Profile() {
               )}
               <div className="min-w-0 flex-1">
                 <p className="truncate font-semibold">{f.restaurants.name}</p>
-                <p className="truncate text-sm text-muted-foreground">{f.restaurants.neighbourhood}</p>
+                <p className="truncate text-sm text-muted-foreground">
+                  {f.restaurants.neighbourhood}
+                </p>
               </div>
               <ChevronRight className="size-5 text-muted-foreground" />
             </Link>
@@ -128,9 +142,81 @@ function Profile() {
         )}
       </div>
 
+      <Settings />
+
       <Button variant="outline" size="xl" className="mt-8 w-full shadow-none" onClick={signOut}>
         <LogOut className="size-5" /> Log out
       </Button>
     </div>
+  );
+}
+
+function Settings() {
+  const [theme, setTheme] = useTheme();
+  const [vortex, setVortex] = useState(false);
+  useEffect(() => setVortex(getVortexPreview()), []);
+  const opts: { key: ThemeChoice; label: string; icon: typeof Sun }[] = [
+    { key: "light", label: "Light", icon: Sun },
+    { key: "dark", label: "Dark", icon: Moon },
+    { key: "auto", label: "Auto", icon: SunMoon },
+  ];
+  return (
+    <section className="mt-7 space-y-3">
+      <h2 className="text-xl font-bold">Explore</h2>
+      <div className="grid grid-cols-2 gap-2">
+        <Link
+          to="/best"
+          className="flex items-center gap-2 rounded-2xl bg-secondary p-4 font-semibold"
+        >
+          <Trophy className="size-5 text-primary" /> Best in the Peg
+        </Link>
+        <Link
+          to="/crawls"
+          className="flex items-center gap-2 rounded-2xl bg-secondary p-4 font-semibold"
+        >
+          <Footprints className="size-5 text-primary" /> Food crawls
+        </Link>
+      </div>
+      <h2 className="pt-3 text-xl font-bold">Appearance</h2>
+      <div
+        className="grid grid-cols-3 gap-1 rounded-2xl bg-secondary p-1"
+        role="radiogroup"
+        aria-label="Theme"
+      >
+        {opts.map((o) => (
+          <button
+            key={o.key}
+            role="radio"
+            aria-checked={theme === o.key}
+            onClick={() => setTheme(o.key)}
+            className={`flex h-11 items-center justify-center gap-1.5 rounded-xl text-sm font-bold ${
+              theme === o.key ? "bg-card shadow-card" : "text-muted-foreground"
+            }`}
+          >
+            <o.icon className="size-4" /> {o.label}
+          </button>
+        ))}
+      </div>
+      <label className="flex items-center justify-between gap-3 rounded-2xl bg-secondary p-4">
+        <span className="flex items-center gap-3">
+          <Snowflake className="size-5 text-sky-600" />
+          <span>
+            <span className="block font-semibold">Preview Polar Vortex mode</span>
+            <span className="block text-xs text-muted-foreground">
+              See the app at -32°C. Turns on by itself when it's really that cold.
+            </span>
+          </span>
+        </span>
+        <input
+          type="checkbox"
+          className="size-5 accent-[var(--primary)]"
+          checked={vortex}
+          onChange={(e) => {
+            setVortex(e.target.checked);
+            setVortexPreview(e.target.checked);
+          }}
+        />
+      </label>
+    </section>
   );
 }

@@ -125,7 +125,7 @@ export default function MapView({
     });
 
   return (
-    <div className="relative h-[calc(100dvh-4rem-max(env(safe-area-inset-bottom),0.5rem))] w-full">
+    <div className="relative isolate h-[calc(100dvh-4rem-max(env(safe-area-inset-bottom),0.5rem))] w-full">
       <MapContainer
         center={WINNIPEG}
         zoom={13}
@@ -163,7 +163,7 @@ export default function MapView({
         ))}
       </MapContainer>
 
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-[500] p-3 pt-[max(env(safe-area-inset-top),0.75rem)]">
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-[1000] p-3 pt-[max(env(safe-area-inset-top),0.75rem)]">
         <div className="no-scrollbar pointer-events-auto flex gap-2 overflow-x-auto">
           <Link
             to="/"
@@ -193,14 +193,14 @@ export default function MapView({
       <button
         onClick={locate}
         aria-label="Show spots near me"
-        className="absolute bottom-4 right-3 z-[500] grid size-12 place-items-center rounded-full bg-card shadow-pop active:scale-90"
+        className="absolute bottom-4 right-3 z-[1000] grid size-12 place-items-center rounded-full bg-card shadow-pop active:scale-90"
         style={{ bottom: selected ? "13.5rem" : "1rem" }}
       >
         <LocateFixed className="size-5 text-primary" />
       </button>
 
       {selected && (
-        <div className="absolute inset-x-3 bottom-3 z-[600] overflow-hidden rounded-3xl bg-card shadow-pop animate-screen">
+        <div className="absolute inset-x-3 bottom-3 z-[1100] overflow-hidden rounded-3xl bg-card shadow-pop animate-screen">
           <button
             onClick={() => setSelectedId(null)}
             aria-label="Close"

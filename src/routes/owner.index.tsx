@@ -8,7 +8,7 @@ import { OpenBadge } from "@/components/bite/RestaurantCard";
 import { useMyRestaurant } from "./owner";
 import { OwnerOrders } from "@/components/bite/OwnerOrders";
 import { OwnerInsights } from "@/components/bite/OwnerInsights";
-import { FreeBanner, OwnerBusy } from "@/components/bite/OwnerBusy";
+import { FreeBanner, OwnerBusy, OwnerForward } from "@/components/bite/OwnerBusy";
 import { OwnerReviews } from "@/components/bite/OwnerReviews";
 
 export const Route = createFileRoute("/owner/")({
@@ -61,6 +61,7 @@ function Dashboard() {
       <h1 className="text-2xl font-extrabold">{r.name}</h1>
       <FreeBanner freeUntil={r.free_until} />
       <OwnerBusy restaurant={r} />
+      <OwnerForward restaurantId={r.id} enabled={r.pay_it_forward} />
       <OwnerOrders restaurant={r} />
       <div className="overflow-hidden rounded-3xl bg-card shadow-card">
         <div className="relative h-32 bg-muted">

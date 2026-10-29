@@ -38,6 +38,78 @@ export type Database = {
         }
         Relationships: []
       }
+      crawl_stops: {
+        Row: {
+          crawl_id: string
+          position: number
+          restaurant_id: string
+          tip: string | null
+        }
+        Insert: {
+          crawl_id: string
+          position?: number
+          restaurant_id: string
+          tip?: string | null
+        }
+        Update: {
+          crawl_id?: string
+          position?: number
+          restaurant_id?: string
+          tip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crawl_stops_crawl_id_fkey"
+            columns: ["crawl_id"]
+            isOneToOne: false
+            referencedRelation: "crawls"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crawl_stops_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crawls: {
+        Row: {
+          cover_url: string | null
+          created_at: string
+          description: string | null
+          emoji: string
+          id: string
+          is_active: boolean
+          reward: string | null
+          slug: string
+          title: string
+        }
+        Insert: {
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          emoji?: string
+          id?: string
+          is_active?: boolean
+          reward?: string | null
+          slug: string
+          title: string
+        }
+        Update: {
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          emoji?: string
+          id?: string
+          is_active?: boolean
+          reward?: string | null
+          slug?: string
+          title?: string
+        }
+        Relationships: []
+      }
       decide_members: {
         Row: {
           display_name: string
@@ -130,6 +202,48 @@ export type Database = {
           },
         ]
       }
+      dish_ratings: {
+        Row: {
+          created_at: string
+          menu_item_id: string
+          rating: number
+          restaurant_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          menu_item_id: string
+          rating: number
+          restaurant_id: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          menu_item_id?: string
+          rating?: number
+          restaurant_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dish_ratings_menu_item_id_fkey"
+            columns: ["menu_item_id"]
+            isOneToOne: false
+            referencedRelation: "menu_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dish_ratings_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       drops: {
         Row: {
           created_at: string
@@ -212,6 +326,86 @@ export type Database = {
           },
         ]
       }
+      food_donations: {
+        Row: {
+          created_at: string
+          drop_id: string | null
+          id: string
+          quantity: number
+          recipient: string
+          restaurant_id: string
+        }
+        Insert: {
+          created_at?: string
+          drop_id?: string | null
+          id?: string
+          quantity: number
+          recipient: string
+          restaurant_id: string
+        }
+        Update: {
+          created_at?: string
+          drop_id?: string | null
+          id?: string
+          quantity?: number
+          recipient?: string
+          restaurant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "food_donations_drop_id_fkey"
+            columns: ["drop_id"]
+            isOneToOne: false
+            referencedRelation: "drops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "food_donations_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      forward_meals: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          given_at: string | null
+          id: string
+          label: string
+          restaurant_id: string
+          user_id: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          given_at?: string | null
+          id?: string
+          label: string
+          restaurant_id: string
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          given_at?: string | null
+          id?: string
+          label?: string
+          restaurant_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forward_meals_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       menu_categories: {
         Row: {
           id: string
@@ -246,6 +440,7 @@ export type Database = {
           category_id: string | null
           created_at: string
           description: string | null
+          dish_type: string | null
           id: string
           is_available: boolean
           is_house_special: boolean
@@ -260,6 +455,7 @@ export type Database = {
           category_id?: string | null
           created_at?: string
           description?: string | null
+          dish_type?: string | null
           id?: string
           is_available?: boolean
           is_house_special?: boolean
@@ -274,6 +470,7 @@ export type Database = {
           category_id?: string | null
           created_at?: string
           description?: string | null
+          dish_type?: string | null
           id?: string
           is_available?: boolean
           is_house_special?: boolean
@@ -435,6 +632,8 @@ export type Database = {
           restaurant_id: string
           starts_at: string
           title: string
+          unlock_temp_c: number
+          vortex_only: boolean
         }
         Insert: {
           created_at?: string
@@ -446,6 +645,8 @@ export type Database = {
           restaurant_id: string
           starts_at?: string
           title: string
+          unlock_temp_c?: number
+          vortex_only?: boolean
         }
         Update: {
           created_at?: string
@@ -457,6 +658,8 @@ export type Database = {
           restaurant_id?: string
           starts_at?: string
           title?: string
+          unlock_temp_c?: number
+          vortex_only?: boolean
         }
         Relationships: [
           {
@@ -511,6 +714,7 @@ export type Database = {
           name: string
           neighbourhood: string | null
           owner_id: string | null
+          pay_it_forward: boolean
           phone: string | null
           slug: string
           wait_minutes: number | null
@@ -534,6 +738,7 @@ export type Database = {
           name: string
           neighbourhood?: string | null
           owner_id?: string | null
+          pay_it_forward?: boolean
           phone?: string | null
           slug: string
           wait_minutes?: number | null
@@ -557,6 +762,7 @@ export type Database = {
           name?: string
           neighbourhood?: string | null
           owner_id?: string | null
+          pay_it_forward?: boolean
           phone?: string | null
           slug?: string
           wait_minutes?: number | null
@@ -765,6 +971,23 @@ export type Database = {
       }
     }
     Views: {
+      dish_leaderboard: {
+        Row: {
+          avg_rating: number | null
+          dish_type: string | null
+          menu_item_id: string | null
+          name: string | null
+          neighbourhood: string | null
+          photo_url: string | null
+          price_cents: number | null
+          rating_count: number | null
+          restaurant_id: string | null
+          restaurant_name: string | null
+          restaurant_slug: string | null
+          score: number | null
+        }
+        Relationships: []
+      }
       restaurant_ratings: {
         Row: {
           avg_rating: number | null
@@ -783,6 +1006,18 @@ export type Database = {
       }
     }
     Functions: {
+      buy_forward: {
+        Args: { p_amount_cents: number; p_label: string; p_restaurant_id: string }
+        Returns: string
+      }
+      city_impact: {
+        Args: never
+        Returns: {
+          meals_donated: number
+          meals_paid_forward: number
+          meals_rescued: number
+        }[]
+      }
       claim_drop: { Args: { p_drop_id: string }; Returns: string }
       claim_visit_stamp: {
         Args: { p_code: string; p_slug: string }
@@ -808,6 +1043,18 @@ export type Database = {
           id: string
         }[]
       }
+      donate_leftover: {
+        Args: { p_drop_id: string; p_recipient: string }
+        Returns: number
+      }
+      forward_counts: {
+        Args: never
+        Returns: {
+          given: number
+          restaurant_id: string
+          waiting: number
+        }[]
+      }
       get_stamp_code: {
         Args: { p_restaurant_id: string }
         Returns: {
@@ -815,6 +1062,7 @@ export type Database = {
           expires_at: string
         }[]
       }
+      give_forward: { Args: { p_restaurant_id: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -850,6 +1098,14 @@ export type Database = {
         Returns: {
           locked_count: number
           next_level: number
+        }[]
+      }
+      taste_twin_picks: {
+        Args: never
+        Returns: {
+          restaurant_id: string
+          score: number
+          twins: number
         }[]
       }
     }

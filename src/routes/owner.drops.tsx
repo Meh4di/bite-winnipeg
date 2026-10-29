@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Flame, Megaphone, Package, Trash2 } from "lucide-react";
+import { Flame, Megaphone, Package, Snowflake, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -35,7 +35,7 @@ function roundUp(d: Date, minutes: number) {
   return new Date(Math.ceil(d.getTime() / ms) * ms);
 }
 
-type Kind = "drop" | "leftover" | "promo";
+type Kind = "drop" | "leftover" | "promo" | "vortex";
 type Draft = {
   kind: Kind;
   title: string;
@@ -45,6 +45,7 @@ type Draft = {
   original: string;
   quantity: string;
   code: string;
+  unlock: string;
   starts: string;
   ends: string;
 };
@@ -57,7 +58,7 @@ function newDraft(kind: Kind): Draft {
       ? new Date(start.getTime() + 2 * 3600_000)
       : kind === "leftover"
         ? roundUp(new Date(now.getTime() + 90 * 60_000), 15)
-        : new Date(now.getTime() + 7 * 86400_000);
+        : new Date(now.getTime() + (kind === "vortex" ? 120 : 7) * 86400_000);
   return {
     kind,
     title: "",
@@ -67,6 +68,7 @@ function newDraft(kind: Kind): Draft {
     original: "",
     quantity: kind === "leftover" ? "5" : "25",
     code: "",
+    unlock: "-25",
     starts: localInput(start),
     ends: localInput(end),
   };
@@ -80,6 +82,11 @@ const KIND_INFO: Record<Kind, { title: string; line: string; icon: typeof Flame 
     icon: Package,
   },
   promo: { title: "Promotion", line: "A deal or code shown in the Deals feed.", icon: Megaphone },
+  vortex: {
+    title: "Vortex deal",
+    line: "Unlocks only when Winnipeg feels like -25°C or colder. Post bigger ones for -30 and -35.",
+    icon: Snowflake,
+  },
 };
 
 function OwnerDrops() {
@@ -158,13 +165,15 @@ function OwnerDrops() {
     }
     setSaving(true);
     try {
-      if (draft.kind === "promo") {
+      if (draft.kind === "promo" || draft.kind === "vortex") {
         const { error } = await supabase.from("promotions").insert({
           restaurant_id: r.id,
           title: draft.title.trim(),
           description: draft.description.trim() || null,
           photo_url: draft.photo_url,
           promo_code: draft.code.trim().toUpperCase() || null,
+          vortex_only: draft.kind === "vortex",
+          unlock_temp_c: draft.kind === "vortex" ? Number(draft.unlock) : -25,
           starts_at: starts.toISOString(),
           ends_at: ends?.toISOString() ?? null,
         });
@@ -194,7 +203,7 @@ function OwnerDrops() {
         if (error) throw error;
       }
       toast.success(
-        draft.kind === "promo" ? "Promotion posted" : "Posted! It's in the Drops feed.",
+        draft.kind === "promo" || draft.kind === "vortex" ? "Posted" : "Posted! It's in the Drops feed.",
       );
       setDraft(null);
       refresh();
@@ -210,6 +219,18 @@ function OwnerDrops() {
     const { error } = await supabase.from("drops").update({ ends_at: end }).eq("id", id);
     if (error) toast.error(error.message);
     refresh();
+  };
+  const donate = async (id: string, left: number) => {
+    const to = prompt(`Donate the ${left} left to which food bank or shelter?`, "Local food bank");
+    if (to === null) return;
+    const { data: n, error } = await supabase.rpc("donate_leftover", { p_drop_id: id, p_recipient: to });
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(`Logged ${n} meals donated. Thank you 💚`);
+    refresh();
+    qc.invalidateQueries({ queryKey: ["city-impact"] });
   };
   const delDrop = async (id: string) => {
     if (!confirm("Delete this? Anyone who already claimed it keeps their order.")) return;
@@ -239,7 +260,7 @@ function OwnerDrops() {
         </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 gap-2">
         {(Object.keys(KIND_INFO) as Kind[]).map((k) => {
           const Icon = KIND_INFO[k].icon;
           return (
@@ -302,6 +323,15 @@ function OwnerDrops() {
                       onClick={() => endDrop(d.id, d.starts_at)}
                     >
                       End now
+                    </Button>
+                  )}
+                  {d.kind === "leftover" && st === "live" && d.quantity_left > 0 && (
+                    <Button
+                      variant="secondary"
+                      className="h-10 flex-1 text-success"
+                      onClick={() => donate(d.id, d.quantity_left)}
+                    >
+                      💚 Donate the rest
                     </Button>
                   )}
                   <Button
@@ -391,7 +421,9 @@ function OwnerDrops() {
               className={field}
               maxLength={80}
               placeholder={
-                draft.kind === "promo"
+                draft.kind === "vortex"
+                  ? "e.g. Free hot chocolate with any soup"
+                  : draft.kind === "promo"
                   ? "e.g. 2-for-1 lattes until 3pm"
                   : draft.kind === "leftover"
                     ? "e.g. Surprise pastry box"
@@ -407,14 +439,31 @@ function OwnerDrops() {
               value={draft.description}
               onChange={(e) => setDraft({ ...draft, description: e.target.value })}
             />
-            {draft.kind === "promo" ? (
-              <input
-                className={`${field} font-mono uppercase`}
-                maxLength={20}
-                placeholder="Promo code (optional)"
-                value={draft.code}
-                onChange={(e) => setDraft({ ...draft, code: e.target.value })}
-              />
+            {draft.kind === "promo" || draft.kind === "vortex" ? (
+              <div className="space-y-2">
+                <input
+                  className={`${field} font-mono uppercase`}
+                  maxLength={20}
+                  placeholder="Promo code (optional)"
+                  value={draft.code}
+                  onChange={(e) => setDraft({ ...draft, code: e.target.value })}
+                />
+                {draft.kind === "vortex" && (
+                  <label className="block text-sm font-semibold">
+                    Unlocks when it feels like
+                    <select
+                      className={`${field} mt-1`}
+                      value={draft.unlock}
+                      onChange={(e) => setDraft({ ...draft, unlock: e.target.value })}
+                    >
+                      <option value="-25">-25°C or colder</option>
+                      <option value="-30">-30°C or colder (bigger deal)</option>
+                      <option value="-35">-35°C or colder (biggest deal)</option>
+                      <option value="-40">-40°C (legendary)</option>
+                    </select>
+                  </label>
+                )}
+              </div>
             ) : (
               <div className="grid grid-cols-2 gap-2">
                 {draft.kind === "leftover" && (

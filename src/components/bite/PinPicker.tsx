@@ -89,7 +89,7 @@ export default function PinPicker({
           <Search className="size-4" /> {looking ? "Looking…" : "Find my address"}
         </Button>
       </div>
-      <div className="h-52 overflow-hidden rounded-2xl border">
+      <div className="isolate h-52 overflow-hidden rounded-2xl border">
         <MapContainer
           center={pos ?? WINNIPEG}
           zoom={pos ? 16 : 12}

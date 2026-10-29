@@ -112,6 +112,8 @@ export type PromoRow = {
   description: string | null;
   photo_url: string | null;
   promo_code: string | null;
+  vortex_only: boolean;
+  unlock_temp_c: number;
   starts_at: string;
   ends_at: string | null;
   restaurants: { name: string; slug: string; logo_url: string | null; category: string } | null;
@@ -127,7 +129,7 @@ export function usePromotions(restaurantId?: string) {
       let q = supabase
         .from("promotions")
         .select(
-          "id, restaurant_id, title, description, photo_url, promo_code, starts_at, ends_at, restaurants(name, slug, logo_url, category)",
+          "id, restaurant_id, title, description, photo_url, promo_code, vortex_only, unlock_temp_c, starts_at, ends_at, restaurants(name, slug, logo_url, category)",
         )
         .lte("starts_at", now)
         .or(`ends_at.is.null,ends_at.gt.${now}`)

@@ -7,12 +7,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { formatPrice } from "@/lib/bite";
+import { DISH_TYPES } from "@/lib/dishes";
 import { ImagePick } from "@/components/bite/ImagePick";
 import { Route as OwnerRoute, useMyRestaurant } from "./owner";
 
 export const Route = createFileRoute("/owner/menu")({ component: MenuManager });
 
-type Draft = { id?: string; name: string; description: string; price: string; photo_url: string | null; is_available: boolean; category_id: string | null; is_secret: boolean; required_level: number; is_house_special: boolean };
+type Draft = { id?: string; name: string; description: string; price: string; photo_url: string | null; is_available: boolean; category_id: string | null; is_secret: boolean; required_level: number; is_house_special: boolean; dish_type: string | null };
 const field = "h-12 w-full rounded-2xl border bg-background px-4 text-base outline-none focus:border-primary";
 
 function MenuManager() {
@@ -71,7 +72,7 @@ function MenuManager() {
     if (!draft) return;
     const row = {
       restaurant_id: r.id, category_id: draft.category_id, name: draft.name, description: draft.description,
-      price_cents: Math.round(parseFloat(draft.price || "0") * 100), photo_url: draft.photo_url, is_available: draft.is_available, is_secret: draft.is_secret, required_level: draft.is_secret ? draft.required_level : 0, is_house_special: draft.is_house_special && !draft.is_secret,
+      price_cents: Math.round(parseFloat(draft.price || "0") * 100), photo_url: draft.photo_url, is_available: draft.is_available, is_secret: draft.is_secret, required_level: draft.is_secret ? draft.required_level : 0, is_house_special: draft.is_house_special && !draft.is_secret, dish_type: draft.dish_type,
     };
     if (row.is_house_special) {
       let clear = supabase.from("menu_items").update({ is_house_special: false }).eq("restaurant_id", r.id).eq("is_house_special", true);
@@ -126,7 +127,7 @@ function MenuManager() {
                   {i.photo_url ? <img src={i.photo_url} alt="" className="size-14 rounded-xl object-cover" /> : <div className="size-14 rounded-xl bg-muted" />}
                   <button
                     className="min-w-0 flex-1 text-left"
-                    onClick={() => setDraft({ id: i.id, name: i.name, description: i.description ?? "", price: (i.price_cents / 100).toFixed(2), photo_url: i.photo_url, is_available: i.is_available, category_id: i.category_id, is_secret: i.is_secret, required_level: i.required_level, is_house_special: i.is_house_special })}
+                    onClick={() => setDraft({ id: i.id, name: i.name, description: i.description ?? "", price: (i.price_cents / 100).toFixed(2), photo_url: i.photo_url, is_available: i.is_available, category_id: i.category_id, is_secret: i.is_secret, required_level: i.required_level, is_house_special: i.is_house_special, dish_type: i.dish_type })}
                   >
                     <p className="truncate font-semibold">{i.is_house_special && "⭐ "}{i.is_secret && "🤫 "}{i.name}</p>
                     <p className="text-sm font-bold text-primary">{formatPrice(i.price_cents)}</p>
@@ -137,7 +138,7 @@ function MenuManager() {
               ))}
               <button
                 className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed text-sm font-semibold text-muted-foreground"
-                onClick={() => setDraft({ name: "", description: "", price: "", photo_url: null, is_available: true, category_id: g.id, is_secret: false, required_level: 1, is_house_special: false })}
+                onClick={() => setDraft({ name: "", description: "", price: "", photo_url: null, is_available: true, category_id: g.id, is_secret: false, required_level: 1, is_house_special: false, dish_type: null })}
               >
                 <Plus className="size-4" /> Add item
               </button>
@@ -160,6 +161,13 @@ function MenuManager() {
             </select>
             <label className="flex h-12 items-center justify-between font-semibold">
               Available <Switch checked={draft.is_available} onCheckedChange={(v) => setDraft({ ...draft, is_available: v })} />
+            </label>
+            <label className="block text-sm font-semibold">
+              Dish type for Best in the Peg rankings
+              <select className={`${field} mt-1`} value={draft.dish_type ?? ""} onChange={(e) => setDraft({ ...draft, dish_type: e.target.value || null })}>
+                <option value="">Not ranked</option>
+                {DISH_TYPES.map((d) => <option key={d.key} value={d.key}>{d.emoji} {d.key}</option>)}
+              </select>
             </label>
             <label className="flex h-12 items-center justify-between font-semibold">
               <span>

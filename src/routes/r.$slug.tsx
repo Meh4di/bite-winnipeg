@@ -16,6 +16,9 @@ import { levelName } from "@/lib/passport";
 import { liveBusy, useLiveQueue, useRatings } from "@/lib/community";
 import { BusyLine, RatingPill } from "@/components/bite/Busy";
 import { ReviewsSection } from "@/components/bite/Reviews";
+import { DishRate } from "@/components/bite/DishRate";
+import { PayForwardCard } from "@/components/bite/PayForward";
+import { useDishLeaderboard, useDishRatings } from "@/lib/dishes";
 
 export const Route = createFileRoute("/r/$slug")({
   head: () => ({
@@ -60,6 +63,21 @@ function RestaurantPage() {
   const drops = useDrops(rid);
   const promos = usePromotions(rid);
   const ratings = useRatings();
+  const dishRatings = useDishRatings(rid, user?.id);
+  const board = useDishLeaderboard();
+  const canRate = useQuery({
+    queryKey: ["can-review", rid, user?.id],
+    enabled: !!user && !!rid,
+    queryFn: async () => {
+      if (!user || !rid) return false;
+      const { count } = await supabase
+        .from("stamps")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("restaurant_id", rid);
+      return (count ?? 0) > 0;
+    },
+  });
   const queue = useLiveQueue();
   const teaser = useQuery({
     queryKey: ["secret-teaser", rid, user?.id ?? "anon"],
@@ -341,6 +359,15 @@ function RestaurantPage() {
                     {i.description && (
                       <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{i.description}</p>
                     )}
+                    <DishRate
+                      itemId={i.id}
+                      restaurantId={r.id}
+                      stats={dishRatings.data?.stats.get(i.id)}
+                      mine={dishRatings.data?.mine.get(i.id)}
+                      rank={board.data?.rank.get(i.id)}
+                      dishType={i.dish_type}
+                      canRate={!!canRate.data && r.owner_id !== user?.id}
+                    />
                     <p className="mt-2 font-bold text-primary">
                       {formatPrice(i.price_cents)}
                       {!i.is_available && <span className="ml-2 text-xs text-muted-foreground">Sold out</span>}
@@ -363,6 +390,7 @@ function RestaurantPage() {
         ))}
       </div>
       <div className="px-5">
+        {r.pay_it_forward && <PayForwardCard restaurantId={r.id} slug={r.slug} name={r.name} />}
         <ReviewsSection restaurantId={r.id} restaurantName={r.name} isOwner={!!user && r.owner_id === user.id} />
       </div>
       {cart.count > 0 && <div className="fixed inset-x-0 bottom-[calc(4rem+max(env(safe-area-inset-bottom),0.5rem))] z-30 mx-auto max-w-[430px] bg-background/95 p-4 backdrop-blur"><Button asChild size="xl" className="w-full"><Link to="/checkout">View cart · {cart.count} {cart.count === 1 ? "item" : "items"} · {formatPrice(cart.total)}</Link></Button></div>}

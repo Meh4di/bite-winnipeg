@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { MapPin } from "lucide-react";
 import { emojiFor, isOpenNow } from "@/lib/bite";
+import { BUSY, type BusyInfo } from "@/lib/community";
 
 export type RestaurantSummary = {
   id: string;
@@ -13,55 +13,104 @@ export type RestaurantSummary = {
   hours: unknown;
 };
 
+export type CardExtras = {
+  rating?: { avg: number; count: number } | undefined;
+  busy?: BusyInfo | null | undefined;
+  special?: string | undefined;
+  deal?: "drop" | "rescue" | null | undefined;
+};
+
 export function OpenBadge({ open }: { open: boolean }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold backdrop-blur ${
-        open ? "bg-success text-success-foreground" : "bg-foreground/70 text-background"
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold backdrop-blur ${
+        open ? "bg-success text-success-foreground" : "bg-foreground/75 text-background"
       }`}
     >
-      <span className={`size-1.5 rounded-full ${open ? "bg-success-foreground" : "bg-background/70"}`} />
+      <span
+        className={`size-1.5 rounded-full ${open ? "bg-success-foreground" : "bg-background/70"}`}
+      />
       {open ? "Open now" : "Closed"}
     </span>
   );
 }
 
-export function RestaurantCard({ r }: { r: RestaurantSummary }) {
+/** Uber Eats-style store card: big photo, name with rating bubble, one line of details. */
+export function RestaurantCard({
+  r,
+  x,
+  compact = false,
+}: {
+  r: RestaurantSummary;
+  x?: CardExtras;
+  compact?: boolean;
+}) {
   const open = isOpenNow(r.hours);
+  const busy = x?.busy?.level ? BUSY[x.busy.level] : null;
   return (
     <Link
       to="/r/$slug"
       params={{ slug: r.slug }}
-      className="block overflow-hidden rounded-3xl bg-card shadow-card transition-transform active:scale-[0.98]"
+      className={`group block transition-transform active:scale-[0.98] ${compact ? "w-[260px] shrink-0" : ""}`}
     >
-      <div className="relative aspect-[16/9] bg-muted">
-        {r.cover_url && (
-          <img src={r.cover_url} alt={r.name} loading="lazy" className="size-full object-cover" />
-        )}
-        <div className="absolute left-3 top-3">
-          <OpenBadge open={open} />
-        </div>
-      </div>
-      <div className="flex items-center gap-3 p-4">
-        {r.logo_url ? (
-          <img src={r.logo_url} alt="" className="size-11 rounded-2xl object-cover ring-2 ring-background" />
+      <div
+        className={`relative overflow-hidden rounded-2xl bg-muted ${compact ? "aspect-[16/10]" : "aspect-[16/9]"}`}
+      >
+        {r.cover_url ? (
+          <img
+            src={r.cover_url}
+            alt=""
+            loading="lazy"
+            className={`size-full object-cover ${open ? "" : "grayscale-[40%]"}`}
+          />
         ) : (
-          <div className="grid size-11 place-items-center rounded-2xl bg-primary-soft text-xl">
-            {emojiFor(r.category)}
-          </div>
+          <div className="grid size-full place-items-center text-6xl">{emojiFor(r.category)}</div>
         )}
-        <div className="min-w-0 flex-1">
-          <h3 className="truncate text-lg font-bold leading-tight">{r.name}</h3>
-          <p className="mt-0.5 flex items-center gap-1 truncate text-sm text-muted-foreground">
-            <span>
-              {emojiFor(r.category)} {r.category}
-            </span>
-            <span>·</span>
-            <MapPin className="size-3.5 shrink-0" />
-            <span className="truncate">{r.neighbourhood}</span>
-          </p>
+        <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1.5">
+          {x?.deal === "drop" && (
+            <Badge className="bg-primary text-primary-foreground">🔥 Drop live</Badge>
+          )}
+          {x?.deal === "rescue" && (
+            <Badge className="bg-success text-success-foreground">♻️ Save food</Badge>
+          )}
+          {!open && <Badge className="bg-foreground/75 text-background">Closed</Badge>}
+          {open && busy && (
+            <Badge className={busy.pill}>
+              {busy.label}
+              {x?.busy?.wait ? ` · ${x.busy.wait} min` : ""}
+            </Badge>
+          )}
         </div>
+        {r.logo_url && !compact && (
+          <img
+            src={r.logo_url}
+            alt=""
+            className="absolute bottom-2.5 left-2.5 size-10 rounded-xl object-cover ring-2 ring-white"
+          />
+        )}
+      </div>
+      <div className="mt-2 flex items-start gap-2">
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-[17px] font-bold leading-tight tracking-tight">{r.name}</h3>
+          <p className="mt-0.5 truncate text-sm text-muted-foreground">
+            {emojiFor(r.category)} {r.category} · {r.neighbourhood}
+          </p>
+          {x?.special && <p className="mt-0.5 truncate text-sm">⭐ {x.special}</p>}
+        </div>
+        {x?.rating && x.rating.count > 0 && (
+          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-secondary text-xs font-bold">
+            {x.rating.avg.toFixed(1)}
+          </span>
+        )}
       </div>
     </Link>
+  );
+}
+
+function Badge({ className, children }: { className: string; children: React.ReactNode }) {
+  return (
+    <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold shadow-sm ${className}`}>
+      {children}
+    </span>
   );
 }
