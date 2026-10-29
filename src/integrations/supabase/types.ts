@@ -203,6 +203,7 @@ export type Database = {
       order_items: {
         Row: {
           id: string
+          item_name: string
           menu_item_id: string | null
           order_id: string
           price_cents: number
@@ -210,6 +211,7 @@ export type Database = {
         }
         Insert: {
           id?: string
+          item_name?: string
           menu_item_id?: string | null
           order_id: string
           price_cents?: number
@@ -217,6 +219,7 @@ export type Database = {
         }
         Update: {
           id?: string
+          item_name?: string
           menu_item_id?: string | null
           order_id?: string
           price_cents?: number
@@ -242,7 +245,11 @@ export type Database = {
       orders: {
         Row: {
           created_at: string
+          customer_name: string
           id: string
+          note: string
+          order_number: string
+          payment_mode: string
           pickup_time: string | null
           restaurant_id: string
           status: Database["public"]["Enums"]["order_status"]
@@ -251,7 +258,11 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          customer_name?: string
           id?: string
+          note?: string
+          order_number?: string
+          payment_mode?: string
           pickup_time?: string | null
           restaurant_id: string
           status?: Database["public"]["Enums"]["order_status"]
@@ -260,7 +271,11 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          customer_name?: string
           id?: string
+          note?: string
+          order_number?: string
+          payment_mode?: string
           pickup_time?: string | null
           restaurant_id?: string
           status?: Database["public"]["Enums"]["order_status"]
@@ -344,6 +359,7 @@ export type Database = {
       }
       restaurants: {
         Row: {
+          accepting_orders: boolean
           address: string | null
           category: string
           cover_url: string | null
@@ -362,6 +378,7 @@ export type Database = {
           slug: string
         }
         Insert: {
+          accepting_orders?: boolean
           address?: string | null
           category?: string
           cover_url?: string | null
@@ -380,6 +397,7 @@ export type Database = {
           slug: string
         }
         Update: {
+          accepting_orders?: boolean
           address?: string | null
           category?: string
           cover_url?: string | null
@@ -403,6 +421,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          order_id: string | null
           restaurant_id: string
           source: Database["public"]["Enums"]["stamp_source"]
           user_id: string
@@ -410,6 +429,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          order_id?: string | null
           restaurant_id: string
           source?: Database["public"]["Enums"]["stamp_source"]
           user_id: string
@@ -417,11 +437,19 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          order_id?: string | null
           restaurant_id?: string
           source?: Database["public"]["Enums"]["stamp_source"]
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "stamps_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "stamps_restaurant_id_fkey"
             columns: ["restaurant_id"]
@@ -483,6 +511,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      checkout_test_order: {
+        Args: {
+          p_items: Json
+          p_note: string
+          p_order_id: string
+          p_pickup_time?: string
+          p_restaurant_id: string
+        }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

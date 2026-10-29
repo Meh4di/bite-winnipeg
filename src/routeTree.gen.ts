@@ -11,14 +11,17 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TabsRouteImport } from './routes/_tabs'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as OwnerRouteImport } from './routes/owner'
 import { Route as TabsIndexRouteImport } from './routes/_tabs.index'
 import { Route as TabsDecideRouteImport } from './routes/_tabs.decide'
 import { Route as TabsDropsRouteImport } from './routes/_tabs.drops'
 import { Route as TabsPassportRouteImport } from './routes/_tabs.passport'
 import { Route as TabsProfileRouteImport } from './routes/_tabs.profile'
+import { Route as OrdersIdRouteImport } from './routes/orders.$id'
 import { Route as OwnerIndexRouteImport } from './routes/owner.index'
 import { Route as OwnerMenuRouteImport } from './routes/owner.menu'
+import { Route as OwnerOrdersRouteImport } from './routes/owner.orders'
 import { Route as OwnerSetupRouteImport } from './routes/owner.setup'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
 
@@ -29,6 +32,11 @@ const TabsRoute = TabsRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OwnerRoute = OwnerRouteImport.update({
@@ -61,6 +69,11 @@ const TabsProfileRoute = TabsProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => TabsRoute,
 } as any)
+const OrdersIdRoute = OrdersIdRouteImport.update({
+  id: '/orders/$id',
+  path: '/orders/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OwnerIndexRoute = OwnerIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -69,6 +82,11 @@ const OwnerIndexRoute = OwnerIndexRouteImport.update({
 const OwnerMenuRoute = OwnerMenuRouteImport.update({
   id: '/menu',
   path: '/menu',
+  getParentRoute: () => OwnerRoute,
+} as any)
+const OwnerOrdersRoute = OwnerOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
   getParentRoute: () => OwnerRoute,
 } as any)
 const OwnerSetupRoute = OwnerSetupRouteImport.update({
@@ -85,23 +103,29 @@ const RSlugRoute = RSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof TabsIndexRoute
   '/auth': typeof AuthRoute
+  '/checkout': typeof CheckoutRoute
   '/owner': typeof OwnerRouteWithChildren
   '/decide': typeof TabsDecideRoute
   '/drops': typeof TabsDropsRoute
   '/passport': typeof TabsPassportRoute
   '/profile': typeof TabsProfileRoute
+  '/orders/$id': typeof OrdersIdRoute
   '/owner/menu': typeof OwnerMenuRoute
+  '/owner/orders': typeof OwnerOrdersRoute
   '/owner/setup': typeof OwnerSetupRoute
   '/r/$slug': typeof RSlugRoute
   '/owner/': typeof OwnerIndexRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
+  '/checkout': typeof CheckoutRoute
   '/decide': typeof TabsDecideRoute
   '/drops': typeof TabsDropsRoute
   '/passport': typeof TabsPassportRoute
   '/profile': typeof TabsProfileRoute
+  '/orders/$id': typeof OrdersIdRoute
   '/owner/menu': typeof OwnerMenuRoute
+  '/owner/orders': typeof OwnerOrdersRoute
   '/owner/setup': typeof OwnerSetupRoute
   '/r/$slug': typeof RSlugRoute
   '/': typeof TabsIndexRoute
@@ -111,12 +135,15 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_tabs': typeof TabsRouteWithChildren
   '/auth': typeof AuthRoute
+  '/checkout': typeof CheckoutRoute
   '/owner': typeof OwnerRouteWithChildren
   '/_tabs/decide': typeof TabsDecideRoute
   '/_tabs/drops': typeof TabsDropsRoute
   '/_tabs/passport': typeof TabsPassportRoute
   '/_tabs/profile': typeof TabsProfileRoute
+  '/orders/$id': typeof OrdersIdRoute
   '/owner/menu': typeof OwnerMenuRoute
+  '/owner/orders': typeof OwnerOrdersRoute
   '/owner/setup': typeof OwnerSetupRoute
   '/r/$slug': typeof RSlugRoute
   '/_tabs/': typeof TabsIndexRoute
@@ -127,23 +154,29 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/checkout'
     | '/owner'
     | '/decide'
     | '/drops'
     | '/passport'
     | '/profile'
+    | '/orders/$id'
     | '/owner/menu'
+    | '/owner/orders'
     | '/owner/setup'
     | '/r/$slug'
     | '/owner/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
+    | '/checkout'
     | '/decide'
     | '/drops'
     | '/passport'
     | '/profile'
+    | '/orders/$id'
     | '/owner/menu'
+    | '/owner/orders'
     | '/owner/setup'
     | '/r/$slug'
     | '/'
@@ -152,12 +185,15 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_tabs'
     | '/auth'
+    | '/checkout'
     | '/owner'
     | '/_tabs/decide'
     | '/_tabs/drops'
     | '/_tabs/passport'
     | '/_tabs/profile'
+    | '/orders/$id'
     | '/owner/menu'
+    | '/owner/orders'
     | '/owner/setup'
     | '/r/$slug'
     | '/_tabs/'
@@ -167,7 +203,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   TabsRoute: typeof TabsRouteWithChildren
   AuthRoute: typeof AuthRoute
+  CheckoutRoute: typeof CheckoutRoute
   OwnerRoute: typeof OwnerRouteWithChildren
+  OrdersIdRoute: typeof OrdersIdRoute
   RSlugRoute: typeof RSlugRoute
 }
 
@@ -185,6 +223,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/owner': {
@@ -229,6 +274,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TabsProfileRouteImport
       parentRoute: typeof TabsRoute
     }
+    '/orders/$id': {
+      id: '/orders/$id'
+      path: '/orders/$id'
+      fullPath: '/orders/$id'
+      preLoaderRoute: typeof OrdersIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/owner/': {
       id: '/owner/'
       path: '/'
@@ -241,6 +293,13 @@ declare module '@tanstack/react-router' {
       path: '/menu'
       fullPath: '/owner/menu'
       preLoaderRoute: typeof OwnerMenuRouteImport
+      parentRoute: typeof OwnerRoute
+    }
+    '/owner/orders': {
+      id: '/owner/orders'
+      path: '/orders'
+      fullPath: '/owner/orders'
+      preLoaderRoute: typeof OwnerOrdersRouteImport
       parentRoute: typeof OwnerRoute
     }
     '/owner/setup': {
@@ -280,12 +339,14 @@ const TabsRouteWithChildren = TabsRoute._addFileChildren(TabsRouteChildren)
 
 interface OwnerRouteChildren {
   OwnerMenuRoute: typeof OwnerMenuRoute
+  OwnerOrdersRoute: typeof OwnerOrdersRoute
   OwnerSetupRoute: typeof OwnerSetupRoute
   OwnerIndexRoute: typeof OwnerIndexRoute
 }
 
 const OwnerRouteChildren: OwnerRouteChildren = {
   OwnerMenuRoute: OwnerMenuRoute,
+  OwnerOrdersRoute: OwnerOrdersRoute,
   OwnerSetupRoute: OwnerSetupRoute,
   OwnerIndexRoute: OwnerIndexRoute,
 }
@@ -295,7 +356,9 @@ const OwnerRouteWithChildren = OwnerRoute._addFileChildren(OwnerRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   TabsRoute: TabsRouteWithChildren,
   AuthRoute: AuthRoute,
+  CheckoutRoute: CheckoutRoute,
   OwnerRoute: OwnerRouteWithChildren,
+  OrdersIdRoute: OrdersIdRoute,
   RSlugRoute: RSlugRoute,
 }
 export const routeTree = rootRouteImport

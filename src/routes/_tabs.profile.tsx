@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { emojiFor } from "@/lib/bite";
+import { OrderHistory } from "@/components/bite/OrderHistory";
 
 export const Route = createFileRoute("/_tabs/profile")({
   head: () => ({
@@ -94,6 +95,7 @@ function Profile() {
         </Link>
       )}
 
+      {user && <OrderHistory />}
       <h2 className="mb-3 mt-7 text-xl font-bold">Following</h2>
       <div className="space-y-2">
         {follows.data?.length === 0 && (

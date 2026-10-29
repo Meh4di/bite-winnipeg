@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router";
-import { LayoutDashboard, Store, UtensilsCrossed, Eye } from "lucide-react";
+import { ShoppingBag, Store, UtensilsCrossed, Eye } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchRole } from "@/lib/auth";
@@ -44,7 +44,7 @@ export function useMyRestaurant() {
 function OwnerLayout() {
   const { data: r } = useMyRestaurant();
   const tabs = [
-    { to: "/owner", label: "Dashboard", icon: LayoutDashboard },
+    { to: "/owner", label: "Orders", icon: ShoppingBag },
     { to: "/owner/setup", label: "Details", icon: Store },
     { to: "/owner/menu", label: "Menu", icon: UtensilsCrossed },
   ] as const;

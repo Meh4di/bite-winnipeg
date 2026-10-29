@@ -6,6 +6,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { DAYS, emojiFor, formatPrice, formatTime, isOpenNow, winnipegNow, type Hours } from "@/lib/bite";
 import { OpenBadge } from "@/components/bite/RestaurantCard";
+import { useEffect } from "react";
+import { useCart } from "@/lib/cart";
+import { Button } from "@/components/ui/button";
+import { Quantity } from "@/components/bite/Quantity";
+import { TabBar } from "@/components/bite/TabBar";
 
 export const Route = createFileRoute("/r/$slug")({
   head: () => ({
@@ -25,10 +30,16 @@ function RestaurantPage() {
   const qc = useQueryClient();
   const router = useRouter();
   const navigate = useNavigate();
+  const cart = useCart();
+  useEffect(() => {
+    const channel = supabase.channel(`restaurant-orders-${crypto.randomUUID()}`).on("postgres_changes", { event: "UPDATE", schema: "public", table: "restaurants", filter: `slug=eq.${slug}` }, () => qc.invalidateQueries({ queryKey: ["restaurant", slug] })).subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [slug, qc]);
 
   const { data, isLoading } = useQuery({
     queryKey: ["restaurant", slug],
     queryFn: async () => {
+      if (!user || !rid) return false;
       const { data: r, error } = await supabase.from("restaurants").select("*").eq("slug", slug).maybeSingle();
       if (error) throw error;
       if (!r) return null;
@@ -48,8 +59,8 @@ function RestaurantPage() {
       const { data } = await supabase
         .from("follows")
         .select("restaurant_id")
-        .eq("user_id", user!.id)
-        .eq("restaurant_id", rid!)
+        .eq("user_id", user.id)
+        .eq("restaurant_id", rid)
         .maybeSingle();
       return !!data;
     },
@@ -61,10 +72,12 @@ function RestaurantPage() {
         navigate({ to: "/auth" });
         return;
       }
+      if (!rid) return;
       if (following.data) {
-        await supabase.from("follows").delete().eq("user_id", user.id).eq("restaurant_id", rid!);
+        const { error } = await supabase.from("follows").delete().eq("user_id", user.id).eq("restaurant_id", rid);
+        if (error) throw error;
       } else {
-        const { error } = await supabase.from("follows").insert({ user_id: user.id, restaurant_id: rid! });
+        const { error } = await supabase.from("follows").insert({ user_id: user.id, restaurant_id: rid });
         if (error) throw error;
         toast.success(`Following ${data?.r.name} 🧡`);
       }
@@ -98,7 +111,7 @@ function RestaurantPage() {
   ].filter((g) => g.items.length);
 
   return (
-    <div className="animate-screen pb-16">
+    <div className="animate-screen pb-48">
       <div className="relative aspect-[4/3] bg-muted">
         {r.cover_url && <img src={r.cover_url} alt={r.name} className="size-full object-cover" />}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
@@ -187,6 +200,7 @@ function RestaurantPage() {
         </div>
 
         <h2 className="mt-8 text-2xl font-extrabold">Menu</h2>
+        {!r.accepting_orders && <p className="mt-3 rounded-xl bg-secondary p-4 font-semibold text-muted-foreground">Not taking orders right now</p>}
         {groups.length === 0 && <p className="mt-2 text-muted-foreground">Menu coming soon.</p>}
         {groups.map((g) => (
           <section key={g.id} className="mt-5">
@@ -206,6 +220,13 @@ function RestaurantPage() {
                       {formatPrice(i.price_cents)}
                       {!i.is_available && <span className="ml-2 text-xs text-muted-foreground">Sold out</span>}
                     </p>
+                    {i.is_available && r.accepting_orders && !i.is_secret && (
+                      <div className="mt-3">
+                        {cart.cart?.restaurant.id === r.id && cart.cart.items.some(item => item.id === i.id) ? (
+                          <Quantity name={i.name} quantity={cart.cart.items.find(item => item.id === i.id)?.quantity ?? 0} onChange={delta => cart.change(i.id, delta)} />
+                        ) : <Button variant="secondary" className="h-11 px-5 font-bold text-primary" aria-label={`Add ${i.name}`} onClick={() => cart.add({ id: r.id, name: r.name, slug: r.slug }, { id: i.id, name: i.name, price_cents: i.price_cents, photo_url: i.photo_url })}>Add</Button>}
+                      </div>
+                    )}
                   </div>
                   {i.photo_url && (
                     <img src={i.photo_url} alt={i.name} loading="lazy" className="size-24 shrink-0 rounded-xl object-cover" />
@@ -216,6 +237,8 @@ function RestaurantPage() {
           </section>
         ))}
       </div>
+      {cart.count > 0 && <div className="fixed inset-x-0 bottom-[calc(4rem+max(env(safe-area-inset-bottom),0.5rem))] z-30 mx-auto max-w-[430px] bg-background/95 p-4 backdrop-blur"><Button asChild size="xl" className="w-full"><Link to="/checkout">View cart · {cart.count} {cart.count === 1 ? "item" : "items"} · {formatPrice(cart.total)}</Link></Button></div>}
+      <TabBar />
     </div>
   );
 }

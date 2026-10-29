@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { isOpenNow } from "@/lib/bite";
 import { OpenBadge } from "@/components/bite/RestaurantCard";
 import { useMyRestaurant } from "./owner";
+import { OwnerOrders } from "@/components/bite/OwnerOrders";
 
 export const Route = createFileRoute("/owner/")({
   component: Dashboard,
@@ -19,9 +20,10 @@ function Dashboard() {
     queryKey: ["owner-stats", r?.id],
     enabled: !!r,
     queryFn: async () => {
+      if (!r) return { items: 0, follows: 0 };
       const [items, follows] = await Promise.all([
-        supabase.from("menu_items").select("id", { count: "exact", head: true }).eq("restaurant_id", r!.id),
-        supabase.from("follows").select("user_id", { count: "exact", head: true }).eq("restaurant_id", r!.id),
+        supabase.from("menu_items").select("id", { count: "exact", head: true }).eq("restaurant_id", r.id),
+        supabase.from("follows").select("user_id", { count: "exact", head: true }).eq("restaurant_id", r.id),
       ]);
       return { items: items.count ?? 0, follows: follows.count ?? 0 };
     },
@@ -53,6 +55,8 @@ function Dashboard() {
 
   return (
     <div className="space-y-4 px-5 pt-5 animate-screen">
+      <h1 className="text-2xl font-extrabold">{r.name}</h1>
+      <OwnerOrders restaurant={r} />
       <div className="overflow-hidden rounded-3xl bg-card shadow-card">
         <div className="relative h-32 bg-muted">
           {r.cover_url && <img src={r.cover_url} alt="" className="size-full object-cover" />}
@@ -61,7 +65,7 @@ function Dashboard() {
           </div>
         </div>
         <div className="p-4">
-          <h1 className="text-2xl font-extrabold">{r.name}</h1>
+          <h2 className="text-2xl font-extrabold">{r.name}</h2>
           <p className="text-sm text-muted-foreground">
             {r.category} · {r.neighbourhood}
           </p>
