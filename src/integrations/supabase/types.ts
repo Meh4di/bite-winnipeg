@@ -14,6 +14,77 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity: {
+        Row: {
+          badge_id: string | null
+          created_at: string
+          id: string
+          kind: string
+          rating: number | null
+          restaurant_id: string | null
+          user_id: string
+        }
+        Insert: {
+          badge_id?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          rating?: number | null
+          restaurant_id?: string | null
+          user_id: string
+        }
+        Update: {
+          badge_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          rating?: number | null
+          restaurant_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activity_reactions: {
+        Row: {
+          activity_id: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          activity_id: string
+          created_at?: string
+          user_id?: string
+        }
+        Update: {
+          activity_id?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_reactions_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activity"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       badges: {
         Row: {
           code: string
@@ -406,6 +477,76 @@ export type Database = {
           },
         ]
       }
+      meetup_members: {
+        Row: {
+          joined_at: string
+          meetup_id: string
+          user_id: string
+        }
+        Insert: {
+          joined_at?: string
+          meetup_id: string
+          user_id: string
+        }
+        Update: {
+          joined_at?: string
+          meetup_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meetup_members_meetup_id_fkey"
+            columns: ["meetup_id"]
+            isOneToOne: false
+            referencedRelation: "meetups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meetups: {
+        Row: {
+          created_at: string
+          host_id: string
+          id: string
+          note: string | null
+          restaurant_id: string
+          seats: number
+          starts_at: string
+          status: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          host_id: string
+          id?: string
+          note?: string | null
+          restaurant_id: string
+          seats: number
+          starts_at: string
+          status?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          host_id?: string
+          id?: string
+          note?: string | null
+          restaurant_id?: string
+          seats?: number
+          starts_at?: string
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meetups_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       menu_categories: {
         Row: {
           id: string
@@ -600,24 +741,54 @@ export type Database = {
           },
         ]
       }
+      profile_private: {
+        Row: {
+          birth_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          birth_date: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          birth_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
           created_at: string
+          discoverable: boolean
           full_name: string | null
           id: string
+          share_activity: boolean
+          username: string | null
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
+          discoverable?: boolean
           full_name?: string | null
           id: string
+          share_activity?: boolean
+          username?: string | null
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
+          discoverable?: boolean
           full_name?: string | null
           id?: string
+          share_activity?: boolean
+          username?: string | null
         }
         Relationships: []
       }
@@ -948,6 +1119,77 @@ export type Database = {
           },
         ]
       }
+      user_blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      user_follows: {
+        Row: {
+          created_at: string
+          followee_id: string
+          follower_id: string
+        }
+        Insert: {
+          created_at?: string
+          followee_id: string
+          follower_id?: string
+        }
+        Update: {
+          created_at?: string
+          followee_id?: string
+          follower_id?: string
+        }
+        Relationships: []
+      }
+      user_reports: {
+        Row: {
+          created_at: string
+          id: string
+          meetup_id: string | null
+          reason: string
+          reported_user_id: string | null
+          reporter_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          meetup_id?: string | null
+          reason: string
+          reported_user_id?: string | null
+          reporter_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          meetup_id?: string | null
+          reason?: string
+          reported_user_id?: string | null
+          reporter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_reports_meetup_id_fkey"
+            columns: ["meetup_id"]
+            isOneToOne: false
+            referencedRelation: "meetups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1006,10 +1248,13 @@ export type Database = {
       }
     }
     Functions: {
+      are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
+      blocked_between: { Args: { _a: string; _b: string }; Returns: boolean }
       buy_forward: {
         Args: { p_amount_cents: number; p_label: string; p_restaurant_id: string }
         Returns: string
       }
+      can_see_activity: { Args: { _at: string; _owner: string }; Returns: boolean }
       city_impact: {
         Args: never
         Returns: {
@@ -1043,6 +1288,10 @@ export type Database = {
           id: string
         }[]
       }
+      create_meetup: {
+        Args: { p_note: string; p_restaurant_id: string; p_seats: number; p_starts_at: string; p_title: string }
+        Returns: string
+      }
       donate_leftover: {
         Args: { p_drop_id: string; p_recipient: string }
         Returns: number
@@ -1070,9 +1319,28 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_adult: { Args: { _user: string }; Returns: boolean }
       is_decide_member: { Args: { _session_id: string }; Returns: boolean }
+      is_meetup_member: { Args: { _meetup: string }; Returns: boolean }
       join_decide_session: { Args: { p_code: string }; Returns: string }
+      join_meetup: { Args: { p_meetup_id: string }; Returns: undefined }
+      leave_meetup: { Args: { p_meetup_id: string }; Returns: undefined }
       level_for: { Args: { _stamps: number }; Returns: number }
+      list_meetups: {
+        Args: never
+        Returns: {
+          host_id: string
+          host_name: string
+          id: string
+          joined: boolean
+          members: number
+          note: string | null
+          restaurant_id: string
+          seats: number
+          starts_at: string
+          title: string
+        }[]
+      }
       live_queue: {
         Args: never
         Returns: {
@@ -1098,6 +1366,28 @@ export type Database = {
         Returns: {
           locked_count: number
           next_level: number
+        }[]
+      }
+      social_summary: {
+        Args: { p_user: string }
+        Returns: {
+          badges: number
+          blocked: boolean
+          followers: number
+          following: number
+          follows_me: boolean
+          i_follow: boolean
+          spots: number
+          stamps: number
+        }[]
+      }
+      taste_match: { Args: { p_other: string }; Returns: number | null }
+      taste_match_people: {
+        Args: never
+        Returns: {
+          score: number | null
+          shared_spots: number
+          user_id: string
         }[]
       }
       taste_twin_picks: {
