@@ -93,7 +93,7 @@ function Home() {
       <section className="mt-6 px-5">
         <div className="mb-3 flex items-baseline justify-between">
           <h2 className="text-xl font-bold">{cat ?? "Near you"}</h2>
-          <span className="text-sm text-muted-foreground">{list.length} spots</span>
+          <span className="text-sm text-muted-foreground">{list.length} {list.length === 1 ? "spot" : "spots"}</span>
         </div>
         <div className="space-y-4">
           {isLoading &&

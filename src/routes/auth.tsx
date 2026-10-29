@@ -6,6 +6,7 @@ import { fetchRole, useAuth, type BiteRole } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: (search: Record<string, unknown>) => ({ redirect: typeof search.redirect === "string" && (search.redirect === "/checkout" || /^\/orders\/[a-f0-9-]+$/.test(search.redirect)) ? search.redirect : undefined }),
   head: () => ({
     meta: [
       { title: "Sign in — Bite" },
@@ -21,6 +22,7 @@ const field =
   "h-13 w-full rounded-2xl border bg-card px-4 text-base outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15";
 
 function AuthPage() {
+  const { redirect } = Route.useSearch();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [role, setRole] = useState<BiteRole>("customer");
   const [name, setName] = useState("");
@@ -33,8 +35,8 @@ function AuthPage() {
 
   useEffect(() => {
     if (!loading && user && currentRole)
-      navigate({ to: currentRole === "restaurant_owner" ? "/owner" : "/", replace: true });
-  }, [loading, user, currentRole, navigate]);
+      navigate({ to: redirect ?? (currentRole === "restaurant_owner" ? "/owner" : "/"), replace: true });
+  }, [loading, user, currentRole, navigate, redirect]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +54,7 @@ function AuthPage() {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         const r = await fetchRole(data.user.id);
-        navigate({ to: r === "restaurant_owner" ? "/owner" : "/", replace: true });
+        navigate({ to: redirect ?? (r === "restaurant_owner" ? "/owner" : "/"), replace: true });
       }
     } catch (err) {
       toast.error((err as Error).message);
