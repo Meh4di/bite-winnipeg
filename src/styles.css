@@ -169,7 +169,7 @@
   }
 }
 @utility animate-screen {
-  animation: screen-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: screen-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
 }
 @keyframes float-y {
   0%,
