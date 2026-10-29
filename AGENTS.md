@@ -19,3 +19,6 @@
 - Secret menu items are hidden by RLS unless the viewer's level is at least `required_level`; `secret_menu_teaser` returns the locked count. Checkout accepts secret items only at the required level.
 - Decide groups (`decide_sessions/members/votes`) are readable only by members; create and join through `create_decide_session` / `join_decide_session`.
 - Avoid `animation-fill-mode: both|forwards` with transforms on page wrappers: it breaks `position: fixed` bars inside them.
+- Migrations 0003–0005 add reviews (verified by stamps), house specials, live busyness, free-until dates, Polar Vortex promos, dish ratings + leaderboard view, crawls, pay-it-forward, food donations and taste-twin picks. New tables get broad default privileges here: when limiting columns, REVOKE first, then GRANT column lists (see 0005).
+- `restaurants.free_until` and `busy_updated_at` are maintained by the `restaurants_guard` trigger; clients can't change the free period.
+- Polar Vortex mode is client-side: Open-Meteo "feels like" temp <= -25°C (or the Profile preview switch) adds `html.vortex`, which recolours the theme.
