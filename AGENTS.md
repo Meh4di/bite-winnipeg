@@ -13,3 +13,9 @@
 - Fulfillment status is updated under owner RLS with column-level grants and a transition trigger; pickup stamps are created by an idempotent database trigger.
 - Cart state is shared at the app root and persists client-side for sign-in returns; payment providers are isolated behind the payment adapter.
 - Order screens subscribe to unique, scoped Realtime channels and remove them on unmount, with periodic refresh as a connection fallback.
+- Migrations are tracked by drizzle (`drizzle/migrations`, hashed in `drizzle.__drizzle_migrations`). 0002 adds drops/last-call deals, passport, secret menu and decide groups; do not re-apply it.
+- Drops and last-call deals share the `drops` table (`kind` = 'drop' | 'leftover'). Claims go only through the `claim_drop` RPC, which creates a paid test-mode pickup order with `orders.drop_id`; a trigger stops anyone else changing `quantity_left`.
+- Passport: levels come from stamp count (`level_for` / `my_level`: Bronze 0, Silver 5, Gold 15, Maple 30). Stamps come from pickups (trigger) and counter visits via `claim_visit_stamp` with a code that rotates every 2 minutes (`get_stamp_code`, owner only). Badges are awarded by a trigger on `stamps`. Rewards (every 5 stamps per spot) go through `redeem_reward`.
+- Secret menu items are hidden by RLS unless the viewer's level is at least `required_level`; `secret_menu_teaser` returns the locked count. Checkout accepts secret items only at the required level.
+- Decide groups (`decide_sessions/members/votes`) are readable only by members; create and join through `create_decide_session` / `join_decide_session`.
+- Avoid `animation-fill-mode: both|forwards` with transforms on page wrappers: it breaks `position: fixed` bars inside them.
