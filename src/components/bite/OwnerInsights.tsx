@@ -22,7 +22,7 @@ export function OwnerInsights({ restaurantId }: { restaurantId: string }) {
       const [orders, stamps, rewards, follows] = await Promise.all([
         supabase
           .from("orders")
-          .select("user_id, total_cents, created_at, drop_id, status")
+          .select("user_id, total_cents, created_at, drop_id, status, drops(kind)")
           .eq("restaurant_id", restaurantId)
           .neq("status", "cancelled")
           .gte("created_at", since),
@@ -67,7 +67,8 @@ export function OwnerInsights({ restaurantId }: { restaurantId: string }) {
         sales30,
         customers,
         repeatPct: customers ? Math.round((repeat / customers) * 100) : 0,
-        dropClaims: list.filter((o) => o.drop_id).length,
+        dropClaims: list.filter((o) => o.drop_id && o.drops?.kind !== "leftover").length,
+        mealsSaved: list.filter((o) => o.drops?.kind === "leftover").length,
         stamps: stamps.count ?? 0,
         rewards: rewards.count ?? 0,
         followers: follows.count ?? 0,
@@ -120,10 +121,11 @@ export function OwnerInsights({ restaurantId }: { restaurantId: string }) {
       <div className="grid grid-cols-3 gap-2">
         <Small value={d?.customers} label="Customers" />
         <Small value={d ? `${d.repeatPct}%` : undefined} label="Came back" />
-        <Small value={d?.followers} label="Followers" />
         <Small value={d?.dropClaims} label="Drop claims" />
+        <Small value={d?.mealsSaved} label="Meals saved ♻️" />
         <Small value={d?.stamps} label="Stamps" />
         <Small value={d?.rewards} label="Rewards" />
+        <Small value={d?.followers} label="Followers" />
       </div>
       <p className="text-xs text-muted-foreground">
         Last 30 days unless noted. Payments are in test mode.

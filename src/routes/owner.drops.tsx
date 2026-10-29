@@ -75,8 +75,8 @@ function newDraft(kind: Kind): Draft {
 const KIND_INFO: Record<Kind, { title: string; line: string; icon: typeof Flame }> = {
   drop: { title: "Drop", line: "A limited item released at a set time. Builds hype.", icon: Flame },
   leftover: {
-    title: "Last call",
-    line: "End-of-day food at a discount. Less waste.",
+    title: "Save food",
+    line: "Food that would be thrown out, 60–70% off. Customers pick it up before you close.",
     icon: Package,
   },
   promo: { title: "Promotion", line: "A deal or code shown in the Deals feed.", icon: Megaphone },
@@ -175,8 +175,10 @@ function OwnerDrops() {
         const qty = parseInt(draft.quantity, 10);
         if (!(price >= 0)) throw new Error("Enter a price");
         if (!(qty >= 1 && qty <= 1000)) throw new Error("Quantity must be between 1 and 1000");
-        if (draft.kind === "leftover" && original !== null && original <= price)
-          throw new Error("Regular price should be higher than the deal price");
+        if (draft.kind === "leftover") {
+          if (!original || original <= 0) throw new Error("Enter the regular price");
+          if (price * 2 > original) throw new Error("Save-food deals need to be at least 50% off (60–70% works best)");
+        }
         const { error } = await supabase.from("drops").insert({
           restaurant_id: r.id,
           kind: draft.kind,
@@ -415,17 +417,7 @@ function OwnerDrops() {
               />
             ) : (
               <div className="grid grid-cols-2 gap-2">
-                <label className="text-sm font-semibold">
-                  {draft.kind === "leftover" ? "Deal price" : "Price"}
-                  <input
-                    className={`${field} mt-1`}
-                    inputMode="decimal"
-                    placeholder="6.00"
-                    value={draft.price}
-                    onChange={(e) => setDraft({ ...draft, price: e.target.value })}
-                  />
-                </label>
-                {draft.kind === "leftover" ? (
+                {draft.kind === "leftover" && (
                   <label className="text-sm font-semibold">
                     Regular price
                     <input
@@ -433,10 +425,35 @@ function OwnerDrops() {
                       inputMode="decimal"
                       placeholder="12.00"
                       value={draft.original}
-                      onChange={(e) => setDraft({ ...draft, original: e.target.value })}
+                      onChange={(e) => {
+                        const original = e.target.value;
+                        const o = parseFloat(original);
+                        setDraft({ ...draft, original, price: o > 0 ? (Math.round(o * 35) / 100).toFixed(2) : draft.price });
+                      }}
                     />
                   </label>
-                ) : (
+                )}
+                <label className="text-sm font-semibold">
+                  {draft.kind === "leftover" ? "Deal price" : "Price"}
+                  <input
+                    className={`${field} mt-1`}
+                    inputMode="decimal"
+                    placeholder={draft.kind === "leftover" ? "4.20" : "6.00"}
+                    value={draft.price}
+                    onChange={(e) => setDraft({ ...draft, price: e.target.value })}
+                  />
+                </label>
+                {draft.kind === "leftover" && parseFloat(draft.original) > 0 && parseFloat(draft.price) >= 0 && (
+                  <p
+                    className={`col-span-2 -mt-1 text-sm font-bold ${
+                      parseFloat(draft.price) * 2 <= parseFloat(draft.original) ? "text-success" : "text-destructive"
+                    }`}
+                  >
+                    {Math.round((1 - parseFloat(draft.price) / parseFloat(draft.original)) * 100)}% off
+                    {parseFloat(draft.price) * 2 <= parseFloat(draft.original) ? " ✓" : " · needs to be at least 50% off"}
+                  </p>
+                )}
+                {draft.kind === "leftover" ? null : (
                   <label className="text-sm font-semibold">
                     How many
                     <input

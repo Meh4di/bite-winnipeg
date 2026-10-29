@@ -248,6 +248,7 @@ export type Database = {
           description: string | null
           id: string
           is_available: boolean
+          is_house_special: boolean
           is_secret: boolean
           name: string
           photo_url: string | null
@@ -261,6 +262,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_available?: boolean
+          is_house_special?: boolean
           is_secret?: boolean
           name: string
           photo_url?: string | null
@@ -274,6 +276,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_available?: boolean
+          is_house_special?: boolean
           is_secret?: boolean
           name?: string
           photo_url?: string | null
@@ -492,10 +495,13 @@ export type Database = {
         Row: {
           accepting_orders: boolean
           address: string | null
+          busy_level: string | null
+          busy_updated_at: string | null
           category: string
           cover_url: string | null
           created_at: string
           description: string | null
+          free_until: string | null
           hours: Json
           id: string
           is_active: boolean
@@ -507,14 +513,18 @@ export type Database = {
           owner_id: string | null
           phone: string | null
           slug: string
+          wait_minutes: number | null
         }
         Insert: {
           accepting_orders?: boolean
           address?: string | null
+          busy_level?: string | null
+          busy_updated_at?: string | null
           category?: string
           cover_url?: string | null
           created_at?: string
           description?: string | null
+          free_until?: string | null
           hours?: Json
           id?: string
           is_active?: boolean
@@ -526,14 +536,18 @@ export type Database = {
           owner_id?: string | null
           phone?: string | null
           slug: string
+          wait_minutes?: number | null
         }
         Update: {
           accepting_orders?: boolean
           address?: string | null
+          busy_level?: string | null
+          busy_updated_at?: string | null
           category?: string
           cover_url?: string | null
           created_at?: string
           description?: string | null
+          free_until?: string | null
           hours?: Json
           id?: string
           is_active?: boolean
@@ -545,8 +559,91 @@ export type Database = {
           owner_id?: string | null
           phone?: string | null
           slug?: string
+          wait_minutes?: number | null
         }
         Relationships: []
+      }
+      review_reports: {
+        Row: {
+          created_at: string
+          reason: string
+          review_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          reason?: string
+          review_id: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          reason?: string
+          review_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_reports_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          author_name: string
+          body: string
+          created_at: string
+          id: string
+          owner_replied_at: string | null
+          owner_reply: string | null
+          photo_urls: string[]
+          rating: number
+          restaurant_id: string
+          tags: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          author_name?: string
+          body?: string
+          created_at?: string
+          id?: string
+          owner_replied_at?: string | null
+          owner_reply?: string | null
+          photo_urls?: string[]
+          rating: number
+          restaurant_id: string
+          tags?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          author_name?: string
+          body?: string
+          created_at?: string
+          id?: string
+          owner_replied_at?: string | null
+          owner_reply?: string | null
+          photo_urls?: string[]
+          rating?: number
+          restaurant_id?: string
+          tags?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reward_redemptions: {
         Row: {
@@ -668,7 +765,22 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      restaurant_ratings: {
+        Row: {
+          avg_rating: number | null
+          restaurant_id: string | null
+          review_count: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       claim_drop: { Args: { p_drop_id: string }; Returns: string }
@@ -713,6 +825,13 @@ export type Database = {
       is_decide_member: { Args: { _session_id: string }; Returns: boolean }
       join_decide_session: { Args: { p_code: string }; Returns: string }
       level_for: { Args: { _stamps: number }; Returns: number }
+      live_queue: {
+        Args: never
+        Returns: {
+          active_orders: number
+          restaurant_id: string
+        }[]
+      }
       my_level: { Args: never; Returns: number }
       owns_restaurant: { Args: { _restaurant_id: string }; Returns: boolean }
       redeem_reward: {
@@ -721,6 +840,10 @@ export type Database = {
           created_at: string
           id: string
         }[]
+      }
+      reply_to_review: {
+        Args: { p_reply: string; p_review_id: string }
+        Returns: undefined
       }
       secret_menu_teaser: {
         Args: { p_restaurant_id: string }

@@ -8,6 +8,8 @@ import { OpenBadge } from "@/components/bite/RestaurantCard";
 import { useMyRestaurant } from "./owner";
 import { OwnerOrders } from "@/components/bite/OwnerOrders";
 import { OwnerInsights } from "@/components/bite/OwnerInsights";
+import { FreeBanner, OwnerBusy } from "@/components/bite/OwnerBusy";
+import { OwnerReviews } from "@/components/bite/OwnerReviews";
 
 export const Route = createFileRoute("/owner/")({
   component: Dashboard,
@@ -57,6 +59,8 @@ function Dashboard() {
   return (
     <div className="space-y-4 px-5 pt-5 animate-screen">
       <h1 className="text-2xl font-extrabold">{r.name}</h1>
+      <FreeBanner freeUntil={r.free_until} />
+      <OwnerBusy restaurant={r} />
       <OwnerOrders restaurant={r} />
       <div className="overflow-hidden rounded-3xl bg-card shadow-card">
         <div className="relative h-32 bg-muted">
@@ -73,6 +77,7 @@ function Dashboard() {
         </div>
       </div>
       <OwnerInsights restaurantId={r.id} />
+      <OwnerReviews restaurantId={r.id} />
       <div className="grid grid-cols-2 gap-3">
         <Stat label="Menu items" value={stats.data?.items} />
         <Stat label="Followers" value={stats.data?.follows} />

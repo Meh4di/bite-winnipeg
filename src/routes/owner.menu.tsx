@@ -12,7 +12,7 @@ import { Route as OwnerRoute, useMyRestaurant } from "./owner";
 
 export const Route = createFileRoute("/owner/menu")({ component: MenuManager });
 
-type Draft = { id?: string; name: string; description: string; price: string; photo_url: string | null; is_available: boolean; category_id: string | null; is_secret: boolean; required_level: number };
+type Draft = { id?: string; name: string; description: string; price: string; photo_url: string | null; is_available: boolean; category_id: string | null; is_secret: boolean; required_level: number; is_house_special: boolean };
 const field = "h-12 w-full rounded-2xl border bg-background px-4 text-base outline-none focus:border-primary";
 
 function MenuManager() {
@@ -71,8 +71,14 @@ function MenuManager() {
     if (!draft) return;
     const row = {
       restaurant_id: r.id, category_id: draft.category_id, name: draft.name, description: draft.description,
-      price_cents: Math.round(parseFloat(draft.price || "0") * 100), photo_url: draft.photo_url, is_available: draft.is_available, is_secret: draft.is_secret, required_level: draft.is_secret ? draft.required_level : 0,
+      price_cents: Math.round(parseFloat(draft.price || "0") * 100), photo_url: draft.photo_url, is_available: draft.is_available, is_secret: draft.is_secret, required_level: draft.is_secret ? draft.required_level : 0, is_house_special: draft.is_house_special && !draft.is_secret,
     };
+    if (row.is_house_special) {
+      let clear = supabase.from("menu_items").update({ is_house_special: false }).eq("restaurant_id", r.id).eq("is_house_special", true);
+      if (draft.id) clear = clear.neq("id", draft.id);
+      const { error: clearError } = await clear;
+      if (clearError) { toast.error(clearError.message); return; }
+    }
     const { error } = draft.id
       ? await supabase.from("menu_items").update(row).eq("id", draft.id)
       : await supabase.from("menu_items").insert(row);
@@ -120,9 +126,9 @@ function MenuManager() {
                   {i.photo_url ? <img src={i.photo_url} alt="" className="size-14 rounded-xl object-cover" /> : <div className="size-14 rounded-xl bg-muted" />}
                   <button
                     className="min-w-0 flex-1 text-left"
-                    onClick={() => setDraft({ id: i.id, name: i.name, description: i.description ?? "", price: (i.price_cents / 100).toFixed(2), photo_url: i.photo_url, is_available: i.is_available, category_id: i.category_id, is_secret: i.is_secret, required_level: i.required_level })}
+                    onClick={() => setDraft({ id: i.id, name: i.name, description: i.description ?? "", price: (i.price_cents / 100).toFixed(2), photo_url: i.photo_url, is_available: i.is_available, category_id: i.category_id, is_secret: i.is_secret, required_level: i.required_level, is_house_special: i.is_house_special })}
                   >
-                    <p className="truncate font-semibold">{i.is_secret && "🤫 "}{i.name}</p>
+                    <p className="truncate font-semibold">{i.is_house_special && "⭐ "}{i.is_secret && "🤫 "}{i.name}</p>
                     <p className="text-sm font-bold text-primary">{formatPrice(i.price_cents)}</p>
                   </button>
                   <Switch checked={i.is_available} onCheckedChange={(v) => toggleAvail(i.id, v)} aria-label="Available" />
@@ -131,7 +137,7 @@ function MenuManager() {
               ))}
               <button
                 className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed text-sm font-semibold text-muted-foreground"
-                onClick={() => setDraft({ name: "", description: "", price: "", photo_url: null, is_available: true, category_id: g.id, is_secret: false, required_level: 1 })}
+                onClick={() => setDraft({ name: "", description: "", price: "", photo_url: null, is_available: true, category_id: g.id, is_secret: false, required_level: 1, is_house_special: false })}
               >
                 <Plus className="size-4" /> Add item
               </button>
@@ -156,8 +162,15 @@ function MenuManager() {
               Available <Switch checked={draft.is_available} onCheckedChange={(v) => setDraft({ ...draft, is_available: v })} />
             </label>
             <label className="flex h-12 items-center justify-between font-semibold">
+              <span>
+                ⭐ House special
+                <span className="block text-xs font-normal text-muted-foreground">Featured at the top of your page and on the map</span>
+              </span>
+              <Switch checked={draft.is_house_special} onCheckedChange={(v) => setDraft({ ...draft, is_house_special: v, is_secret: v ? false : draft.is_secret })} />
+            </label>
+            <label className="flex h-12 items-center justify-between font-semibold">
               <span>🤫 Secret menu item</span>
-              <Switch checked={draft.is_secret} onCheckedChange={(v) => setDraft({ ...draft, is_secret: v })} />
+              <Switch checked={draft.is_secret} onCheckedChange={(v) => setDraft({ ...draft, is_secret: v, is_house_special: v ? false : draft.is_house_special })} />
             </label>
             {draft.is_secret && (
               <label className="block text-sm font-semibold">

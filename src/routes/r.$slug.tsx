@@ -13,6 +13,9 @@ import { Quantity } from "@/components/bite/Quantity";
 import { TabBar } from "@/components/bite/TabBar";
 import { clockTime, countdown, dropState, useDrops, useNow, usePromotions } from "@/lib/live";
 import { levelName } from "@/lib/passport";
+import { liveBusy, useLiveQueue, useRatings } from "@/lib/community";
+import { BusyLine, RatingPill } from "@/components/bite/Busy";
+import { ReviewsSection } from "@/components/bite/Reviews";
 
 export const Route = createFileRoute("/r/$slug")({
   head: () => ({
@@ -56,6 +59,8 @@ function RestaurantPage() {
   const now = useNow(1000);
   const drops = useDrops(rid);
   const promos = usePromotions(rid);
+  const ratings = useRatings();
+  const queue = useLiveQueue();
   const teaser = useQuery({
     queryKey: ["secret-teaser", rid, user?.id ?? "anon"],
     enabled: !!rid,
@@ -156,6 +161,10 @@ function RestaurantPage() {
         <p className="mt-1 text-sm font-medium text-muted-foreground">
           {emojiFor(r.category)} {r.category} · {r.neighbourhood}
         </p>
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+          <RatingPill avg={ratings.data?.get(r.id)?.avg ?? 0} count={ratings.data?.get(r.id)?.count ?? 0} />
+          {open && <BusyLine busy={liveBusy(r, now)} queue={queue.data?.get(r.id)} />}
+        </div>
         {r.description && <p className="mt-3 text-[15px] leading-relaxed">{r.description}</p>}
 
         <button
@@ -276,6 +285,39 @@ function RestaurantPage() {
           </Link>
         )}
         {!r.accepting_orders && <p className="mt-3 rounded-xl bg-secondary p-4 font-semibold text-muted-foreground">Not taking orders right now</p>}
+        {(() => {
+          const special = items.find((i) => i.is_house_special && i.is_available);
+          if (!special) return null;
+          return (
+            <div className="mt-4 overflow-hidden rounded-3xl bg-warm text-primary-foreground shadow-pop">
+              {special.photo_url && <img src={special.photo_url} alt={special.name} className="aspect-[16/9] w-full object-cover" />}
+              <div className="flex items-center gap-3 p-4">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold uppercase tracking-wider opacity-90">⭐ House special</p>
+                  <p className="text-xl font-extrabold leading-tight">{special.name}</p>
+                  {special.description && <p className="mt-1 line-clamp-2 text-sm opacity-90">{special.description}</p>}
+                </div>
+                <div className="flex shrink-0 flex-col items-end gap-2">
+                  <span className="font-display text-xl font-extrabold">{formatPrice(special.price_cents)}</span>
+                  {r.accepting_orders && (
+                    <Button
+                      variant="secondary"
+                      className="h-10 px-4 font-bold text-primary"
+                      onClick={() =>
+                        cart.add(
+                          { id: r.id, name: r.name, slug: r.slug },
+                          { id: special.id, name: special.name, price_cents: special.price_cents, photo_url: special.photo_url },
+                        )
+                      }
+                    >
+                      Add
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
         {groups.length === 0 && <p className="mt-2 text-muted-foreground">Menu coming soon.</p>}
         {groups.map((g) => (
           <section key={g.id} className="mt-5">
@@ -292,7 +334,10 @@ function RestaurantPage() {
                         🤫 Secret menu{i.required_level > 0 ? ` · ${levelName(i.required_level)}+` : ""}
                       </span>
                     )}
-                    <p className="font-semibold leading-snug">{i.name}</p>
+                    <p className="font-semibold leading-snug">
+                      {i.is_house_special && <span className="mr-1">⭐</span>}
+                      {i.name}
+                    </p>
                     {i.description && (
                       <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{i.description}</p>
                     )}
@@ -316,6 +361,9 @@ function RestaurantPage() {
             </div>
           </section>
         ))}
+      </div>
+      <div className="px-5">
+        <ReviewsSection restaurantId={r.id} restaurantName={r.name} isOwner={!!user && r.owner_id === user.id} />
       </div>
       {cart.count > 0 && <div className="fixed inset-x-0 bottom-[calc(4rem+max(env(safe-area-inset-bottom),0.5rem))] z-30 mx-auto max-w-[430px] bg-background/95 p-4 backdrop-blur"><Button asChild size="xl" className="w-full"><Link to="/checkout">View cart · {cart.count} {cart.count === 1 ? "item" : "items"} · {formatPrice(cart.total)}</Link></Button></div>}
       <TabBar />

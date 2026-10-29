@@ -49,7 +49,7 @@ export function usePassport(userId: string | undefined) {
     enabled: !!userId,
     queryFn: async () => {
       if (!userId) return null;
-      const [stamps, badges, mine, redemptions] = await Promise.all([
+      const [stamps, badges, mine, redemptions, rescues] = await Promise.all([
         supabase
           .from("stamps")
           .select(
@@ -63,6 +63,12 @@ export function usePassport(userId: string | undefined) {
           .from("reward_redemptions")
           .select("restaurant_id, created_at")
           .eq("user_id", userId),
+        supabase
+          .from("orders")
+          .select("id, drops(kind)")
+          .eq("user_id", userId)
+          .eq("status", "picked_up")
+          .not("drop_id", "is", null),
       ]);
       if (stamps.error) throw stamps.error;
       return {
@@ -70,6 +76,7 @@ export function usePassport(userId: string | undefined) {
         badges: badges.data ?? [],
         earned: new Map((mine.data ?? []).map((b) => [b.badge_id, b.earned_at])),
         redemptions: redemptions.data ?? [],
+        rescued: (rescues.data ?? []).filter((o) => o.drops?.kind === "leftover").length,
       };
     },
   });

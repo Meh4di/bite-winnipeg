@@ -21,7 +21,7 @@ export const Route = createFileRoute("/_tabs/drops")({
 
 const SEGMENTS = [
   { key: "drops", label: "🔥 Drops" },
-  { key: "leftover", label: "🥡 Last call" },
+  { key: "leftover", label: "♻️ Save food" },
   { key: "deals", label: "📣 Deals" },
 ] as const;
 
@@ -113,10 +113,10 @@ function Drops() {
           {!drops.isLoading && list.length === 0 && (
             <Empty
               emoji={seg === "leftover" ? "🥡" : "⏰"}
-              title={seg === "leftover" ? "No last-call deals right now" : "No drops right now"}
+              title={seg === "leftover" ? "No food to save right now" : "No drops right now"}
               line={
                 seg === "leftover"
-                  ? "Spots post end-of-day food here at a discount. Check back near closing time."
+                  ? "Near closing, spots post food that would be thrown out at 60–70% off. Check back later today."
                   : "Follow your favourite spots and check back. Drops sell out fast."
               }
             />

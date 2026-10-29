@@ -179,6 +179,13 @@ function Passport() {
         </div>
       </section>
 
+      {(passport.data?.rescued ?? 0) > 0 && (
+        <p className="flex items-center gap-3 rounded-2xl bg-success/15 p-4 font-semibold text-success">
+          <span className="text-2xl">♻️</span>
+          You've rescued {passport.data?.rescued} {passport.data?.rescued === 1 ? "meal" : "meals"} from the bin.
+        </p>
+      )}
+
       <section className="rounded-3xl bg-card p-4 shadow-card">
         <h2 className="flex items-center gap-2 font-bold">
           <ScanLine className="size-5 text-primary" /> Get stamped

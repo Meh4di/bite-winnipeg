@@ -40,7 +40,7 @@ export function DropCard({ d, now }: { d: DropRow; now: number }) {
       if (error) throw error;
       qc.invalidateQueries({ queryKey: ["drops"] });
       qc.invalidateQueries({ queryKey: ["orders"] });
-      toast.success(leftover ? "Saved! It's yours 🎉" : "You got it! 🔥");
+      toast.success(leftover ? "Rescued! Thanks for saving food ♻️" : "You got it! 🔥");
       navigate({ to: "/orders/$id", params: { id: data } });
     } catch (e) {
       toast.error((e as Error).message);
@@ -68,7 +68,7 @@ export function DropCard({ d, now }: { d: DropRow; now: number }) {
           <img src={d.photo_url} alt={d.title} loading="lazy" className="size-full object-cover" />
         ) : (
           <div className="grid size-full place-items-center bg-warm text-6xl">
-            {leftover ? "🥡" : "🔥"}
+            {leftover ? "♻️" : "🔥"}
           </div>
         )}
         <div className="absolute left-3 top-3 flex gap-2">
@@ -169,7 +169,7 @@ export function DropCard({ d, now }: { d: DropRow; now: number }) {
           <Button size="xl" className="mt-4 w-full" onClick={onClaim} disabled={busy}>
             <Flame className="size-5" />
             {leftover
-              ? `Grab it · ${formatPrice(d.price_cents)}`
+              ? `Rescue it · ${formatPrice(d.price_cents)}`
               : `Claim · ${formatPrice(d.price_cents)}`}
           </Button>
         )}
