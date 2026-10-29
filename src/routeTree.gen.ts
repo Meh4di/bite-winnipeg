@@ -18,6 +18,8 @@ import { Route as TabsDropsRouteImport } from './routes/_tabs.drops'
 import { Route as TabsPassportRouteImport } from './routes/_tabs.passport'
 import { Route as TabsProfileRouteImport } from './routes/_tabs.profile'
 import { Route as OwnerIndexRouteImport } from './routes/owner.index'
+import { Route as OwnerMenuRouteImport } from './routes/owner.menu'
+import { Route as OwnerSetupRouteImport } from './routes/owner.setup'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
 
 const TabsRoute = TabsRouteImport.update({
@@ -64,6 +66,16 @@ const OwnerIndexRoute = OwnerIndexRouteImport.update({
   path: '/',
   getParentRoute: () => OwnerRoute,
 } as any)
+const OwnerMenuRoute = OwnerMenuRouteImport.update({
+  id: '/menu',
+  path: '/menu',
+  getParentRoute: () => OwnerRoute,
+} as any)
+const OwnerSetupRoute = OwnerSetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
+  getParentRoute: () => OwnerRoute,
+} as any)
 const RSlugRoute = RSlugRouteImport.update({
   id: '/r/$slug',
   path: '/r/$slug',
@@ -78,6 +90,8 @@ export interface FileRoutesByFullPath {
   '/drops': typeof TabsDropsRoute
   '/passport': typeof TabsPassportRoute
   '/profile': typeof TabsProfileRoute
+  '/owner/menu': typeof OwnerMenuRoute
+  '/owner/setup': typeof OwnerSetupRoute
   '/r/$slug': typeof RSlugRoute
   '/owner/': typeof OwnerIndexRoute
 }
@@ -87,6 +101,8 @@ export interface FileRoutesByTo {
   '/drops': typeof TabsDropsRoute
   '/passport': typeof TabsPassportRoute
   '/profile': typeof TabsProfileRoute
+  '/owner/menu': typeof OwnerMenuRoute
+  '/owner/setup': typeof OwnerSetupRoute
   '/r/$slug': typeof RSlugRoute
   '/': typeof TabsIndexRoute
   '/owner': typeof OwnerIndexRoute
@@ -100,6 +116,8 @@ export interface FileRoutesById {
   '/_tabs/drops': typeof TabsDropsRoute
   '/_tabs/passport': typeof TabsPassportRoute
   '/_tabs/profile': typeof TabsProfileRoute
+  '/owner/menu': typeof OwnerMenuRoute
+  '/owner/setup': typeof OwnerSetupRoute
   '/r/$slug': typeof RSlugRoute
   '/_tabs/': typeof TabsIndexRoute
   '/owner/': typeof OwnerIndexRoute
@@ -114,6 +132,8 @@ export interface FileRouteTypes {
     | '/drops'
     | '/passport'
     | '/profile'
+    | '/owner/menu'
+    | '/owner/setup'
     | '/r/$slug'
     | '/owner/'
   fileRoutesByTo: FileRoutesByTo
@@ -123,6 +143,8 @@ export interface FileRouteTypes {
     | '/drops'
     | '/passport'
     | '/profile'
+    | '/owner/menu'
+    | '/owner/setup'
     | '/r/$slug'
     | '/'
     | '/owner'
@@ -135,6 +157,8 @@ export interface FileRouteTypes {
     | '/_tabs/drops'
     | '/_tabs/passport'
     | '/_tabs/profile'
+    | '/owner/menu'
+    | '/owner/setup'
     | '/r/$slug'
     | '/_tabs/'
     | '/owner/'
@@ -212,6 +236,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OwnerIndexRouteImport
       parentRoute: typeof OwnerRoute
     }
+    '/owner/menu': {
+      id: '/owner/menu'
+      path: '/menu'
+      fullPath: '/owner/menu'
+      preLoaderRoute: typeof OwnerMenuRouteImport
+      parentRoute: typeof OwnerRoute
+    }
+    '/owner/setup': {
+      id: '/owner/setup'
+      path: '/setup'
+      fullPath: '/owner/setup'
+      preLoaderRoute: typeof OwnerSetupRouteImport
+      parentRoute: typeof OwnerRoute
+    }
     '/r/$slug': {
       id: '/r/$slug'
       path: '/r/$slug'
@@ -241,10 +279,14 @@ const TabsRouteChildren: TabsRouteChildren = {
 const TabsRouteWithChildren = TabsRoute._addFileChildren(TabsRouteChildren)
 
 interface OwnerRouteChildren {
+  OwnerMenuRoute: typeof OwnerMenuRoute
+  OwnerSetupRoute: typeof OwnerSetupRoute
   OwnerIndexRoute: typeof OwnerIndexRoute
 }
 
 const OwnerRouteChildren: OwnerRouteChildren = {
+  OwnerMenuRoute: OwnerMenuRoute,
+  OwnerSetupRoute: OwnerSetupRoute,
   OwnerIndexRoute: OwnerIndexRoute,
 }
 
