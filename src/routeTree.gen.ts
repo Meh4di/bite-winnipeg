@@ -22,6 +22,7 @@ import { Route as TabsDropsRouteImport } from './routes/_tabs.drops'
 import { Route as TabsMapRouteImport } from './routes/_tabs.map'
 import { Route as TabsPassportRouteImport } from './routes/_tabs.passport'
 import { Route as TabsProfileRouteImport } from './routes/_tabs.profile'
+import { Route as TabsSocialRouteImport } from './routes/_tabs.social'
 import { Route as OrdersIdRouteImport } from './routes/orders.$id'
 import { Route as OwnerIndexRouteImport } from './routes/owner.index'
 import { Route as OwnerDropsRouteImport } from './routes/owner.drops'
@@ -32,6 +33,7 @@ import { Route as OwnerStampsRouteImport } from './routes/owner.stamps'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
 import { Route as TabsCrawlsSlugRouteImport } from './routes/_tabs.crawls_.$slug'
 import { Route as TabsDecideCodeRouteImport } from './routes/_tabs.decide_.$code'
+import { Route as TabsPeopleIdRouteImport } from './routes/_tabs.people.$id'
 import { Route as StampSlugCodeRouteImport } from './routes/stamp.$slug.$code'
 
 const TabsRoute = TabsRouteImport.update({
@@ -98,6 +100,11 @@ const TabsProfileRoute = TabsProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => TabsRoute,
 } as any)
+const TabsSocialRoute = TabsSocialRouteImport.update({
+  id: '/social',
+  path: '/social',
+  getParentRoute: () => TabsRoute,
+} as any)
 const OrdersIdRoute = OrdersIdRouteImport.update({
   id: '/orders/$id',
   path: '/orders/$id',
@@ -148,6 +155,11 @@ const TabsDecideCodeRoute = TabsDecideCodeRouteImport.update({
   path: '/decide/$code',
   getParentRoute: () => TabsRoute,
 } as any)
+const TabsPeopleIdRoute = TabsPeopleIdRouteImport.update({
+  id: '/people/$id',
+  path: '/people/$id',
+  getParentRoute: () => TabsRoute,
+} as any)
 const StampSlugCodeRoute = StampSlugCodeRouteImport.update({
   id: '/stamp/$slug/$code',
   path: '/stamp/$slug/$code',
@@ -167,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/map': typeof TabsMapRoute
   '/passport': typeof TabsPassportRoute
   '/profile': typeof TabsProfileRoute
+  '/social': typeof TabsSocialRoute
   '/orders/$id': typeof OrdersIdRoute
   '/owner/drops': typeof OwnerDropsRoute
   '/owner/menu': typeof OwnerMenuRoute
@@ -177,6 +190,7 @@ export interface FileRoutesByFullPath {
   '/owner/': typeof OwnerIndexRoute
   '/crawls/$slug': typeof TabsCrawlsSlugRoute
   '/decide/$code': typeof TabsDecideCodeRoute
+  '/people/$id': typeof TabsPeopleIdRoute
   '/stamp/$slug/$code': typeof StampSlugCodeRoute
 }
 export interface FileRoutesByTo {
@@ -190,6 +204,7 @@ export interface FileRoutesByTo {
   '/map': typeof TabsMapRoute
   '/passport': typeof TabsPassportRoute
   '/profile': typeof TabsProfileRoute
+  '/social': typeof TabsSocialRoute
   '/orders/$id': typeof OrdersIdRoute
   '/owner/drops': typeof OwnerDropsRoute
   '/owner/menu': typeof OwnerMenuRoute
@@ -201,6 +216,7 @@ export interface FileRoutesByTo {
   '/owner': typeof OwnerIndexRoute
   '/crawls/$slug': typeof TabsCrawlsSlugRoute
   '/decide/$code': typeof TabsDecideCodeRoute
+  '/people/$id': typeof TabsPeopleIdRoute
   '/stamp/$slug/$code': typeof StampSlugCodeRoute
 }
 export interface FileRoutesById {
@@ -217,6 +233,7 @@ export interface FileRoutesById {
   '/_tabs/map': typeof TabsMapRoute
   '/_tabs/passport': typeof TabsPassportRoute
   '/_tabs/profile': typeof TabsProfileRoute
+  '/_tabs/social': typeof TabsSocialRoute
   '/orders/$id': typeof OrdersIdRoute
   '/owner/drops': typeof OwnerDropsRoute
   '/owner/menu': typeof OwnerMenuRoute
@@ -228,6 +245,7 @@ export interface FileRoutesById {
   '/owner/': typeof OwnerIndexRoute
   '/_tabs/crawls_/$slug': typeof TabsCrawlsSlugRoute
   '/_tabs/decide_/$code': typeof TabsDecideCodeRoute
+  '/_tabs/people/$id': typeof TabsPeopleIdRoute
   '/stamp/$slug/$code': typeof StampSlugCodeRoute
 }
 export interface FileRouteTypes {
@@ -245,6 +263,7 @@ export interface FileRouteTypes {
     | '/map'
     | '/passport'
     | '/profile'
+    | '/social'
     | '/orders/$id'
     | '/owner/drops'
     | '/owner/menu'
@@ -255,6 +274,7 @@ export interface FileRouteTypes {
     | '/owner/'
     | '/crawls/$slug'
     | '/decide/$code'
+    | '/people/$id'
     | '/stamp/$slug/$code'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -268,6 +288,7 @@ export interface FileRouteTypes {
     | '/map'
     | '/passport'
     | '/profile'
+    | '/social'
     | '/orders/$id'
     | '/owner/drops'
     | '/owner/menu'
@@ -279,6 +300,7 @@ export interface FileRouteTypes {
     | '/owner'
     | '/crawls/$slug'
     | '/decide/$code'
+    | '/people/$id'
     | '/stamp/$slug/$code'
   id:
     | '__root__'
@@ -294,6 +316,7 @@ export interface FileRouteTypes {
     | '/_tabs/map'
     | '/_tabs/passport'
     | '/_tabs/profile'
+    | '/_tabs/social'
     | '/orders/$id'
     | '/owner/drops'
     | '/owner/menu'
@@ -305,6 +328,7 @@ export interface FileRouteTypes {
     | '/owner/'
     | '/_tabs/crawls_/$slug'
     | '/_tabs/decide_/$code'
+    | '/_tabs/people/$id'
     | '/stamp/$slug/$code'
   fileRoutesById: FileRoutesById
 }
@@ -412,6 +436,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TabsProfileRouteImport
       parentRoute: typeof TabsRoute
     }
+    '/_tabs/social': {
+      id: '/_tabs/social'
+      path: '/social'
+      fullPath: '/social'
+      preLoaderRoute: typeof TabsSocialRouteImport
+      parentRoute: typeof TabsRoute
+    }
     '/orders/$id': {
       id: '/orders/$id'
       path: '/orders/$id'
@@ -482,6 +513,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TabsDecideCodeRouteImport
       parentRoute: typeof TabsRoute
     }
+    '/_tabs/people/$id': {
+      id: '/_tabs/people/$id'
+      path: '/people/$id'
+      fullPath: '/people/$id'
+      preLoaderRoute: typeof TabsPeopleIdRouteImport
+      parentRoute: typeof TabsRoute
+    }
     '/stamp/$slug/$code': {
       id: '/stamp/$slug/$code'
       path: '/stamp/$slug/$code'
@@ -500,9 +538,11 @@ interface TabsRouteChildren {
   TabsMapRoute: typeof TabsMapRoute
   TabsPassportRoute: typeof TabsPassportRoute
   TabsProfileRoute: typeof TabsProfileRoute
+  TabsSocialRoute: typeof TabsSocialRoute
   TabsIndexRoute: typeof TabsIndexRoute
   TabsCrawlsSlugRoute: typeof TabsCrawlsSlugRoute
   TabsDecideCodeRoute: typeof TabsDecideCodeRoute
+  TabsPeopleIdRoute: typeof TabsPeopleIdRoute
 }
 
 const TabsRouteChildren: TabsRouteChildren = {
@@ -513,9 +553,11 @@ const TabsRouteChildren: TabsRouteChildren = {
   TabsMapRoute: TabsMapRoute,
   TabsPassportRoute: TabsPassportRoute,
   TabsProfileRoute: TabsProfileRoute,
+  TabsSocialRoute: TabsSocialRoute,
   TabsIndexRoute: TabsIndexRoute,
   TabsCrawlsSlugRoute: TabsCrawlsSlugRoute,
   TabsDecideCodeRoute: TabsDecideCodeRoute,
+  TabsPeopleIdRoute: TabsPeopleIdRoute,
 }
 
 const TabsRouteWithChildren = TabsRoute._addFileChildren(TabsRouteChildren)

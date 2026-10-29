@@ -10,7 +10,7 @@ export const Route = createFileRoute("/auth")({
     const r = search["redirect"];
     const ok =
       typeof r === "string" &&
-      /^\/(checkout|drops|passport|decide(\/[A-Za-z0-9]{5})?|stamp\/[a-z0-9-]+\/[A-Za-z0-9]{6}|orders\/[a-f0-9-]+)$/.test(
+      /^\/(checkout|drops|passport|social|people\/[0-9a-f-]{36}|decide(\/[A-Za-z0-9]{5})?|stamp\/[a-z0-9-]+\/[A-Za-z0-9]{6}|orders\/[a-f0-9-]+)$/.test(
         r,
       );
     const as = search["as"] === "owner" ? ("owner" as const) : undefined;

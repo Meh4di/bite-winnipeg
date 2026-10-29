@@ -6,8 +6,9 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { emojiFor } from "@/lib/bite";
 import { OrderHistory } from "@/components/bite/OrderHistory";
+import { SocialSettings } from "@/components/bite/Social";
 import { useEffect, useState } from "react";
-import { Moon, Snowflake, Sun, SunMoon, Trophy, Footprints } from "lucide-react";
+import { Moon, Snowflake, Sun, SunMoon, Trophy, Footprints, Dices } from "lucide-react";
 import { getVortexPreview, setVortexPreview, useTheme, type ThemeChoice } from "@/lib/theme";
 
 export const Route = createFileRoute("/_tabs/profile")({
@@ -142,6 +143,8 @@ function Profile() {
         )}
       </div>
 
+      {user && <SocialSettings userId={user.id} />}
+
       <Settings />
 
       <Button variant="outline" size="xl" className="mt-8 w-full shadow-none" onClick={signOut}>
@@ -175,6 +178,12 @@ function Settings() {
           className="flex items-center gap-2 rounded-2xl bg-secondary p-4 font-semibold"
         >
           <Footprints className="size-5 text-primary" /> Food crawls
+        </Link>
+        <Link
+          to="/decide"
+          className="col-span-2 flex items-center gap-2 rounded-2xl bg-secondary p-4 font-semibold"
+        >
+          <Dices className="size-5 text-primary" /> Decide: spin or swipe with friends
         </Link>
         <Link
           to="/for-restaurants"

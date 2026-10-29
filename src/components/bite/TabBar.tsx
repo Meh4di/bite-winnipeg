@@ -1,12 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { Home, Zap, Stamp, Dices, User } from "lucide-react";
+import { Home, Zap, Stamp, Users, User } from "lucide-react";
 import { useVortex } from "@/lib/weather";
 
 const TABS = [
   { to: "/", label: "Home", icon: Home },
   { to: "/drops", label: "Drops", icon: Zap },
+  { to: "/social", label: "Social", icon: Users },
   { to: "/passport", label: "Passport", icon: Stamp },
-  { to: "/decide", label: "Decide", icon: Dices },
   { to: "/profile", label: "Profile", icon: User },
 ] as const;
 
@@ -19,7 +19,7 @@ export function TabBar() {
           <li key={to}>
             <Link
               to={to}
-              activeOptions={{ exact: true }}
+              activeOptions={{ exact: true, includeSearch: false }}
               className="group flex h-16 flex-col items-center justify-center gap-1 text-muted-foreground transition-colors data-[status=active]:text-primary"
             >
               <span className="grid h-8 w-14 place-items-center transition-all group-active:scale-90">

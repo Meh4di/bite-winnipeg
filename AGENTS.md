@@ -22,3 +22,11 @@
 - Migrations 0003–0005 add reviews (verified by stamps), house specials, live busyness, free-until dates, Polar Vortex promos, dish ratings + leaderboard view, crawls, pay-it-forward, food donations and taste-twin picks. New tables get broad default privileges here: when limiting columns, REVOKE first, then GRANT column lists (see 0005).
 - `restaurants.free_until` and `busy_updated_at` are maintained by the `restaurants_guard` trigger; clients can't change the free period.
 - Polar Vortex mode is client-side: Open-Meteo "feels like" temp <= -25°C (or the Profile preview switch) adds `html.vortex`, which recolours the theme.
+
+## Social (migration 0007)
+- Tab bar: Home, Drops, Social, Passport, Profile. Decide moved to Profile > Explore and the Social header.
+- `/social?tab=feed|tables|match`, `/people/$id`. Hooks in `src/lib/social.ts`, shared UI in `components/bite/Social.tsx`.
+- Friends = mutual follows. Feed (`activity`) is filled by triggers and RLS only shows friends' items older than 1 hour.
+- Tables (`meetups`): 18+ (`profile_private.birth_date`, owner-only), 3–8 seats, Bite restaurants only, always via RPCs.
+- Blocking hides everything both ways; reports go to `user_reports` (insert-only for users).
+- DEMO DATA to delete before launch: auth users `00000000-0000-0000-0000-00000000de01..06` (sample.*@bite.example), their follows/activity, meetups `11111111-aaaa-*`, crawl `date-night` and promo `DATE2` (keep those two if you like them).
