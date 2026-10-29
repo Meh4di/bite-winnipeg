@@ -9,27 +9,153 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TabsRouteImport } from './routes/_tabs'
+import { Route as TabsIndexRouteImport } from './routes/_tabs.index'
+import { Route as TabsDecideRouteImport } from './routes/_tabs.decide'
+import { Route as TabsDropsRouteImport } from './routes/_tabs.drops'
+import { Route as TabsPassportRouteImport } from './routes/_tabs.passport'
+import { Route as TabsProfileRouteImport } from './routes/_tabs.profile'
 
-export interface FileRoutesByFullPath {}
-export interface FileRoutesByTo {}
+const TabsRoute = TabsRouteImport.update({
+  id: '/_tabs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TabsIndexRoute = TabsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TabsRoute,
+} as any)
+const TabsDecideRoute = TabsDecideRouteImport.update({
+  id: '/decide',
+  path: '/decide',
+  getParentRoute: () => TabsRoute,
+} as any)
+const TabsDropsRoute = TabsDropsRouteImport.update({
+  id: '/drops',
+  path: '/drops',
+  getParentRoute: () => TabsRoute,
+} as any)
+const TabsPassportRoute = TabsPassportRouteImport.update({
+  id: '/passport',
+  path: '/passport',
+  getParentRoute: () => TabsRoute,
+} as any)
+const TabsProfileRoute = TabsProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => TabsRoute,
+} as any)
+
+export interface FileRoutesByFullPath {
+  '/': typeof TabsIndexRoute
+  '/decide': typeof TabsDecideRoute
+  '/drops': typeof TabsDropsRoute
+  '/passport': typeof TabsPassportRoute
+  '/profile': typeof TabsProfileRoute
+}
+export interface FileRoutesByTo {
+  '/decide': typeof TabsDecideRoute
+  '/drops': typeof TabsDropsRoute
+  '/passport': typeof TabsPassportRoute
+  '/profile': typeof TabsProfileRoute
+  '/': typeof TabsIndexRoute
+}
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/_tabs': typeof TabsRouteWithChildren
+  '/_tabs/decide': typeof TabsDecideRoute
+  '/_tabs/drops': typeof TabsDropsRoute
+  '/_tabs/passport': typeof TabsPassportRoute
+  '/_tabs/profile': typeof TabsProfileRoute
+  '/_tabs/': typeof TabsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: never
+  fullPaths: '/' | '/decide' | '/drops' | '/passport' | '/profile'
   fileRoutesByTo: FileRoutesByTo
-  to: never
-  id: '__root__'
+  to: '/decide' | '/drops' | '/passport' | '/profile' | '/'
+  id:
+    | '__root__'
+    | '/_tabs'
+    | '/_tabs/decide'
+    | '/_tabs/drops'
+    | '/_tabs/passport'
+    | '/_tabs/profile'
+    | '/_tabs/'
   fileRoutesById: FileRoutesById
 }
-export interface RootRouteChildren {}
-
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {}
+export interface RootRouteChildren {
+  TabsRoute: typeof TabsRouteWithChildren
 }
 
-const rootRouteChildren: RootRouteChildren = {}
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/_tabs': {
+      id: '/_tabs'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof TabsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_tabs/': {
+      id: '/_tabs/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof TabsIndexRouteImport
+      parentRoute: typeof TabsRoute
+    }
+    '/_tabs/decide': {
+      id: '/_tabs/decide'
+      path: '/decide'
+      fullPath: '/decide'
+      preLoaderRoute: typeof TabsDecideRouteImport
+      parentRoute: typeof TabsRoute
+    }
+    '/_tabs/drops': {
+      id: '/_tabs/drops'
+      path: '/drops'
+      fullPath: '/drops'
+      preLoaderRoute: typeof TabsDropsRouteImport
+      parentRoute: typeof TabsRoute
+    }
+    '/_tabs/passport': {
+      id: '/_tabs/passport'
+      path: '/passport'
+      fullPath: '/passport'
+      preLoaderRoute: typeof TabsPassportRouteImport
+      parentRoute: typeof TabsRoute
+    }
+    '/_tabs/profile': {
+      id: '/_tabs/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof TabsProfileRouteImport
+      parentRoute: typeof TabsRoute
+    }
+  }
+}
+
+interface TabsRouteChildren {
+  TabsDecideRoute: typeof TabsDecideRoute
+  TabsDropsRoute: typeof TabsDropsRoute
+  TabsPassportRoute: typeof TabsPassportRoute
+  TabsProfileRoute: typeof TabsProfileRoute
+  TabsIndexRoute: typeof TabsIndexRoute
+}
+
+const TabsRouteChildren: TabsRouteChildren = {
+  TabsDecideRoute: TabsDecideRoute,
+  TabsDropsRoute: TabsDropsRoute,
+  TabsPassportRoute: TabsPassportRoute,
+  TabsProfileRoute: TabsProfileRoute,
+  TabsIndexRoute: TabsIndexRoute,
+}
+
+const TabsRouteWithChildren = TabsRoute._addFileChildren(TabsRouteChildren)
+
+const rootRouteChildren: RootRouteChildren = {
+  TabsRoute: TabsRouteWithChildren,
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
