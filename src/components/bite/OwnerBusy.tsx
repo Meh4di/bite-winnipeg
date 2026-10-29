@@ -11,7 +11,12 @@ const WAITS = [0, 10, 20, 30, 45, 60];
 export function OwnerBusy({
   restaurant,
 }: {
-  restaurant: { id: string; busy_level: string | null; wait_minutes: number | null; busy_updated_at: string | null };
+  restaurant: {
+    id: string;
+    busy_level: string | null;
+    wait_minutes: number | null;
+    busy_updated_at: string | null;
+  };
 }) {
   const qc = useQueryClient();
   const now = useNow(30_000);
@@ -69,7 +74,9 @@ export function OwnerBusy({
           );
         })}
       </div>
-      <p className="mt-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Wait for a table / walk-in</p>
+      <p className="mt-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+        Wait for a table / walk-in
+      </p>
       <div className="no-scrollbar mt-1.5 flex gap-1.5 overflow-x-auto">
         {WAITS.map((w) => {
           const on = live?.wait === w;
@@ -107,9 +114,13 @@ export function FreeBanner({ freeUntil }: { freeUntil: string | null }) {
   return (
     <section className="rounded-3xl bg-warm p-4 text-primary-foreground shadow-pop">
       <p className="text-xs font-bold uppercase tracking-wider opacity-90">🍁 Founding partner</p>
-      <p className="mt-1 text-lg font-extrabold leading-tight">Bite is free for you until {end.toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" })}</p>
+      <p className="mt-1 text-lg font-extrabold leading-tight">
+        Bite is free for you until{" "}
+        {end.toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" })}
+      </p>
       <p className="mt-1 text-sm opacity-90">
-        No fees on pickup orders, drops, last-call deals or promotions. {days} {days === 1 ? "day" : "days"} left.
+        No fees on pickup orders, drops, last-call deals or promotions. {days}{" "}
+        {days === 1 ? "day" : "days"} left.
       </p>
     </section>
   );

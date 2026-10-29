@@ -24,7 +24,8 @@ export type Review = {
   created_at: string;
 };
 
-const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" });
+const fmtDate = (iso: string) =>
+  new Date(iso).toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" });
 
 export function useReviews(restaurantId: string | undefined) {
   return useQuery({
@@ -44,7 +45,15 @@ export function useReviews(restaurantId: string | undefined) {
   });
 }
 
-export function ReviewsSection({ restaurantId, restaurantName, isOwner }: { restaurantId: string; restaurantName: string; isOwner: boolean }) {
+export function ReviewsSection({
+  restaurantId,
+  restaurantName,
+  isOwner,
+}: {
+  restaurantId: string;
+  restaurantName: string;
+  isOwner: boolean;
+}) {
   const { user } = useAuth();
   const reviews = useReviews(restaurantId);
   const [writing, setWriting] = useState(false);
@@ -101,9 +110,14 @@ export function ReviewsSection({ restaurantId, restaurantName, isOwner }: { rest
         <div className="mt-3 space-y-2 rounded-2xl bg-card p-4 shadow-card">
           {likes.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="mr-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">People love</span>
+              <span className="mr-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                People love
+              </span>
               {likes.map(([t, n]) => (
-                <span key={t} className="rounded-full bg-success/15 px-2.5 py-1 text-xs font-semibold text-success">
+                <span
+                  key={t}
+                  className="rounded-full bg-success/15 px-2.5 py-1 text-xs font-semibold text-success"
+                >
                   {t} · {n}
                 </span>
               ))}
@@ -111,9 +125,14 @@ export function ReviewsSection({ restaurantId, restaurantName, isOwner }: { rest
           )}
           {dislikes.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="mr-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">Heads up</span>
+              <span className="mr-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                Heads up
+              </span>
               {dislikes.map(([t, n]) => (
-                <span key={t} className="rounded-full bg-destructive/10 px-2.5 py-1 text-xs font-semibold text-destructive">
+                <span
+                  key={t}
+                  className="rounded-full bg-destructive/10 px-2.5 py-1 text-xs font-semibold text-destructive"
+                >
                   {t} · {n}
                 </span>
               ))}
@@ -125,7 +144,12 @@ export function ReviewsSection({ restaurantId, restaurantName, isOwner }: { rest
       {photos.length > 0 && (
         <div className="no-scrollbar -mx-5 mt-3 flex gap-2 overflow-x-auto px-5">
           {photos.slice(0, 20).map((p, i) => (
-            <button key={`${p.url}-${i}`} onClick={() => setPhoto(p.url)} className="shrink-0" aria-label={`Photo by ${p.by}`}>
+            <button
+              key={`${p.url}-${i}`}
+              onClick={() => setPhoto(p.url)}
+              className="shrink-0"
+              aria-label={`Photo by ${p.by}`}
+            >
               <img src={p.url} alt="" loading="lazy" className="size-24 rounded-2xl object-cover" />
             </button>
           ))}
@@ -136,16 +160,25 @@ export function ReviewsSection({ restaurantId, restaurantName, isOwner }: { rest
         <div className="mt-3">
           {!user ? (
             <p className="rounded-2xl bg-card p-4 text-sm text-muted-foreground shadow-card">
-              <Link to="/auth" className="font-semibold text-primary">Sign in</Link> to leave a review.
+              <Link to="/auth" className="font-semibold text-primary">
+                Sign in
+              </Link>{" "}
+              to leave a review.
             </p>
           ) : verified.data ? (
-            <Button variant={mine ? "secondary" : "default"} size="xl" className="w-full" onClick={() => setWriting(true)}>
+            <Button
+              variant={mine ? "secondary" : "default"}
+              size="xl"
+              className="w-full"
+              onClick={() => setWriting(true)}
+            >
               {mine ? <Pencil className="size-5" /> : <Camera className="size-5" />}
               {mine ? "Edit my review" : "Write a review"}
             </Button>
           ) : verified.isSuccess ? (
             <p className="rounded-2xl bg-card p-4 text-sm text-muted-foreground shadow-card">
-              ✅ Reviews on Bite are from real customers. Order, grab a drop, or scan the counter code here once and you can review.
+              ✅ Reviews on Bite are from real customers. Order, grab a drop, or scan the counter
+              code here once and you can review.
             </p>
           ) : null}
         </div>
@@ -159,7 +192,14 @@ export function ReviewsSection({ restaurantId, restaurantName, isOwner }: { rest
           </p>
         )}
         {shown.map((r) => (
-          <ReviewCard key={r.id} r={r} mine={r.user_id === user?.id} isOwner={isOwner} onPhoto={setPhoto} onChange={refresh} />
+          <ReviewCard
+            key={r.id}
+            r={r}
+            mine={r.user_id === user?.id}
+            isOwner={isOwner}
+            onPhoto={setPhoto}
+            onChange={refresh}
+          />
         ))}
         {list.length > 4 && !showAll && (
           <Button variant="ghost" className="w-full" onClick={() => setShowAll(true)}>
@@ -183,7 +223,11 @@ export function ReviewsSection({ restaurantId, restaurantName, isOwner }: { rest
       )}
 
       {photo && (
-        <button className="fixed inset-0 z-50 grid place-items-center bg-black/90 p-4" onClick={() => setPhoto(null)} aria-label="Close photo">
+        <button
+          className="fixed inset-0 z-50 grid place-items-center bg-black/90 p-4"
+          onClick={() => setPhoto(null)}
+          aria-label="Close photo"
+        >
           <img src={photo} alt="" className="max-h-full max-w-full rounded-2xl object-contain" />
         </button>
       )}
@@ -212,7 +256,9 @@ export function ReviewCard({
     if (!user) return;
     const reason = prompt("What's wrong with this review? (fake, offensive, spam…)");
     if (reason === null) return;
-    const { error } = await supabase.from("review_reports").insert({ review_id: r.id, reason: reason.slice(0, 300) });
+    const { error } = await supabase
+      .from("review_reports")
+      .insert({ review_id: r.id, reason: reason.slice(0, 300) });
     if (error && !error.message.includes("duplicate")) toast.error(error.message);
     else toast.success("Thanks, we'll take a look.");
   };
@@ -245,15 +291,24 @@ export function ReviewCard({
             {mine && <span className="ml-1 text-xs text-muted-foreground">(you)</span>}
           </p>
           <p className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Stars value={r.rating} size="size-3.5" /> {fmtDate(r.created_at)} · <span className="text-success">Verified visit</span>
+            <Stars value={r.rating} size="size-3.5" /> {fmtDate(r.created_at)} ·{" "}
+            <span className="text-success">Verified visit</span>
           </p>
         </div>
         {mine ? (
-          <button onClick={remove} aria-label="Delete review" className="grid size-9 place-items-center text-muted-foreground">
+          <button
+            onClick={remove}
+            aria-label="Delete review"
+            className="grid size-9 place-items-center text-muted-foreground"
+          >
             <Trash2 className="size-4" />
           </button>
         ) : user && !isOwner ? (
-          <button onClick={report} aria-label="Report review" className="grid size-9 place-items-center text-muted-foreground">
+          <button
+            onClick={report}
+            aria-label="Report review"
+            className="grid size-9 place-items-center text-muted-foreground"
+          >
             <Flag className="size-4" />
           </button>
         ) : null}
@@ -275,19 +330,30 @@ export function ReviewCard({
         <div className="mt-3 grid grid-cols-4 gap-1.5">
           {r.photo_urls.map((u) => (
             <button key={u} onClick={() => onPhoto(u)} aria-label="Open photo">
-              <img src={u} alt="" loading="lazy" className="aspect-square w-full rounded-xl object-cover" />
+              <img
+                src={u}
+                alt=""
+                loading="lazy"
+                className="aspect-square w-full rounded-xl object-cover"
+              />
             </button>
           ))}
         </div>
       )}
       {r.owner_reply && !replying && (
         <div className="mt-3 rounded-xl bg-secondary p-3 text-sm">
-          <p className="mb-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">Reply from the owner</p>
+          <p className="mb-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Reply from the owner
+          </p>
           <p className="whitespace-pre-line">{r.owner_reply}</p>
         </div>
       )}
       {isOwner && !replying && (
-        <Button variant="ghost" className="mt-2 h-10 px-2 text-primary" onClick={() => setReplying(true)}>
+        <Button
+          variant="ghost"
+          className="mt-2 h-10 px-2 text-primary"
+          onClick={() => setReplying(true)}
+        >
           <MessageSquareReply className="size-4" /> {r.owner_reply ? "Edit reply" : "Reply"}
         </Button>
       )}
@@ -301,8 +367,12 @@ export function ReviewCard({
             className="min-h-20 w-full rounded-2xl border bg-background p-3 text-base outline-none focus:border-primary"
           />
           <div className="flex gap-2">
-            <Button variant="ghost" className="h-10 flex-1" onClick={() => setReplying(false)}>Cancel</Button>
-            <Button className="h-10 flex-1" onClick={sendReply}>Post reply</Button>
+            <Button variant="ghost" className="h-10 flex-1" onClick={() => setReplying(false)}>
+              Cancel
+            </Button>
+            <Button className="h-10 flex-1" onClick={sendReply}>
+              Post reply
+            </Button>
           </div>
         </div>
       )}
@@ -332,7 +402,10 @@ function ReviewSheet({
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const toggle = (t: string) => setTags((cur) => (cur.includes(t) ? cur.filter((x) => x !== t) : cur.length >= 8 ? cur : [...cur, t]));
+  const toggle = (t: string) =>
+    setTags((cur) =>
+      cur.includes(t) ? cur.filter((x) => x !== t) : cur.length >= 8 ? cur : [...cur, t],
+    );
 
   const addPhotos = async (files: FileList | null) => {
     if (!files?.length) return;
@@ -367,7 +440,11 @@ function ReviewSheet({
       : await supabase.from("reviews").insert({ ...row, restaurant_id: restaurantId });
     setSaving(false);
     if (error) {
-      toast.error(error.message.includes("row-level security") ? "Visit or order here first to review." : error.message);
+      toast.error(
+        error.message.includes("row-level security")
+          ? "Visit or order here first to review."
+          : error.message,
+      );
       return;
     }
     toast.success(existing ? "Review updated" : "Thanks for reviewing! 🍁");
@@ -375,7 +452,10 @@ function ReviewSheet({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40"
+      onClick={onClose}
+    >
       <div
         className="max-h-[92dvh] w-full max-w-[430px] space-y-4 overflow-y-auto rounded-t-3xl bg-card p-5 pb-safe animate-screen"
         onClick={(e) => e.stopPropagation()}
@@ -388,8 +468,17 @@ function ReviewSheet({
         </div>
         <div className="flex justify-center gap-2" role="radiogroup" aria-label="Rating">
           {[1, 2, 3, 4, 5].map((i) => (
-            <button key={i} role="radio" aria-checked={rating === i} aria-label={`${i} stars`} onClick={() => setRating(i)} className="p-1 active:scale-90">
-              <Star className={`size-10 ${i <= rating ? "fill-amber-400 text-amber-400" : "text-border"}`} />
+            <button
+              key={i}
+              role="radio"
+              aria-checked={rating === i}
+              aria-label={`${i} stars`}
+              onClick={() => setRating(i)}
+              className="p-1 active:scale-90"
+            >
+              <Star
+                className={`size-10 ${i <= rating ? "fill-amber-400 text-amber-400" : "text-border"}`}
+              />
             </button>
           ))}
         </div>
@@ -397,7 +486,9 @@ function ReviewSheet({
           <p className="mb-2 text-sm font-bold">What did you like?</p>
           <div className="flex flex-wrap gap-2">
             {LIKE_TAGS.map((t) => (
-              <TagButton key={t} on={tags.includes(t)} good onClick={() => toggle(t)}>{t}</TagButton>
+              <TagButton key={t} on={tags.includes(t)} good onClick={() => toggle(t)}>
+                {t}
+              </TagButton>
             ))}
           </div>
         </div>
@@ -405,7 +496,9 @@ function ReviewSheet({
           <p className="mb-2 text-sm font-bold">Anything you didn't like?</p>
           <div className="flex flex-wrap gap-2">
             {DISLIKE_TAGS.map((t) => (
-              <TagButton key={t} on={tags.includes(t)} onClick={() => toggle(t)}>{t}</TagButton>
+              <TagButton key={t} on={tags.includes(t)} onClick={() => toggle(t)}>
+                {t}
+              </TagButton>
             ))}
           </div>
         </div>
@@ -435,7 +528,13 @@ function ReviewSheet({
                 <Camera className="size-5" />
                 {uploading ? "…" : "Add"}
               </span>
-              <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => addPhotos(e.target.files)} />
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={(e) => addPhotos(e.target.files)}
+              />
             </label>
           )}
         </div>
@@ -447,8 +546,20 @@ function ReviewSheet({
   );
 }
 
-function TagButton({ on, good, onClick, children }: { on: boolean; good?: boolean; onClick: () => void; children: React.ReactNode }) {
-  const active = good ? "border-success bg-success/15 text-success" : "border-destructive bg-destructive/10 text-destructive";
+function TagButton({
+  on,
+  good,
+  onClick,
+  children,
+}: {
+  on: boolean;
+  good?: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  const active = good
+    ? "border-success bg-success/15 text-success"
+    : "border-destructive bg-destructive/10 text-destructive";
   return (
     <button
       onClick={onClick}

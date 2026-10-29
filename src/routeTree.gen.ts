@@ -16,6 +16,7 @@ import { Route as OwnerRouteImport } from './routes/owner'
 import { Route as TabsIndexRouteImport } from './routes/_tabs.index'
 import { Route as TabsDecideRouteImport } from './routes/_tabs.decide'
 import { Route as TabsDropsRouteImport } from './routes/_tabs.drops'
+import { Route as TabsMapRouteImport } from './routes/_tabs.map'
 import { Route as TabsPassportRouteImport } from './routes/_tabs.passport'
 import { Route as TabsProfileRouteImport } from './routes/_tabs.profile'
 import { Route as OrdersIdRouteImport } from './routes/orders.$id'
@@ -61,6 +62,11 @@ const TabsDecideRoute = TabsDecideRouteImport.update({
 const TabsDropsRoute = TabsDropsRouteImport.update({
   id: '/drops',
   path: '/drops',
+  getParentRoute: () => TabsRoute,
+} as any)
+const TabsMapRoute = TabsMapRouteImport.update({
+  id: '/map',
+  path: '/map',
   getParentRoute: () => TabsRoute,
 } as any)
 const TabsPassportRoute = TabsPassportRouteImport.update({
@@ -131,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/owner': typeof OwnerRouteWithChildren
   '/decide': typeof TabsDecideRoute
   '/drops': typeof TabsDropsRoute
+  '/map': typeof TabsMapRoute
   '/passport': typeof TabsPassportRoute
   '/profile': typeof TabsProfileRoute
   '/orders/$id': typeof OrdersIdRoute
@@ -149,6 +156,7 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/decide': typeof TabsDecideRoute
   '/drops': typeof TabsDropsRoute
+  '/map': typeof TabsMapRoute
   '/passport': typeof TabsPassportRoute
   '/profile': typeof TabsProfileRoute
   '/orders/$id': typeof OrdersIdRoute
@@ -171,6 +179,7 @@ export interface FileRoutesById {
   '/owner': typeof OwnerRouteWithChildren
   '/_tabs/decide': typeof TabsDecideRoute
   '/_tabs/drops': typeof TabsDropsRoute
+  '/_tabs/map': typeof TabsMapRoute
   '/_tabs/passport': typeof TabsPassportRoute
   '/_tabs/profile': typeof TabsProfileRoute
   '/orders/$id': typeof OrdersIdRoute
@@ -194,6 +203,7 @@ export interface FileRouteTypes {
     | '/owner'
     | '/decide'
     | '/drops'
+    | '/map'
     | '/passport'
     | '/profile'
     | '/orders/$id'
@@ -212,6 +222,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/decide'
     | '/drops'
+    | '/map'
     | '/passport'
     | '/profile'
     | '/orders/$id'
@@ -233,6 +244,7 @@ export interface FileRouteTypes {
     | '/owner'
     | '/_tabs/decide'
     | '/_tabs/drops'
+    | '/_tabs/map'
     | '/_tabs/passport'
     | '/_tabs/profile'
     | '/orders/$id'
@@ -307,6 +319,13 @@ declare module '@tanstack/react-router' {
       path: '/drops'
       fullPath: '/drops'
       preLoaderRoute: typeof TabsDropsRouteImport
+      parentRoute: typeof TabsRoute
+    }
+    '/_tabs/map': {
+      id: '/_tabs/map'
+      path: '/map'
+      fullPath: '/map'
+      preLoaderRoute: typeof TabsMapRouteImport
       parentRoute: typeof TabsRoute
     }
     '/_tabs/passport': {
@@ -399,6 +418,7 @@ declare module '@tanstack/react-router' {
 interface TabsRouteChildren {
   TabsDecideRoute: typeof TabsDecideRoute
   TabsDropsRoute: typeof TabsDropsRoute
+  TabsMapRoute: typeof TabsMapRoute
   TabsPassportRoute: typeof TabsPassportRoute
   TabsProfileRoute: typeof TabsProfileRoute
   TabsIndexRoute: typeof TabsIndexRoute
@@ -408,6 +428,7 @@ interface TabsRouteChildren {
 const TabsRouteChildren: TabsRouteChildren = {
   TabsDecideRoute: TabsDecideRoute,
   TabsDropsRoute: TabsDropsRoute,
+  TabsMapRoute: TabsMapRoute,
   TabsPassportRoute: TabsPassportRoute,
   TabsProfileRoute: TabsProfileRoute,
   TabsIndexRoute: TabsIndexRoute,

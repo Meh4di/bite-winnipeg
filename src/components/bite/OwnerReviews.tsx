@@ -50,7 +50,11 @@ export function OwnerReviews({ restaurantId }: { restaurantId: string }) {
         </Button>
       )}
       {photo && (
-        <button className="fixed inset-0 z-50 grid place-items-center bg-black/90 p-4" onClick={() => setPhoto(null)} aria-label="Close photo">
+        <button
+          className="fixed inset-0 z-50 grid place-items-center bg-black/90 p-4"
+          onClick={() => setPhoto(null)}
+          aria-label="Close photo"
+        >
           <img src={photo} alt="" className="max-h-full max-w-full rounded-2xl object-contain" />
         </button>
       )}

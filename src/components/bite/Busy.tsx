@@ -2,7 +2,15 @@ import { Clock, Star } from "lucide-react";
 import { BUSY, minutesAgo, type BusyInfo } from "@/lib/community";
 
 /** "Busy · ~20 min wait · updated 5 min ago" or the kitchen queue when there's no owner update. */
-export function BusyLine({ busy, queue, compact = false }: { busy: BusyInfo | null; queue?: number | undefined; compact?: boolean }) {
+export function BusyLine({
+  busy,
+  queue,
+  compact = false,
+}: {
+  busy: BusyInfo | null;
+  queue?: number | undefined;
+  compact?: boolean;
+}) {
   if (!busy && !queue) return null;
   const meta = busy?.level ? BUSY[busy.level] : null;
   return (
@@ -22,7 +30,9 @@ export function BusyLine({ busy, queue, compact = false }: { busy: BusyInfo | nu
           {queue} {queue === 1 ? "order" : "orders"} in the kitchen
         </span>
       ) : null}
-      {busy?.updatedAt && !compact && <span className="font-normal text-muted-foreground">· {minutesAgo(busy.updatedAt)}</span>}
+      {busy?.updatedAt && !compact && (
+        <span className="font-normal text-muted-foreground">· {minutesAgo(busy.updatedAt)}</span>
+      )}
     </span>
   );
 }
@@ -31,7 +41,10 @@ export function Stars({ value, size = "size-4" }: { value: number; size?: string
   return (
     <span className="inline-flex items-center gap-0.5" aria-label={`${value} out of 5 stars`}>
       {[1, 2, 3, 4, 5].map((i) => (
-        <Star key={i} className={`${size} ${i <= Math.round(value) ? "fill-amber-400 text-amber-400" : "text-border"}`} />
+        <Star
+          key={i}
+          className={`${size} ${i <= Math.round(value) ? "fill-amber-400 text-amber-400" : "text-border"}`}
+        />
       ))}
     </span>
   );

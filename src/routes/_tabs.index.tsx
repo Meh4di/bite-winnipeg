@@ -116,6 +116,17 @@ function Home() {
       )}
 
       <section className="mt-6 px-5">
+        <Link
+          to="/map"
+          className="mb-4 flex items-center gap-3 rounded-2xl bg-card p-3 shadow-card active:scale-[0.98]"
+        >
+          <span className="grid size-11 place-items-center rounded-xl bg-primary-soft text-2xl">🗺️</span>
+          <div className="min-w-0 flex-1">
+            <p className="font-bold">Map view</p>
+            <p className="truncate text-sm text-muted-foreground">See what's near you, how busy it is, and the wait</p>
+          </div>
+          <ChevronRight className="size-5 text-muted-foreground" />
+        </Link>
         <div className="mb-3 flex items-baseline justify-between">
           <h2 className="text-xl font-bold">{cat ?? "Near you"}</h2>
           <span className="text-sm text-muted-foreground">{list.length} {list.length === 1 ? "spot" : "spots"}</span>
