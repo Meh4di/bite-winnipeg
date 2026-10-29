@@ -9,50 +9,294 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as TabsRouteImport } from './routes/_tabs'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as OwnerRouteImport } from './routes/owner'
+import { Route as TabsIndexRouteImport } from './routes/_tabs.index'
+import { Route as TabsDecideRouteImport } from './routes/_tabs.decide'
+import { Route as TabsDropsRouteImport } from './routes/_tabs.drops'
+import { Route as TabsPassportRouteImport } from './routes/_tabs.passport'
+import { Route as TabsProfileRouteImport } from './routes/_tabs.profile'
+import { Route as OwnerIndexRouteImport } from './routes/owner.index'
+import { Route as OwnerMenuRouteImport } from './routes/owner.menu'
+import { Route as OwnerSetupRouteImport } from './routes/owner.setup'
+import { Route as RSlugRouteImport } from './routes/r.$slug'
 
-const IndexRoute = IndexRouteImport.update({
+const TabsRoute = TabsRouteImport.update({
+  id: '/_tabs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OwnerRoute = OwnerRouteImport.update({
+  id: '/owner',
+  path: '/owner',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TabsIndexRoute = TabsIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => TabsRoute,
+} as any)
+const TabsDecideRoute = TabsDecideRouteImport.update({
+  id: '/decide',
+  path: '/decide',
+  getParentRoute: () => TabsRoute,
+} as any)
+const TabsDropsRoute = TabsDropsRouteImport.update({
+  id: '/drops',
+  path: '/drops',
+  getParentRoute: () => TabsRoute,
+} as any)
+const TabsPassportRoute = TabsPassportRouteImport.update({
+  id: '/passport',
+  path: '/passport',
+  getParentRoute: () => TabsRoute,
+} as any)
+const TabsProfileRoute = TabsProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => TabsRoute,
+} as any)
+const OwnerIndexRoute = OwnerIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => OwnerRoute,
+} as any)
+const OwnerMenuRoute = OwnerMenuRouteImport.update({
+  id: '/menu',
+  path: '/menu',
+  getParentRoute: () => OwnerRoute,
+} as any)
+const OwnerSetupRoute = OwnerSetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
+  getParentRoute: () => OwnerRoute,
+} as any)
+const RSlugRoute = RSlugRouteImport.update({
+  id: '/r/$slug',
+  path: '/r/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof TabsIndexRoute
+  '/auth': typeof AuthRoute
+  '/owner': typeof OwnerRouteWithChildren
+  '/decide': typeof TabsDecideRoute
+  '/drops': typeof TabsDropsRoute
+  '/passport': typeof TabsPassportRoute
+  '/profile': typeof TabsProfileRoute
+  '/owner/menu': typeof OwnerMenuRoute
+  '/owner/setup': typeof OwnerSetupRoute
+  '/r/$slug': typeof RSlugRoute
+  '/owner/': typeof OwnerIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/decide': typeof TabsDecideRoute
+  '/drops': typeof TabsDropsRoute
+  '/passport': typeof TabsPassportRoute
+  '/profile': typeof TabsProfileRoute
+  '/owner/menu': typeof OwnerMenuRoute
+  '/owner/setup': typeof OwnerSetupRoute
+  '/r/$slug': typeof RSlugRoute
+  '/': typeof TabsIndexRoute
+  '/owner': typeof OwnerIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_tabs': typeof TabsRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/owner': typeof OwnerRouteWithChildren
+  '/_tabs/decide': typeof TabsDecideRoute
+  '/_tabs/drops': typeof TabsDropsRoute
+  '/_tabs/passport': typeof TabsPassportRoute
+  '/_tabs/profile': typeof TabsProfileRoute
+  '/owner/menu': typeof OwnerMenuRoute
+  '/owner/setup': typeof OwnerSetupRoute
+  '/r/$slug': typeof RSlugRoute
+  '/_tabs/': typeof TabsIndexRoute
+  '/owner/': typeof OwnerIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/owner'
+    | '/decide'
+    | '/drops'
+    | '/passport'
+    | '/profile'
+    | '/owner/menu'
+    | '/owner/setup'
+    | '/r/$slug'
+    | '/owner/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/auth'
+    | '/decide'
+    | '/drops'
+    | '/passport'
+    | '/profile'
+    | '/owner/menu'
+    | '/owner/setup'
+    | '/r/$slug'
+    | '/'
+    | '/owner'
+  id:
+    | '__root__'
+    | '/_tabs'
+    | '/auth'
+    | '/owner'
+    | '/_tabs/decide'
+    | '/_tabs/drops'
+    | '/_tabs/passport'
+    | '/_tabs/profile'
+    | '/owner/menu'
+    | '/owner/setup'
+    | '/r/$slug'
+    | '/_tabs/'
+    | '/owner/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  TabsRoute: typeof TabsRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  OwnerRoute: typeof OwnerRouteWithChildren
+  RSlugRoute: typeof RSlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_tabs': {
+      id: '/_tabs'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof TabsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/owner': {
+      id: '/owner'
+      path: '/owner'
+      fullPath: '/owner'
+      preLoaderRoute: typeof OwnerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_tabs/': {
+      id: '/_tabs/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof TabsIndexRouteImport
+      parentRoute: typeof TabsRoute
+    }
+    '/_tabs/decide': {
+      id: '/_tabs/decide'
+      path: '/decide'
+      fullPath: '/decide'
+      preLoaderRoute: typeof TabsDecideRouteImport
+      parentRoute: typeof TabsRoute
+    }
+    '/_tabs/drops': {
+      id: '/_tabs/drops'
+      path: '/drops'
+      fullPath: '/drops'
+      preLoaderRoute: typeof TabsDropsRouteImport
+      parentRoute: typeof TabsRoute
+    }
+    '/_tabs/passport': {
+      id: '/_tabs/passport'
+      path: '/passport'
+      fullPath: '/passport'
+      preLoaderRoute: typeof TabsPassportRouteImport
+      parentRoute: typeof TabsRoute
+    }
+    '/_tabs/profile': {
+      id: '/_tabs/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof TabsProfileRouteImport
+      parentRoute: typeof TabsRoute
+    }
+    '/owner/': {
+      id: '/owner/'
+      path: '/'
+      fullPath: '/owner/'
+      preLoaderRoute: typeof OwnerIndexRouteImport
+      parentRoute: typeof OwnerRoute
+    }
+    '/owner/menu': {
+      id: '/owner/menu'
+      path: '/menu'
+      fullPath: '/owner/menu'
+      preLoaderRoute: typeof OwnerMenuRouteImport
+      parentRoute: typeof OwnerRoute
+    }
+    '/owner/setup': {
+      id: '/owner/setup'
+      path: '/setup'
+      fullPath: '/owner/setup'
+      preLoaderRoute: typeof OwnerSetupRouteImport
+      parentRoute: typeof OwnerRoute
+    }
+    '/r/$slug': {
+      id: '/r/$slug'
+      path: '/r/$slug'
+      fullPath: '/r/$slug'
+      preLoaderRoute: typeof RSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
+interface TabsRouteChildren {
+  TabsDecideRoute: typeof TabsDecideRoute
+  TabsDropsRoute: typeof TabsDropsRoute
+  TabsPassportRoute: typeof TabsPassportRoute
+  TabsProfileRoute: typeof TabsProfileRoute
+  TabsIndexRoute: typeof TabsIndexRoute
+}
+
+const TabsRouteChildren: TabsRouteChildren = {
+  TabsDecideRoute: TabsDecideRoute,
+  TabsDropsRoute: TabsDropsRoute,
+  TabsPassportRoute: TabsPassportRoute,
+  TabsProfileRoute: TabsProfileRoute,
+  TabsIndexRoute: TabsIndexRoute,
+}
+
+const TabsRouteWithChildren = TabsRoute._addFileChildren(TabsRouteChildren)
+
+interface OwnerRouteChildren {
+  OwnerMenuRoute: typeof OwnerMenuRoute
+  OwnerSetupRoute: typeof OwnerSetupRoute
+  OwnerIndexRoute: typeof OwnerIndexRoute
+}
+
+const OwnerRouteChildren: OwnerRouteChildren = {
+  OwnerMenuRoute: OwnerMenuRoute,
+  OwnerSetupRoute: OwnerSetupRoute,
+  OwnerIndexRoute: OwnerIndexRoute,
+}
+
+const OwnerRouteWithChildren = OwnerRoute._addFileChildren(OwnerRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  TabsRoute: TabsRouteWithChildren,
+  AuthRoute: AuthRoute,
+  OwnerRoute: OwnerRouteWithChildren,
+  RSlugRoute: RSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
