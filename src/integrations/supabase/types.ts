@@ -38,12 +38,106 @@ export type Database = {
         }
         Relationships: []
       }
+      decide_members: {
+        Row: {
+          display_name: string
+          joined_at: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          display_name?: string
+          joined_at?: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          display_name?: string
+          joined_at?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "decide_members_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "decide_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      decide_sessions: {
+        Row: {
+          category: string | null
+          code: string
+          created_at: string
+          created_by: string
+          id: string
+        }
+        Insert: {
+          category?: string | null
+          code: string
+          created_at?: string
+          created_by: string
+          id?: string
+        }
+        Update: {
+          category?: string | null
+          code?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      decide_votes: {
+        Row: {
+          created_at: string
+          liked: boolean
+          restaurant_id: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          liked: boolean
+          restaurant_id: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          liked?: boolean
+          restaurant_id?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "decide_votes_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "decide_votes_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "decide_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       drops: {
         Row: {
           created_at: string
           description: string | null
           ends_at: string | null
           id: string
+          kind: string
+          original_price_cents: number | null
           photo_url: string | null
           price_cents: number
           quantity_left: number
@@ -57,6 +151,8 @@ export type Database = {
           description?: string | null
           ends_at?: string | null
           id?: string
+          kind?: string
+          original_price_cents?: number | null
           photo_url?: string | null
           price_cents?: number
           quantity_left?: number
@@ -70,6 +166,8 @@ export type Database = {
           description?: string | null
           ends_at?: string | null
           id?: string
+          kind?: string
+          original_price_cents?: number | null
           photo_url?: string | null
           price_cents?: number
           quantity_left?: number
@@ -246,6 +344,7 @@ export type Database = {
         Row: {
           created_at: string
           customer_name: string
+          drop_id: string | null
           id: string
           note: string
           order_number: string
@@ -259,6 +358,7 @@ export type Database = {
         Insert: {
           created_at?: string
           customer_name?: string
+          drop_id?: string | null
           id?: string
           note?: string
           order_number?: string
@@ -272,6 +372,7 @@ export type Database = {
         Update: {
           created_at?: string
           customer_name?: string
+          drop_id?: string | null
           id?: string
           note?: string
           order_number?: string
@@ -283,6 +384,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "orders_drop_id_fkey"
+            columns: ["drop_id"]
+            isOneToOne: false
+            referencedRelation: "drops"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "orders_restaurant_id_fkey"
             columns: ["restaurant_id"]
@@ -357,6 +465,29 @@ export type Database = {
           },
         ]
       }
+      restaurant_secrets: {
+        Row: {
+          restaurant_id: string
+          stamp_secret: string
+        }
+        Insert: {
+          restaurant_id: string
+          stamp_secret?: string
+        }
+        Update: {
+          restaurant_id?: string
+          stamp_secret?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_secrets_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       restaurants: {
         Row: {
           accepting_orders: boolean
@@ -416,6 +547,35 @@ export type Database = {
           slug?: string
         }
         Relationships: []
+      }
+      reward_redemptions: {
+        Row: {
+          created_at: string
+          id: string
+          restaurant_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          restaurant_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          restaurant_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_redemptions_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stamps: {
         Row: {
@@ -511,6 +671,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_drop: { Args: { p_drop_id: string }; Returns: string }
+      claim_visit_stamp: {
+        Args: { p_code: string; p_slug: string }
+        Returns: {
+          restaurant_name: string
+          restaurant_slug: string
+        }[]
+      }
       checkout_test_order: {
         Args: {
           p_items: Json
@@ -521,6 +689,20 @@ export type Database = {
         }
         Returns: string
       }
+      create_decide_session: {
+        Args: { p_category?: string }
+        Returns: {
+          code: string
+          id: string
+        }[]
+      }
+      get_stamp_code: {
+        Args: { p_restaurant_id: string }
+        Returns: {
+          code: string
+          expires_at: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -528,7 +710,25 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_decide_member: { Args: { _session_id: string }; Returns: boolean }
+      join_decide_session: { Args: { p_code: string }; Returns: string }
+      level_for: { Args: { _stamps: number }; Returns: number }
+      my_level: { Args: never; Returns: number }
       owns_restaurant: { Args: { _restaurant_id: string }; Returns: boolean }
+      redeem_reward: {
+        Args: { p_restaurant_id: string }
+        Returns: {
+          created_at: string
+          id: string
+        }[]
+      }
+      secret_menu_teaser: {
+        Args: { p_restaurant_id: string }
+        Returns: {
+          locked_count: number
+          next_level: number
+        }[]
+      }
     }
     Enums: {
       app_role: "customer" | "restaurant_owner" | "admin"

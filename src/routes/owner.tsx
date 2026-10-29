@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router";
-import { ShoppingBag, Store, UtensilsCrossed, Eye } from "lucide-react";
+import { ShoppingBag, Store, UtensilsCrossed, Eye, Zap, QrCode } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchRole } from "@/lib/auth";
@@ -45,8 +45,10 @@ function OwnerLayout() {
   const { data: r } = useMyRestaurant();
   const tabs = [
     { to: "/owner", label: "Orders", icon: ShoppingBag },
-    { to: "/owner/setup", label: "Details", icon: Store },
+    { to: "/owner/drops", label: "Drops", icon: Zap },
+    { to: "/owner/stamps", label: "Stamps", icon: QrCode },
     { to: "/owner/menu", label: "Menu", icon: UtensilsCrossed },
+    { to: "/owner/setup", label: "Details", icon: Store },
   ] as const;
   return (
     <div className="pb-24">
@@ -70,7 +72,7 @@ function OwnerLayout() {
       </header>
       <Outlet />
       <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-[430px] border-t bg-sidebar/95 backdrop-blur-xl pb-safe">
-        <ul className="grid grid-cols-3">
+        <ul className="grid grid-cols-5">
           {tabs.map(({ to, label, icon: Icon }) => (
             <li key={to}>
               <Link

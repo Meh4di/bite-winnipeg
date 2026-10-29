@@ -20,10 +20,13 @@ import { Route as TabsPassportRouteImport } from './routes/_tabs.passport'
 import { Route as TabsProfileRouteImport } from './routes/_tabs.profile'
 import { Route as OrdersIdRouteImport } from './routes/orders.$id'
 import { Route as OwnerIndexRouteImport } from './routes/owner.index'
+import { Route as OwnerDropsRouteImport } from './routes/owner.drops'
 import { Route as OwnerMenuRouteImport } from './routes/owner.menu'
 import { Route as OwnerOrdersRouteImport } from './routes/owner.orders'
 import { Route as OwnerSetupRouteImport } from './routes/owner.setup'
+import { Route as OwnerStampsRouteImport } from './routes/owner.stamps'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
+import { Route as StampSlugCodeRouteImport } from './routes/stamp.$slug.$code'
 
 const TabsRoute = TabsRouteImport.update({
   id: '/_tabs',
@@ -79,6 +82,11 @@ const OwnerIndexRoute = OwnerIndexRouteImport.update({
   path: '/',
   getParentRoute: () => OwnerRoute,
 } as any)
+const OwnerDropsRoute = OwnerDropsRouteImport.update({
+  id: '/drops',
+  path: '/drops',
+  getParentRoute: () => OwnerRoute,
+} as any)
 const OwnerMenuRoute = OwnerMenuRouteImport.update({
   id: '/menu',
   path: '/menu',
@@ -94,9 +102,19 @@ const OwnerSetupRoute = OwnerSetupRouteImport.update({
   path: '/setup',
   getParentRoute: () => OwnerRoute,
 } as any)
+const OwnerStampsRoute = OwnerStampsRouteImport.update({
+  id: '/stamps',
+  path: '/stamps',
+  getParentRoute: () => OwnerRoute,
+} as any)
 const RSlugRoute = RSlugRouteImport.update({
   id: '/r/$slug',
   path: '/r/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StampSlugCodeRoute = StampSlugCodeRouteImport.update({
+  id: '/stamp/$slug/$code',
+  path: '/stamp/$slug/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -110,11 +128,14 @@ export interface FileRoutesByFullPath {
   '/passport': typeof TabsPassportRoute
   '/profile': typeof TabsProfileRoute
   '/orders/$id': typeof OrdersIdRoute
+  '/owner/drops': typeof OwnerDropsRoute
   '/owner/menu': typeof OwnerMenuRoute
   '/owner/orders': typeof OwnerOrdersRoute
   '/owner/setup': typeof OwnerSetupRoute
+  '/owner/stamps': typeof OwnerStampsRoute
   '/r/$slug': typeof RSlugRoute
   '/owner/': typeof OwnerIndexRoute
+  '/stamp/$slug/$code': typeof StampSlugCodeRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
@@ -124,12 +145,15 @@ export interface FileRoutesByTo {
   '/passport': typeof TabsPassportRoute
   '/profile': typeof TabsProfileRoute
   '/orders/$id': typeof OrdersIdRoute
+  '/owner/drops': typeof OwnerDropsRoute
   '/owner/menu': typeof OwnerMenuRoute
   '/owner/orders': typeof OwnerOrdersRoute
   '/owner/setup': typeof OwnerSetupRoute
+  '/owner/stamps': typeof OwnerStampsRoute
   '/r/$slug': typeof RSlugRoute
   '/': typeof TabsIndexRoute
   '/owner': typeof OwnerIndexRoute
+  '/stamp/$slug/$code': typeof StampSlugCodeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -142,12 +166,15 @@ export interface FileRoutesById {
   '/_tabs/passport': typeof TabsPassportRoute
   '/_tabs/profile': typeof TabsProfileRoute
   '/orders/$id': typeof OrdersIdRoute
+  '/owner/drops': typeof OwnerDropsRoute
   '/owner/menu': typeof OwnerMenuRoute
   '/owner/orders': typeof OwnerOrdersRoute
   '/owner/setup': typeof OwnerSetupRoute
+  '/owner/stamps': typeof OwnerStampsRoute
   '/r/$slug': typeof RSlugRoute
   '/_tabs/': typeof TabsIndexRoute
   '/owner/': typeof OwnerIndexRoute
+  '/stamp/$slug/$code': typeof StampSlugCodeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -161,11 +188,14 @@ export interface FileRouteTypes {
     | '/passport'
     | '/profile'
     | '/orders/$id'
+    | '/owner/drops'
     | '/owner/menu'
     | '/owner/orders'
     | '/owner/setup'
+    | '/owner/stamps'
     | '/r/$slug'
     | '/owner/'
+    | '/stamp/$slug/$code'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -175,12 +205,15 @@ export interface FileRouteTypes {
     | '/passport'
     | '/profile'
     | '/orders/$id'
+    | '/owner/drops'
     | '/owner/menu'
     | '/owner/orders'
     | '/owner/setup'
+    | '/owner/stamps'
     | '/r/$slug'
     | '/'
     | '/owner'
+    | '/stamp/$slug/$code'
   id:
     | '__root__'
     | '/_tabs'
@@ -192,12 +225,15 @@ export interface FileRouteTypes {
     | '/_tabs/passport'
     | '/_tabs/profile'
     | '/orders/$id'
+    | '/owner/drops'
     | '/owner/menu'
     | '/owner/orders'
     | '/owner/setup'
+    | '/owner/stamps'
     | '/r/$slug'
     | '/_tabs/'
     | '/owner/'
+    | '/stamp/$slug/$code'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -207,6 +243,7 @@ export interface RootRouteChildren {
   OwnerRoute: typeof OwnerRouteWithChildren
   OrdersIdRoute: typeof OrdersIdRoute
   RSlugRoute: typeof RSlugRoute
+  StampSlugCodeRoute: typeof StampSlugCodeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -288,6 +325,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OwnerIndexRouteImport
       parentRoute: typeof OwnerRoute
     }
+    '/owner/drops': {
+      id: '/owner/drops'
+      path: '/drops'
+      fullPath: '/owner/drops'
+      preLoaderRoute: typeof OwnerDropsRouteImport
+      parentRoute: typeof OwnerRoute
+    }
     '/owner/menu': {
       id: '/owner/menu'
       path: '/menu'
@@ -309,11 +353,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OwnerSetupRouteImport
       parentRoute: typeof OwnerRoute
     }
+    '/owner/stamps': {
+      id: '/owner/stamps'
+      path: '/stamps'
+      fullPath: '/owner/stamps'
+      preLoaderRoute: typeof OwnerStampsRouteImport
+      parentRoute: typeof OwnerRoute
+    }
     '/r/$slug': {
       id: '/r/$slug'
       path: '/r/$slug'
       fullPath: '/r/$slug'
       preLoaderRoute: typeof RSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stamp/$slug/$code': {
+      id: '/stamp/$slug/$code'
+      path: '/stamp/$slug/$code'
+      fullPath: '/stamp/$slug/$code'
+      preLoaderRoute: typeof StampSlugCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -338,16 +396,20 @@ const TabsRouteChildren: TabsRouteChildren = {
 const TabsRouteWithChildren = TabsRoute._addFileChildren(TabsRouteChildren)
 
 interface OwnerRouteChildren {
+  OwnerDropsRoute: typeof OwnerDropsRoute
   OwnerMenuRoute: typeof OwnerMenuRoute
   OwnerOrdersRoute: typeof OwnerOrdersRoute
   OwnerSetupRoute: typeof OwnerSetupRoute
+  OwnerStampsRoute: typeof OwnerStampsRoute
   OwnerIndexRoute: typeof OwnerIndexRoute
 }
 
 const OwnerRouteChildren: OwnerRouteChildren = {
+  OwnerDropsRoute: OwnerDropsRoute,
   OwnerMenuRoute: OwnerMenuRoute,
   OwnerOrdersRoute: OwnerOrdersRoute,
   OwnerSetupRoute: OwnerSetupRoute,
+  OwnerStampsRoute: OwnerStampsRoute,
   OwnerIndexRoute: OwnerIndexRoute,
 }
 
@@ -360,6 +422,7 @@ const rootRouteChildren: RootRouteChildren = {
   OwnerRoute: OwnerRouteWithChildren,
   OrdersIdRoute: OrdersIdRoute,
   RSlugRoute: RSlugRoute,
+  StampSlugCodeRoute: StampSlugCodeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -8,7 +8,10 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>): { redirect?: string } => {
     const r = search["redirect"];
-    return typeof r === "string" && (r === "/checkout" || /^\/orders\/[a-f0-9-]+$/.test(r)) ? { redirect: r } : {};
+    const ok =
+      typeof r === "string" &&
+      /^\/(checkout|drops|passport|decide(\/[A-Za-z0-9]{5})?|stamp\/[a-z0-9-]+\/[A-Za-z0-9]{6}|orders\/[a-f0-9-]+)$/.test(r);
+    return ok ? { redirect: r } : {};
   },
   head: () => ({
     meta: [
