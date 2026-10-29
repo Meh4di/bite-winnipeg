@@ -344,7 +344,7 @@ function Home() {
                       {c.emoji} {c.title}
                     </p>
                     <p className="text-xs opacity-90">
-                      {c.crawl_stops.length} stops{c.reward ? ` · 🎁 ${c.reward}` : ""}
+                      {c.crawl_stops.length} {c.crawl_stops.length === 1 ? "stop" : "stops"}{c.reward ? ` · 🎁 ${c.reward}` : ""}
                     </p>
                   </div>
                 </Link>

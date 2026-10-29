@@ -53,7 +53,7 @@ function Crawls() {
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
                 <span className="absolute left-3 top-3 rounded-full bg-card px-2.5 py-1 text-xs font-bold">
-                  {total} stops{done ? ` · ${done}/${total} done` : ""}
+                  {total} {total === 1 ? "stop" : "stops"}{done ? ` · ${done}/${total} done` : ""}
                 </span>
                 <div className="absolute inset-x-0 bottom-0 p-4 text-white">
                   <p className="text-2xl font-extrabold leading-tight">
