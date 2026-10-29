@@ -39,7 +39,6 @@ function RestaurantPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["restaurant", slug],
     queryFn: async () => {
-      if (!user || !rid) return false;
       const { data: r, error } = await supabase.from("restaurants").select("*").eq("slug", slug).maybeSingle();
       if (error) throw error;
       if (!r) return null;
@@ -51,7 +50,7 @@ function RestaurantPage() {
     },
   });
 
-  const rid = data ? data.r.id : undefined;
+  const rid = data?.r.id;
   const following = useQuery({
     queryKey: ["following", user?.id, rid],
     enabled: !!user && !!rid,
@@ -80,7 +79,7 @@ function RestaurantPage() {
       } else {
         const { error } = await supabase.from("follows").insert({ user_id: user.id, restaurant_id: rid });
         if (error) throw error;
-        toast.success(`Following ${data ? data.r.name : "this spot"} 🧡`);
+        toast.success(`Following ${data?.r.name ?? "this spot"} 🧡`);
       }
     },
     onSuccess: () => {
