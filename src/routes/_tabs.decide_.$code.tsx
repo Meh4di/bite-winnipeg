@@ -15,7 +15,10 @@ export const Route = createFileRoute("/_tabs/decide_/$code")({
   head: () => ({
     meta: [
       { title: "Swipe with friends — Bite" },
-      { name: "description", content: "Swipe on Winnipeg spots with your friends until you match." },
+      {
+        name: "description",
+        content: "Swipe on Winnipeg spots with your friends until you match.",
+      },
       { property: "og:title", content: "Join my Bite group" },
       { property: "og:description", content: "Swipe with me to pick where we eat." },
     ],
@@ -47,11 +50,15 @@ function Group() {
     if (!sid) return;
     const channel = supabase
       .channel(`decide-${sid}-${crypto.randomUUID()}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "decide_votes", filter: `session_id=eq.${sid}` }, () =>
-        qc.invalidateQueries({ queryKey: ["decide", sid] }),
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "decide_votes", filter: `session_id=eq.${sid}` },
+        () => qc.invalidateQueries({ queryKey: ["decide", sid] }),
       )
-      .on("postgres_changes", { event: "*", schema: "public", table: "decide_members", filter: `session_id=eq.${sid}` }, () =>
-        qc.invalidateQueries({ queryKey: ["decide", sid] }),
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "decide_members", filter: `session_id=eq.${sid}` },
+        () => qc.invalidateQueries({ queryKey: ["decide", sid] }),
       )
       .subscribe();
     return () => {
@@ -81,7 +88,12 @@ function Group() {
   }, [restaurants.data, group.data?.session.category]);
 
   const myVotes = useMemo(
-    () => new Map((group.data?.votes ?? []).filter((v) => v.user_id === user?.id).map((v) => [v.restaurant_id, v.liked])),
+    () =>
+      new Map(
+        (group.data?.votes ?? [])
+          .filter((v) => v.user_id === user?.id)
+          .map((v) => [v.restaurant_id, v.liked]),
+      ),
     [group.data?.votes, user?.id],
   );
   const deck = deckAll.filter((r) => !myVotes.has(r.id));
@@ -89,7 +101,8 @@ function Group() {
 
   const tally = useMemo(() => {
     const likes = new Map<string, number>();
-    for (const v of group.data?.votes ?? []) if (v.liked) likes.set(v.restaurant_id, (likes.get(v.restaurant_id) ?? 0) + 1);
+    for (const v of group.data?.votes ?? [])
+      if (v.liked) likes.set(v.restaurant_id, (likes.get(v.restaurant_id) ?? 0) + 1);
     return deckAll
       .map((r) => ({ r, likes: likes.get(r.id) ?? 0 }))
       .filter((x) => x.likes > 0)
@@ -109,11 +122,24 @@ function Group() {
   const vote = async (restaurantId: string, liked: boolean) => {
     if (!sid || !user) return;
     qc.setQueryData(["decide", sid], (old: typeof group.data) =>
-      old ? { ...old, votes: [...old.votes.filter((v) => !(v.user_id === user.id && v.restaurant_id === restaurantId)), { user_id: user.id, restaurant_id: restaurantId, liked }] } : old,
+      old
+        ? {
+            ...old,
+            votes: [
+              ...old.votes.filter(
+                (v) => !(v.user_id === user.id && v.restaurant_id === restaurantId),
+              ),
+              { user_id: user.id, restaurant_id: restaurantId, liked },
+            ],
+          }
+        : old,
     );
     const { error } = await supabase
       .from("decide_votes")
-      .upsert({ session_id: sid, user_id: user.id, restaurant_id: restaurantId, liked }, { onConflict: "session_id,user_id,restaurant_id" });
+      .upsert(
+        { session_id: sid, user_id: user.id, restaurant_id: restaurantId, liked },
+        { onConflict: "session_id,user_id,restaurant_id" },
+      );
     if (error) {
       toast.error(error.message);
       qc.invalidateQueries({ queryKey: ["decide", sid] });
@@ -138,7 +164,9 @@ function Group() {
     return (
       <Center emoji="🤝" title={`Join group ${code}`} line="Sign in to swipe with your friends.">
         <Button asChild size="xl" className="w-full">
-          <Link to="/auth" search={{ redirect: `/decide/${code}` }}>Sign in to join</Link>
+          <Link to="/auth" search={{ redirect: `/decide/${code}` }}>
+            Sign in to join
+          </Link>
         </Button>
       </Center>
     );
@@ -150,7 +178,8 @@ function Group() {
         </Button>
       </Center>
     );
-  if (!group.data || restaurants.isLoading) return <div className="m-5 h-96 animate-pulse rounded-3xl bg-muted" />;
+  if (!group.data || restaurants.isLoading)
+    return <div className="m-5 h-96 animate-pulse rounded-3xl bg-muted" />;
 
   const top = deck[0];
   const shown = matchShown ? deckAll.find((r) => r.id === matchShown) : null;
@@ -158,12 +187,19 @@ function Group() {
   return (
     <div className="animate-screen space-y-5 px-5 pt-[max(env(safe-area-inset-top),1.25rem)]">
       <header className="flex items-center gap-3">
-        <Link to="/decide" aria-label="Back" className="grid size-11 place-items-center rounded-full bg-card shadow-card">
+        <Link
+          to="/decide"
+          aria-label="Back"
+          className="grid size-11 place-items-center rounded-full bg-card shadow-card"
+        >
           <ArrowLeft className="size-5" />
         </Link>
         <div className="flex-1">
           <p className="text-xs font-semibold text-muted-foreground">
-            Group{group.data.session.category ? ` · ${emojiFor(group.data.session.category)} ${group.data.session.category}` : ""}
+            Group
+            {group.data.session.category
+              ? ` · ${emojiFor(group.data.session.category)} ${group.data.session.category}`
+              : ""}
           </p>
           <p className="font-mono text-2xl font-extrabold tracking-[0.25em]">{code}</p>
         </div>
@@ -176,7 +212,10 @@ function Group() {
         {group.data.members.map((m) => {
           const n = group.data!.votes.filter((v) => v.user_id === m.user_id).length;
           return (
-            <span key={m.user_id} className="flex shrink-0 items-center gap-2 rounded-full bg-card py-1 pl-1 pr-3 text-sm font-semibold shadow-card">
+            <span
+              key={m.user_id}
+              className="flex shrink-0 items-center gap-2 rounded-full bg-card py-1 pl-1 pr-3 text-sm font-semibold shadow-card"
+            >
               <span className="grid size-7 place-items-center rounded-full bg-warm text-xs font-extrabold text-primary-foreground">
                 {m.display_name.charAt(0).toUpperCase()}
               </span>
@@ -187,7 +226,11 @@ function Group() {
             </span>
           );
         })}
-        {memberCount < 2 && <span className="shrink-0 self-center text-sm text-muted-foreground">Waiting for friends to join…</span>}
+        {memberCount < 2 && (
+          <span className="shrink-0 self-center text-sm text-muted-foreground">
+            Waiting for friends to join…
+          </span>
+        )}
       </div>
 
       {top ? (
@@ -195,16 +238,24 @@ function Group() {
       ) : (
         <div className="rounded-3xl bg-card p-6 text-center shadow-card">
           <p className="text-5xl">{matches.length ? "🎉" : "⏳"}</p>
-          <p className="mt-2 text-lg font-extrabold">{matches.length ? "You've got a match!" : "You're done swiping"}</p>
+          <p className="mt-2 text-lg font-extrabold">
+            {matches.length ? "You've got a match!" : "You're done swiping"}
+          </p>
           <p className="text-sm text-muted-foreground">
-            {matches.length ? "Everyone liked the spots below." : memberCount < 2 ? "Invite friends to find a match." : "Waiting on your friends…"}
+            {matches.length
+              ? "Everyone liked the spots below."
+              : memberCount < 2
+                ? "Invite friends to find a match."
+                : "Waiting on your friends…"}
           </p>
         </div>
       )}
 
       {tally.length > 0 && (
         <section>
-          <h2 className="mb-2 text-lg font-bold">{matches.length ? "Matches & favourites" : "Group favourites"}</h2>
+          <h2 className="mb-2 text-lg font-bold">
+            {matches.length ? "Matches & favourites" : "Group favourites"}
+          </h2>
           <div className="space-y-2">
             {tally.slice(0, 6).map(({ r, likes }) => (
               <Link
@@ -225,14 +276,22 @@ function Group() {
       )}
 
       {shown && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60 p-6" onClick={() => setMatchShown(null)}>
-          <div className="w-full max-w-sm rounded-3xl bg-card p-6 text-center shadow-pop animate-stamp" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60 p-6"
+          onClick={() => setMatchShown(null)}
+        >
+          <div
+            className="w-full max-w-sm rounded-3xl bg-card p-6 text-center shadow-pop animate-stamp"
+            onClick={(e) => e.stopPropagation()}
+          >
             <p className="text-6xl">🎉</p>
             <h2 className="mt-3 text-3xl font-extrabold">It's a match!</h2>
             <p className="mt-1 text-muted-foreground">Everyone wants</p>
             <p className="mt-1 text-2xl font-extrabold text-primary">{shown.name}</p>
             <Button asChild size="xl" className="mt-6 w-full">
-              <Link to="/r/$slug" params={{ slug: shown.slug }}>Let's go</Link>
+              <Link to="/r/$slug" params={{ slug: shown.slug }}>
+                Let's go
+              </Link>
             </Button>
             <Button variant="ghost" className="mt-2 w-full" onClick={() => setMatchShown(null)}>
               Keep swiping
@@ -244,7 +303,15 @@ function Group() {
   );
 }
 
-type SwipeRestaurant = { id: string; name: string; category: string; neighbourhood: string | null; cover_url: string | null; hours: unknown; description: string | null };
+type SwipeRestaurant = {
+  id: string;
+  name: string;
+  category: string;
+  neighbourhood: string | null;
+  cover_url: string | null;
+  hours: unknown;
+  description: string | null;
+};
 
 function SwipeCard({ r, onVote }: { r: SwipeRestaurant; onVote: (liked: boolean) => void }) {
   const [dx, setDx] = useState(0);
@@ -305,7 +372,9 @@ function SwipeCard({ r, onVote }: { r: SwipeRestaurant; onVote: (liked: boolean)
             <p className="mt-1 flex items-center gap-1 text-sm opacity-90">
               <MapPin className="size-4" /> {r.neighbourhood}
             </p>
-            {r.description && <p className="mt-2 line-clamp-2 text-sm opacity-90">{r.description}</p>}
+            {r.description && (
+              <p className="mt-2 line-clamp-2 text-sm opacity-90">{r.description}</p>
+            )}
           </div>
         </div>
       </div>
@@ -331,11 +400,25 @@ function SwipeCard({ r, onVote }: { r: SwipeRestaurant; onVote: (liked: boolean)
 
 function Stamp({ text, className }: { text: string; className: string }) {
   return (
-    <span className={`absolute top-6 rotate-[-12deg] rounded-xl border-4 px-3 py-1 text-3xl font-extrabold ${className}`}>{text}</span>
+    <span
+      className={`absolute top-6 rotate-[-12deg] rounded-xl border-4 px-3 py-1 text-3xl font-extrabold ${className}`}
+    >
+      {text}
+    </span>
   );
 }
 
-function Center({ emoji, title, line, children }: { emoji: string; title: string; line: string; children?: React.ReactNode }) {
+function Center({
+  emoji,
+  title,
+  line,
+  children,
+}: {
+  emoji: string;
+  title: string;
+  line: string;
+  children?: React.ReactNode;
+}) {
   return (
     <div className="flex min-h-[80vh] flex-col items-center justify-center px-8 text-center animate-screen">
       <p className="text-6xl">{emoji}</p>

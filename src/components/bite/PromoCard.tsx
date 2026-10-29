@@ -16,7 +16,14 @@ export function PromoCard({ p }: { p: PromoRow }) {
   };
   return (
     <article className="overflow-hidden rounded-3xl bg-card shadow-card">
-      {p.photo_url && <img src={p.photo_url} alt={p.title} loading="lazy" className="aspect-[16/9] w-full object-cover" />}
+      {p.photo_url && (
+        <img
+          src={p.photo_url}
+          alt={p.title}
+          loading="lazy"
+          className="aspect-[16/9] w-full object-cover"
+        />
+      )}
       <div className="p-4">
         {p.restaurants && (
           <Link
@@ -46,7 +53,9 @@ export function PromoCard({ p }: { p: PromoRow }) {
               {p.promo_code} <Copy className="size-4" />
             </button>
           )}
-          {p.ends_at && <span className="text-xs text-muted-foreground">Until {clockTime(p.ends_at)}</span>}
+          {p.ends_at && (
+            <span className="text-xs text-muted-foreground">Until {clockTime(p.ends_at)}</span>
+          )}
         </div>
       </div>
     </article>

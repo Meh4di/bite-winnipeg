@@ -1,12 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronRight, Eye, LogOut, Store, UtensilsCrossed } from "lucide-react";
+import { ChevronRight, Eye, LogOut, QrCode, Store, UtensilsCrossed, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { isOpenNow } from "@/lib/bite";
 import { OpenBadge } from "@/components/bite/RestaurantCard";
 import { useMyRestaurant } from "./owner";
 import { OwnerOrders } from "@/components/bite/OwnerOrders";
+import { OwnerInsights } from "@/components/bite/OwnerInsights";
 
 export const Route = createFileRoute("/owner/")({
   component: Dashboard,
@@ -71,6 +72,7 @@ function Dashboard() {
           </p>
         </div>
       </div>
+      <OwnerInsights restaurantId={r.id} />
       <div className="grid grid-cols-2 gap-3">
         <Stat label="Menu items" value={stats.data?.items} />
         <Stat label="Followers" value={stats.data?.follows} />
@@ -80,6 +82,8 @@ function Dashboard() {
           <Eye className="size-5" /> Preview my page
         </Link>
       </Button>
+      <Row to="/owner/drops" icon={Zap} label="Post a drop or deal" />
+      <Row to="/owner/stamps" icon={QrCode} label="Counter stamp code" />
       <Row to="/owner/menu" icon={UtensilsCrossed} label="Manage menu" />
       <Row to="/owner/setup" icon={Store} label="Edit details, hours & photos" />
       <button onClick={signOut} className="flex h-14 w-full items-center gap-3 px-4 text-muted-foreground">
@@ -98,7 +102,7 @@ function Stat({ label, value }: { label: string; value?: number | undefined }) {
   );
 }
 
-function Row({ to, icon: Icon, label }: { to: "/owner/menu" | "/owner/setup"; icon: typeof Store; label: string }) {
+function Row({ to, icon: Icon, label }: { to: "/owner/menu" | "/owner/setup" | "/owner/drops" | "/owner/stamps"; icon: typeof Store; label: string }) {
   return (
     <Link to={to} className="flex h-16 items-center gap-3 rounded-2xl bg-card px-4 shadow-card active:scale-[0.98]">
       <Icon className="size-5 text-primary" />

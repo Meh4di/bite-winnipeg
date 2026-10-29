@@ -22,7 +22,8 @@ export const Route = createFileRoute("/owner/drops")({
   component: OwnerDrops,
 });
 
-const field = "h-12 w-full rounded-2xl border bg-background px-4 text-base outline-none focus:border-primary";
+const field =
+  "h-12 w-full rounded-2xl border bg-background px-4 text-base outline-none focus:border-primary";
 
 /** datetime-local value for a Date, in the device's time zone. */
 function localInput(d: Date) {
@@ -73,7 +74,11 @@ function newDraft(kind: Kind): Draft {
 
 const KIND_INFO: Record<Kind, { title: string; line: string; icon: typeof Flame }> = {
   drop: { title: "Drop", line: "A limited item released at a set time. Builds hype.", icon: Flame },
-  leftover: { title: "Last call", line: "End-of-day food at a discount. Less waste.", icon: Package },
+  leftover: {
+    title: "Last call",
+    line: "End-of-day food at a discount. Less waste.",
+    icon: Package,
+  },
   promo: { title: "Promotion", line: "A deal or code shown in the Deals feed.", icon: Megaphone },
 };
 
@@ -92,13 +97,29 @@ function OwnerDrops() {
     queryFn: async () => {
       if (!r) return { drops: [], promos: [], claims: new Map<string, number>() };
       const [drops, promos, claims] = await Promise.all([
-        supabase.from("drops").select("*").eq("restaurant_id", r.id).order("starts_at", { ascending: false }).limit(50),
-        supabase.from("promotions").select("*").eq("restaurant_id", r.id).order("starts_at", { ascending: false }).limit(50),
-        supabase.from("orders").select("drop_id").eq("restaurant_id", r.id).not("drop_id", "is", null).neq("status", "cancelled"),
+        supabase
+          .from("drops")
+          .select("*")
+          .eq("restaurant_id", r.id)
+          .order("starts_at", { ascending: false })
+          .limit(50),
+        supabase
+          .from("promotions")
+          .select("*")
+          .eq("restaurant_id", r.id)
+          .order("starts_at", { ascending: false })
+          .limit(50),
+        supabase
+          .from("orders")
+          .select("drop_id")
+          .eq("restaurant_id", r.id)
+          .not("drop_id", "is", null)
+          .neq("status", "cancelled"),
       ]);
       if (drops.error) throw drops.error;
       const counts = new Map<string, number>();
-      for (const o of claims.data ?? []) if (o.drop_id) counts.set(o.drop_id, (counts.get(o.drop_id) ?? 0) + 1);
+      for (const o of claims.data ?? [])
+        if (o.drop_id) counts.set(o.drop_id, (counts.get(o.drop_id) ?? 0) + 1);
       return { drops: drops.data ?? [], promos: promos.data ?? [], claims: counts };
     },
   });
@@ -113,7 +134,9 @@ function OwnerDrops() {
     return (
       <div className="p-8 text-center">
         <p>Set up your restaurant first.</p>
-        <Link to="/owner/setup" className="font-semibold text-primary">Go to setup</Link>
+        <Link to="/owner/setup" className="font-semibold text-primary">
+          Go to setup
+        </Link>
       </div>
     );
 
@@ -121,9 +144,18 @@ function OwnerDrops() {
     if (!draft) return;
     const starts = new Date(draft.starts);
     const ends = draft.ends ? new Date(draft.ends) : null;
-    if (!draft.title.trim()) { toast.error("Add a title"); return; }
-    if (Number.isNaN(starts.getTime())) { toast.error("Pick a start time"); return; }
-    if (ends && ends <= starts) { toast.error("End time must be after the start"); return; }
+    if (!draft.title.trim()) {
+      toast.error("Add a title");
+      return;
+    }
+    if (Number.isNaN(starts.getTime())) {
+      toast.error("Pick a start time");
+      return;
+    }
+    if (ends && ends <= starts) {
+      toast.error("End time must be after the start");
+      return;
+    }
     setSaving(true);
     try {
       if (draft.kind === "promo") {
@@ -159,7 +191,9 @@ function OwnerDrops() {
         });
         if (error) throw error;
       }
-      toast.success(draft.kind === "promo" ? "Promotion posted" : "Posted! It's in the Drops feed.");
+      toast.success(
+        draft.kind === "promo" ? "Promotion posted" : "Posted! It's in the Drops feed.",
+      );
       setDraft(null);
       refresh();
     } catch (e) {
@@ -198,7 +232,9 @@ function OwnerDrops() {
     <div className="space-y-6 px-5 pt-5 animate-screen">
       <div>
         <h1 className="text-2xl font-extrabold">Drops & deals</h1>
-        <p className="text-sm text-muted-foreground">Bring people in on slow hours and sell what's left at close.</p>
+        <p className="text-sm text-muted-foreground">
+          Bring people in on slow hours and sell what's left at close.
+        </p>
       </div>
 
       <div className="grid grid-cols-3 gap-2">
@@ -235,24 +271,43 @@ function OwnerDrops() {
                   {d.photo_url ? (
                     <img src={d.photo_url} alt="" className="size-14 rounded-xl object-cover" />
                   ) : (
-                    <div className="grid size-14 place-items-center rounded-xl bg-muted text-2xl">{d.kind === "leftover" ? "🥡" : "🔥"}</div>
+                    <div className="grid size-14 place-items-center rounded-xl bg-muted text-2xl">
+                      {d.kind === "leftover" ? "🥡" : "🔥"}
+                    </div>
                   )}
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-bold uppercase tracking-wider text-primary">
-                      {d.kind === "leftover" ? "Last call" : "Drop"} · {st === "upcoming" ? `starts ${clockTime(d.starts_at)}` : st === "soldout" ? "sold out" : "live"}
+                      {d.kind === "leftover" ? "Last call" : "Drop"} ·{" "}
+                      {st === "upcoming"
+                        ? `starts ${clockTime(d.starts_at)}`
+                        : st === "soldout"
+                          ? "sold out"
+                          : "live"}
                     </p>
                     <p className="truncate font-semibold">{d.title}</p>
                     <p className="text-sm text-muted-foreground">
-                      {formatPrice(d.price_cents)} · {d.quantity_total - d.quantity_left}/{d.quantity_total} claimed
+                      {formatPrice(d.price_cents)} · {d.quantity_total - d.quantity_left}/
+                      {d.quantity_total} claimed
                       {d.ends_at ? ` · until ${clockTime(d.ends_at)}` : ""}
                     </p>
                   </div>
                 </div>
                 <div className="mt-3 flex gap-2">
                   {st !== "upcoming" && (
-                    <Button variant="secondary" className="h-10 flex-1" onClick={() => endDrop(d.id, d.starts_at)}>End now</Button>
+                    <Button
+                      variant="secondary"
+                      className="h-10 flex-1"
+                      onClick={() => endDrop(d.id, d.starts_at)}
+                    >
+                      End now
+                    </Button>
                   )}
-                  <Button variant="ghost" className="h-10 text-destructive" onClick={() => delDrop(d.id)} aria-label="Delete">
+                  <Button
+                    variant="ghost"
+                    className="h-10 text-destructive"
+                    onClick={() => delDrop(d.id)}
+                    aria-label="Delete"
+                  >
                     <Trash2 className="size-4" />
                   </Button>
                 </div>
@@ -265,7 +320,9 @@ function OwnerDrops() {
       <section>
         <h2 className="mb-2 text-lg font-bold">Promotions</h2>
         {promoActive.length === 0 && (
-          <p className="rounded-2xl bg-card p-4 text-sm text-muted-foreground shadow-card">No promotions running.</p>
+          <p className="rounded-2xl bg-card p-4 text-sm text-muted-foreground shadow-card">
+            No promotions running.
+          </p>
         )}
         <div className="space-y-2">
           {promoActive.map((p) => (
@@ -274,12 +331,20 @@ function OwnerDrops() {
               <div className="min-w-0 flex-1">
                 <p className="truncate font-semibold">{p.title}</p>
                 <p className="text-sm text-muted-foreground">
-                  {new Date(p.starts_at).getTime() > now ? `Starts ${clockTime(p.starts_at)}` : "Running"}
+                  {new Date(p.starts_at).getTime() > now
+                    ? `Starts ${clockTime(p.starts_at)}`
+                    : "Running"}
                   {p.promo_code ? ` · ${p.promo_code}` : ""}
                   {p.ends_at ? ` · until ${clockTime(p.ends_at)}` : ""}
                 </p>
               </div>
-              <Button variant="secondary" className="h-10" onClick={() => endPromo(p.id, p.starts_at)}>End</Button>
+              <Button
+                variant="secondary"
+                className="h-10"
+                onClick={() => endPromo(p.id, p.starts_at)}
+              >
+                End
+              </Button>
             </div>
           ))}
         </div>
@@ -302,7 +367,10 @@ function OwnerDrops() {
       )}
 
       {draft && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40" onClick={() => setDraft(null)}>
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40"
+          onClick={() => setDraft(null)}
+        >
           <div
             className="max-h-[92dvh] w-full max-w-[430px] space-y-3 overflow-y-auto rounded-t-3xl bg-card p-5 pb-safe animate-screen"
             onClick={(e) => e.stopPropagation()}
@@ -320,7 +388,13 @@ function OwnerDrops() {
             <input
               className={field}
               maxLength={80}
-              placeholder={draft.kind === "promo" ? "e.g. 2-for-1 lattes until 3pm" : draft.kind === "leftover" ? "e.g. Surprise pastry box" : "e.g. Birria tacos (only 50!)"}
+              placeholder={
+                draft.kind === "promo"
+                  ? "e.g. 2-for-1 lattes until 3pm"
+                  : draft.kind === "leftover"
+                    ? "e.g. Surprise pastry box"
+                    : "e.g. Birria tacos (only 50!)"
+              }
               value={draft.title}
               onChange={(e) => setDraft({ ...draft, title: e.target.value })}
             />
@@ -343,23 +417,45 @@ function OwnerDrops() {
               <div className="grid grid-cols-2 gap-2">
                 <label className="text-sm font-semibold">
                   {draft.kind === "leftover" ? "Deal price" : "Price"}
-                  <input className={`${field} mt-1`} inputMode="decimal" placeholder="6.00" value={draft.price} onChange={(e) => setDraft({ ...draft, price: e.target.value })} />
+                  <input
+                    className={`${field} mt-1`}
+                    inputMode="decimal"
+                    placeholder="6.00"
+                    value={draft.price}
+                    onChange={(e) => setDraft({ ...draft, price: e.target.value })}
+                  />
                 </label>
                 {draft.kind === "leftover" ? (
                   <label className="text-sm font-semibold">
                     Regular price
-                    <input className={`${field} mt-1`} inputMode="decimal" placeholder="12.00" value={draft.original} onChange={(e) => setDraft({ ...draft, original: e.target.value })} />
+                    <input
+                      className={`${field} mt-1`}
+                      inputMode="decimal"
+                      placeholder="12.00"
+                      value={draft.original}
+                      onChange={(e) => setDraft({ ...draft, original: e.target.value })}
+                    />
                   </label>
                 ) : (
                   <label className="text-sm font-semibold">
                     How many
-                    <input className={`${field} mt-1`} inputMode="numeric" value={draft.quantity} onChange={(e) => setDraft({ ...draft, quantity: e.target.value })} />
+                    <input
+                      className={`${field} mt-1`}
+                      inputMode="numeric"
+                      value={draft.quantity}
+                      onChange={(e) => setDraft({ ...draft, quantity: e.target.value })}
+                    />
                   </label>
                 )}
                 {draft.kind === "leftover" && (
                   <label className="col-span-2 text-sm font-semibold">
                     How many
-                    <input className={`${field} mt-1`} inputMode="numeric" value={draft.quantity} onChange={(e) => setDraft({ ...draft, quantity: e.target.value })} />
+                    <input
+                      className={`${field} mt-1`}
+                      inputMode="numeric"
+                      value={draft.quantity}
+                      onChange={(e) => setDraft({ ...draft, quantity: e.target.value })}
+                    />
                   </label>
                 )}
               </div>
@@ -367,11 +463,21 @@ function OwnerDrops() {
             <div className="grid grid-cols-2 gap-2">
               <label className="text-sm font-semibold">
                 Starts
-                <input type="datetime-local" className={`${field} mt-1 px-2 text-sm`} value={draft.starts} onChange={(e) => setDraft({ ...draft, starts: e.target.value })} />
+                <input
+                  type="datetime-local"
+                  className={`${field} mt-1 px-2 text-sm`}
+                  value={draft.starts}
+                  onChange={(e) => setDraft({ ...draft, starts: e.target.value })}
+                />
               </label>
               <label className="text-sm font-semibold">
                 {draft.kind === "leftover" ? "Pick up by" : "Ends"}
-                <input type="datetime-local" className={`${field} mt-1 px-2 text-sm`} value={draft.ends} onChange={(e) => setDraft({ ...draft, ends: e.target.value })} />
+                <input
+                  type="datetime-local"
+                  className={`${field} mt-1 px-2 text-sm`}
+                  value={draft.ends}
+                  onChange={(e) => setDraft({ ...draft, ends: e.target.value })}
+                />
               </label>
             </div>
             <Button size="xl" className="w-full" disabled={saving} onClick={save}>

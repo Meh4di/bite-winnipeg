@@ -7,13 +7,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { emojiFor } from "@/lib/bite";
-import { LEVELS, STAMPS_PER_REWARD, levelFor, nextLevel, usePassport, weekStreak } from "@/lib/passport";
+import {
+  LEVELS,
+  STAMPS_PER_REWARD,
+  levelFor,
+  nextLevel,
+  usePassport,
+  weekStreak,
+} from "@/lib/passport";
 
 export const Route = createFileRoute("/_tabs/passport")({
   head: () => ({
     meta: [
       { title: "Passport — Bite" },
-      { name: "description", content: "Collect stamps at Winnipeg spots, level up, earn badges and unlock secret menus." },
+      {
+        name: "description",
+        content: "Collect stamps at Winnipeg spots, level up, earn badges and unlock secret menus.",
+      },
       { property: "og:title", content: "Passport — Bite" },
       { property: "og:description", content: "Your Winnipeg food passport." },
     ],
@@ -31,7 +41,18 @@ function Passport() {
   const [showCode, setShowCode] = useState(false);
 
   const cards = useMemo(() => {
-    const map = new Map<string, { id: string; name: string; slug: string; logo: string | null; category: string; count: number; used: number }>();
+    const map = new Map<
+      string,
+      {
+        id: string;
+        name: string;
+        slug: string;
+        logo: string | null;
+        category: string;
+        count: number;
+        used: number;
+      }
+    >();
     for (const s of passport.data?.stamps ?? []) {
       if (!s.restaurants) continue;
       const c = map.get(s.restaurant_id) ?? {
@@ -56,18 +77,23 @@ function Passport() {
   if (!loading && !user)
     return (
       <div className="flex min-h-[80vh] flex-col items-center justify-center px-8 text-center animate-screen">
-        <div className="grid size-28 place-items-center rounded-[2.5rem] bg-warm text-6xl shadow-pop">🍁</div>
+        <div className="grid size-28 place-items-center rounded-[2.5rem] bg-warm text-6xl shadow-pop">
+          🍁
+        </div>
         <h1 className="mt-6 text-3xl font-extrabold">Your Winnipeg food passport</h1>
         <p className="mt-2 max-w-xs text-muted-foreground">
           Collect stamps everywhere you eat, level up, earn badges and unlock secret menus.
         </p>
         <Button asChild size="xl" className="mt-6 w-full max-w-xs">
-          <Link to="/auth" search={{ redirect: "/passport" }}>Start my passport</Link>
+          <Link to="/auth" search={{ redirect: "/passport" }}>
+            Start my passport
+          </Link>
         </Button>
       </div>
     );
 
-  if (loading || passport.isLoading) return <div className="m-5 h-56 animate-pulse rounded-3xl bg-muted" />;
+  if (loading || passport.isLoading)
+    return <div className="m-5 h-56 animate-pulse rounded-3xl bg-muted" />;
 
   const stamps = passport.data?.stamps ?? [];
   const total = stamps.length;
@@ -77,7 +103,12 @@ function Passport() {
   const streak = weekStreak(stamps.map((s) => s.created_at));
 
   const redeem = async (c: (typeof cards)[number]) => {
-    if (!confirm(`Redeem your reward at ${c.name}? Only tap this at the counter: staff need to see the next screen.`)) return;
+    if (
+      !confirm(
+        `Redeem your reward at ${c.name}? Only tap this at the counter: staff need to see the next screen.`,
+      )
+    )
+      return;
     const { data, error } = await supabase.rpc("redeem_reward", { p_restaurant_id: c.id });
     if (error) {
       toast.error(error.message);
@@ -90,14 +121,25 @@ function Passport() {
   if (redeemed)
     return (
       <div className="flex min-h-[85vh] flex-col items-center justify-center bg-success px-8 text-center text-success-foreground">
-        <div className="grid size-32 place-items-center rounded-full bg-success-foreground/20 text-7xl animate-stamp">🎁</div>
+        <div className="grid size-32 place-items-center rounded-full bg-success-foreground/20 text-7xl animate-stamp">
+          🎁
+        </div>
         <h1 className="mt-6 text-4xl font-extrabold">Reward redeemed</h1>
         <p className="mt-2 text-xl font-bold">{redeemed.name}</p>
         <p className="mt-1 text-lg">
-          {new Intl.DateTimeFormat("en-CA", { timeZone: "America/Winnipeg", dateStyle: "medium", timeStyle: "short" }).format(new Date(redeemed.at))}
+          {new Intl.DateTimeFormat("en-CA", {
+            timeZone: "America/Winnipeg",
+            dateStyle: "medium",
+            timeStyle: "short",
+          }).format(new Date(redeemed.at))}
         </p>
         <p className="mt-6 max-w-xs text-sm opacity-90">Show this screen to staff.</p>
-        <Button variant="secondary" size="xl" className="mt-8 w-full max-w-xs" onClick={() => setRedeemed(null)}>
+        <Button
+          variant="secondary"
+          size="xl"
+          className="mt-8 w-full max-w-xs"
+          onClick={() => setRedeemed(null)}
+        >
           Done
         </Button>
       </div>
@@ -108,13 +150,18 @@ function Passport() {
       <h1 className="text-[2rem] font-extrabold leading-tight">Passport</h1>
 
       <section className="relative overflow-hidden rounded-3xl bg-warm p-5 text-primary-foreground shadow-pop">
-        <span className="pointer-events-none absolute -right-6 -top-8 text-[9rem] opacity-15">🍁</span>
+        <span className="pointer-events-none absolute -right-6 -top-8 text-[9rem] opacity-15">
+          🍁
+        </span>
         <p className="text-sm font-semibold opacity-90">Level</p>
         <p className="flex items-center gap-2 font-display text-4xl font-extrabold">
           {lvl.emoji} {lvl.name}
         </p>
         <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-primary-foreground/25">
-          <div className="h-full rounded-full bg-primary-foreground transition-all" style={{ width: `${pct}%` }} />
+          <div
+            className="h-full rounded-full bg-primary-foreground transition-all"
+            style={{ width: `${pct}%` }}
+          />
         </div>
         <p className="mt-2 text-sm opacity-90">
           {next
@@ -124,7 +171,11 @@ function Passport() {
         <div className="mt-4 grid grid-cols-3 gap-2 text-center">
           <Stat value={total} label="Stamps" />
           <Stat value={cards.length} label="Spots" />
-          <Stat value={streak} label={streak === 1 ? "Week streak" : "Week streak"} icon={streak > 0 ? <Flame className="size-4" /> : null} />
+          <Stat
+            value={streak}
+            label={streak === 1 ? "Week streak" : "Week streak"}
+            icon={streak > 0 ? <Flame className="size-4" /> : null}
+          />
         </div>
       </section>
 
@@ -133,12 +184,17 @@ function Passport() {
           <ScanLine className="size-5 text-primary" /> Get stamped
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Scan the Bite code at the counter with your camera, or pick up any order or drop. One visit stamp per spot per day.
+          Scan the Bite code at the counter with your camera, or pick up any order or drop. One
+          visit stamp per spot per day.
         </p>
         {showCode ? (
           <ManualCode onDone={() => setShowCode(false)} />
         ) : (
-          <Button variant="secondary" className="mt-3 h-11 w-full" onClick={() => setShowCode(true)}>
+          <Button
+            variant="secondary"
+            className="mt-3 h-11 w-full"
+            onClick={() => setShowCode(true)}
+          >
             <KeyRound className="size-4" /> Enter a counter code
           </Button>
         )}
@@ -161,7 +217,9 @@ function Passport() {
                   {c.logo ? (
                     <img src={c.logo} alt="" className="size-10 rounded-xl object-cover" />
                   ) : (
-                    <div className="grid size-10 place-items-center rounded-xl bg-primary-soft">{emojiFor(c.category)}</div>
+                    <div className="grid size-10 place-items-center rounded-xl bg-primary-soft">
+                      {emojiFor(c.category)}
+                    </div>
                   )}
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-semibold">{c.name}</p>
@@ -170,21 +228,33 @@ function Passport() {
                     </p>
                   </div>
                 </Link>
-                <div className="mt-3 flex gap-2" aria-label={`${filled} of ${STAMPS_PER_REWARD} stamps`}>
+                <div
+                  className="mt-3 flex gap-2"
+                  aria-label={`${filled} of ${STAMPS_PER_REWARD} stamps`}
+                >
                   {Array.from({ length: STAMPS_PER_REWARD }, (_, i) => (
                     <span
                       key={i}
                       className={`grid aspect-square flex-1 place-items-center rounded-full border-2 text-lg ${
-                        i < filled ? "border-primary bg-primary text-primary-foreground" : "border-dashed border-border"
+                        i < filled
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-dashed border-border"
                       }`}
                     >
-                      {i < filled ? "🍁" : i === STAMPS_PER_REWARD - 1 ? <Gift className="size-4 text-muted-foreground" /> : ""}
+                      {i < filled ? (
+                        "🍁"
+                      ) : i === STAMPS_PER_REWARD - 1 ? (
+                        <Gift className="size-4 text-muted-foreground" />
+                      ) : (
+                        ""
+                      )}
                     </span>
                   ))}
                 </div>
                 {available > 0 && (
                   <Button className="mt-3 h-11 w-full" onClick={() => redeem(c)}>
-                    <Gift className="size-4" /> Redeem reward{available > 1 ? ` (${available})` : ""}
+                    <Gift className="size-4" /> Redeem reward
+                    {available > 1 ? ` (${available})` : ""}
                   </Button>
                 )}
               </div>
@@ -206,7 +276,9 @@ function Passport() {
               >
                 <span className="text-3xl">{b.icon}</span>
                 <span className="mt-1 text-xs font-bold leading-tight">{b.name}</span>
-                <span className="mt-0.5 text-[10px] leading-tight text-muted-foreground">{b.description}</span>
+                <span className="mt-0.5 text-[10px] leading-tight text-muted-foreground">
+                  {b.description}
+                </span>
               </div>
             );
           })}
@@ -238,7 +310,11 @@ function Passport() {
                 <span>🍁</span>
                 <span className="flex-1 truncate font-semibold">{s.restaurants?.name}</span>
                 <span className="text-xs text-muted-foreground">
-                  {SOURCE_LABEL[s.source]} · {new Date(s.created_at).toLocaleDateString("en-CA", { month: "short", day: "numeric" })}
+                  {SOURCE_LABEL[s.source]} ·{" "}
+                  {new Date(s.created_at).toLocaleDateString("en-CA", {
+                    month: "short",
+                    day: "numeric",
+                  })}
                 </span>
               </li>
             ))}
@@ -268,7 +344,11 @@ function ManualCode({ onDone }: { onDone: () => void }) {
   const spots = useQuery({
     queryKey: ["restaurants-mini"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("restaurants").select("slug, name").eq("is_active", true).order("name");
+      const { data, error } = await supabase
+        .from("restaurants")
+        .select("slug, name")
+        .eq("is_active", true)
+        .order("name");
       if (error) throw error;
       return data;
     },
@@ -283,13 +363,22 @@ function ManualCode({ onDone }: { onDone: () => void }) {
   };
   return (
     <div className="mt-3 space-y-2">
-      <label className="sr-only" htmlFor="stamp-spot">Spot</label>
+      <label className="sr-only" htmlFor="stamp-spot">
+        Spot
+      </label>
       <div className="flex h-12 items-center gap-2 rounded-2xl border bg-background px-3">
         <Store className="size-4 text-muted-foreground" />
-        <select id="stamp-spot" value={slug} onChange={(e) => setSlug(e.target.value)} className="h-full flex-1 bg-transparent text-base outline-none">
+        <select
+          id="stamp-spot"
+          value={slug}
+          onChange={(e) => setSlug(e.target.value)}
+          className="h-full flex-1 bg-transparent text-base outline-none"
+        >
           <option value="">Which spot?</option>
           {spots.data?.map((s) => (
-            <option key={s.slug} value={s.slug}>{s.name}</option>
+            <option key={s.slug} value={s.slug}>
+              {s.name}
+            </option>
           ))}
         </select>
       </div>
@@ -302,8 +391,12 @@ function ManualCode({ onDone }: { onDone: () => void }) {
         className="h-12 w-full rounded-2xl border bg-background px-4 text-center font-mono text-xl font-bold uppercase tracking-[0.3em] outline-none focus:border-primary"
       />
       <div className="flex gap-2">
-        <Button variant="ghost" className="h-11 flex-1" onClick={onDone}>Cancel</Button>
-        <Button className="h-11 flex-1" onClick={go}>Stamp me</Button>
+        <Button variant="ghost" className="h-11 flex-1" onClick={onDone}>
+          Cancel
+        </Button>
+        <Button className="h-11 flex-1" onClick={go}>
+          Stamp me
+        </Button>
       </div>
     </div>
   );

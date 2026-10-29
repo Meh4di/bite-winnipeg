@@ -14,7 +14,10 @@ export const Route = createFileRoute("/_tabs/decide")({
   head: () => ({
     meta: [
       { title: "Decide — Bite" },
-      { name: "description", content: "Can't choose where to eat? Spin the roulette or swipe with friends." },
+      {
+        name: "description",
+        content: "Can't choose where to eat? Spin the roulette or swipe with friends.",
+      },
       { property: "og:title", content: "Decide — Bite" },
       { property: "og:description", content: "Spin or swipe to pick where to eat in Winnipeg." },
     ],
@@ -52,7 +55,10 @@ function Decide() {
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
   const pool = useMemo(
-    () => (restaurants.data ?? []).filter((r) => (!cat || r.category === cat) && (!openOnly || isOpenNow(r.hours))),
+    () =>
+      (restaurants.data ?? []).filter(
+        (r) => (!cat || r.category === cat) && (!openOnly || isOpenNow(r.hours)),
+      ),
     [restaurants.data, cat, openOnly],
   );
   const pick = (restaurants.data ?? []).find((r) => r.id === pickId) ?? null;
@@ -71,7 +77,9 @@ function Decide() {
     for (let i = 0; i < steps; i++) {
       t += 45 + Math.pow(i / steps, 3) * 320;
       const last = i === steps - 1;
-      const name = last ? winner.name : pool[Math.floor(Math.random() * pool.length)]?.name ?? winner.name;
+      const name = last
+        ? winner.name
+        : (pool[Math.floor(Math.random() * pool.length)]?.name ?? winner.name);
       timers.current.push(
         window.setTimeout(() => {
           setReel(name);
@@ -91,7 +99,10 @@ function Decide() {
       return;
     }
     setCreating(true);
-    const { data, error } = await supabase.rpc("create_decide_session", cat ? { p_category: cat } : {});
+    const { data, error } = await supabase.rpc(
+      "create_decide_session",
+      cat ? { p_category: cat } : {},
+    );
     setCreating(false);
     if (error || !data?.[0]) {
       toast.error(error?.message ?? "Couldn't start a group");
@@ -113,13 +124,21 @@ function Decide() {
     <div className="animate-screen space-y-6 px-5 pt-[max(env(safe-area-inset-top),1.25rem)]">
       <div>
         <h1 className="text-[2rem] font-extrabold leading-tight">Decide</h1>
-        <p className="text-sm text-muted-foreground">Can't choose? Let fate (or your friends) pick.</p>
+        <p className="text-sm text-muted-foreground">
+          Can't choose? Let fate (or your friends) pick.
+        </p>
       </div>
 
       <div className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 pb-1">
-        <Chip active={!cat} onClick={() => setCat(null)}>✨ Anything</Chip>
+        <Chip active={!cat} onClick={() => setCat(null)}>
+          ✨ Anything
+        </Chip>
         {CATEGORIES.map((c) => (
-          <Chip key={c.name} active={cat === c.name} onClick={() => setCat(cat === c.name ? null : c.name)}>
+          <Chip
+            key={c.name}
+            active={cat === c.name}
+            onClick={() => setCat(cat === c.name ? null : c.name)}
+          >
             {c.emoji} {c.name}
           </Chip>
         ))}
@@ -138,16 +157,28 @@ function Decide() {
           className="mt-4 grid h-24 place-items-center overflow-hidden rounded-2xl bg-warm px-4 text-center text-primary-foreground"
           aria-live="polite"
         >
-          <p className={`font-display text-2xl font-extrabold leading-tight ${spinning ? "blur-[0.5px]" : ""}`}>
-            {reel ?? (pool.length ? `${pool.length} ${pool.length === 1 ? "spot" : "spots"} in the wheel` : "No spots match")}
+          <p
+            className={`font-display text-2xl font-extrabold leading-tight ${spinning ? "blur-[0.5px]" : ""}`}
+          >
+            {reel ??
+              (pool.length
+                ? `${pool.length} ${pool.length === 1 ? "spot" : "spots"} in the wheel`
+                : "No spots match")}
           </p>
         </div>
-        <Button size="xl" className="mt-4 w-full" onClick={spin} disabled={!pool.length || spinning}>
+        <Button
+          size="xl"
+          className="mt-4 w-full"
+          onClick={spin}
+          disabled={!pool.length || spinning}
+        >
           {spinning ? "Spinning…" : pickId ? "Spin again" : "Spin 🎲"}
         </Button>
         {pick && !spinning && (
           <div className="mt-4 animate-screen">
-            <p className="mb-2 text-center text-sm font-bold text-primary">Fate has spoken {emojiFor(pick.category)}</p>
+            <p className="mb-2 text-center text-sm font-bold text-primary">
+              Fate has spoken {emojiFor(pick.category)}
+            </p>
             <RestaurantCard r={pick} />
           </div>
         )}
@@ -158,7 +189,8 @@ function Decide() {
           <Users className="size-6 text-primary" /> Swipe with friends
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Start a group, share the code, and everyone swipes. When you all like the same spot, it's a match.
+          Start a group, share the code, and everyone swipes. When you all like the same spot, it's
+          a match.
         </p>
         <Button size="xl" className="mt-4 w-full" onClick={startGroup} disabled={creating}>
           {creating ? "Starting…" : `Start a group${cat ? ` · ${cat}` : ""}`}
@@ -178,7 +210,15 @@ function Decide() {
         </div>
         {!user && (
           <p className="mt-3 text-center text-xs text-muted-foreground">
-            You'll need to <Link to="/auth" search={{ redirect: "/decide" }} className="font-semibold text-primary">sign in</Link> to swipe with friends.
+            You'll need to{" "}
+            <Link
+              to="/auth"
+              search={{ redirect: "/decide" }}
+              className="font-semibold text-primary"
+            >
+              sign in
+            </Link>{" "}
+            to swipe with friends.
           </p>
         )}
       </section>
@@ -186,7 +226,15 @@ function Decide() {
   );
 }
 
-function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+function Chip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <button
       onClick={onClick}

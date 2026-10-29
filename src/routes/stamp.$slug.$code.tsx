@@ -22,7 +22,9 @@ function StampClaim() {
   const { slug, code } = Route.useParams();
   const { user, loading } = useAuth();
   const qc = useQueryClient();
-  const [state, setState] = useState<{ ok: true; name: string } | { ok: false; error: string } | null>(null);
+  const [state, setState] = useState<
+    { ok: true; name: string } | { ok: false; error: string } | null
+  >(null);
   const tried = useRef(false);
 
   useEffect(() => {
@@ -39,9 +41,15 @@ function StampClaim() {
 
   if (!loading && !user)
     return (
-      <Shell emoji="🍁" title="Sign in to collect your stamp" line="It takes a few seconds. We'll bring you right back.">
+      <Shell
+        emoji="🍁"
+        title="Sign in to collect your stamp"
+        line="It takes a few seconds. We'll bring you right back."
+      >
         <Button asChild size="xl" className="w-full">
-          <Link to="/auth" search={{ redirect: `/stamp/${slug}/${code}` }}>Sign in or create account</Link>
+          <Link to="/auth" search={{ redirect: `/stamp/${slug}/${code}` }}>
+            Sign in or create account
+          </Link>
         </Button>
       </Shell>
     );
@@ -63,7 +71,9 @@ function StampClaim() {
         <Link to="/passport">See my Passport</Link>
       </Button>
       <Button asChild variant="ghost" className="w-full">
-        <Link to="/r/$slug" params={{ slug }}>Back to {state.name}</Link>
+        <Link to="/r/$slug" params={{ slug }}>
+          Back to {state.name}
+        </Link>
       </Button>
     </Shell>
   );
@@ -84,7 +94,9 @@ function Shell({
 }) {
   return (
     <div className="flex min-h-[90dvh] flex-col items-center justify-center px-8 text-center animate-screen">
-      <div className={`grid size-32 place-items-center rounded-[2.5rem] text-6xl ${celebrate ? "bg-warm shadow-pop animate-stamp" : "bg-card shadow-card"}`}>
+      <div
+        className={`grid size-32 place-items-center rounded-[2.5rem] text-6xl ${celebrate ? "bg-warm shadow-pop animate-stamp" : "bg-card shadow-card"}`}
+      >
         {emoji}
       </div>
       <h1 className="mt-6 text-3xl font-extrabold">{title}</h1>

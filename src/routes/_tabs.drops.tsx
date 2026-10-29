@@ -8,7 +8,10 @@ export const Route = createFileRoute("/_tabs/drops")({
   head: () => ({
     meta: [
       { title: "Drops — Bite" },
-      { name: "description", content: "Limited food drops, last-call deals and promos from Winnipeg spots." },
+      {
+        name: "description",
+        content: "Limited food drops, last-call deals and promos from Winnipeg spots.",
+      },
       { property: "og:title", content: "Drops — Bite" },
       { property: "og:description", content: "Limited-quantity food drops from Winnipeg spots." },
     ],
@@ -36,12 +39,17 @@ function Drops() {
   const count = (k: string) =>
     k === "deals"
       ? (promos.data?.length ?? 0)
-      : (drops.data ?? []).filter((d) => d.kind === (k === "leftover" ? "leftover" : "drop") && dropState(d, now) === "live").length;
+      : (drops.data ?? []).filter(
+          (d) =>
+            d.kind === (k === "leftover" ? "leftover" : "drop") && dropState(d, now) === "live",
+        ).length;
 
   return (
     <div className="animate-screen px-5 pt-[max(env(safe-area-inset-top),1.25rem)]">
       <h1 className="text-[2rem] font-extrabold leading-tight">Drops</h1>
-      <p className="text-sm text-muted-foreground">Limited runs, last-call deals and promos. First come, first served.</p>
+      <p className="text-sm text-muted-foreground">
+        Limited runs, last-call deals and promos. First come, first served.
+      </p>
 
       <div className="mt-4 grid grid-cols-3 gap-1 rounded-2xl bg-muted p-1" role="tablist">
         {SEGMENTS.map((s) => (
@@ -67,19 +75,41 @@ function Drops() {
       {seg === "deals" ? (
         <div className="mt-5 space-y-4">
           {promos.isLoading && <div className="h-48 animate-pulse rounded-3xl bg-muted" />}
-          {promos.data?.map((p) => <PromoCard key={p.id} p={p} />)}
+          {promos.data?.map((p) => (
+            <PromoCard key={p.id} p={p} />
+          ))}
           {!promos.isLoading && !promos.data?.length && (
-            <Empty emoji="📣" title="No deals running" line="When spots post promos, they'll show up here." />
+            <Empty
+              emoji="📣"
+              title="No deals running"
+              line="When spots post promos, they'll show up here."
+            />
           )}
         </div>
       ) : (
         <div className="mt-5 space-y-6">
           {drops.isLoading && <div className="h-72 animate-pulse rounded-3xl bg-muted" />}
-          {live.length > 0 && <Section title="Live now">{live.map((d) => <DropCard key={d.id} d={d} now={now} />)}</Section>}
-          {upcoming.length > 0 && (
-            <Section title="Coming up">{upcoming.map((d) => <DropCard key={d.id} d={d} now={now} />)}</Section>
+          {live.length > 0 && (
+            <Section title="Live now">
+              {live.map((d) => (
+                <DropCard key={d.id} d={d} now={now} />
+              ))}
+            </Section>
           )}
-          {gone.length > 0 && <Section title="Just missed">{gone.map((d) => <DropCard key={d.id} d={d} now={now} />)}</Section>}
+          {upcoming.length > 0 && (
+            <Section title="Coming up">
+              {upcoming.map((d) => (
+                <DropCard key={d.id} d={d} now={now} />
+              ))}
+            </Section>
+          )}
+          {gone.length > 0 && (
+            <Section title="Just missed">
+              {gone.map((d) => (
+                <DropCard key={d.id} d={d} now={now} />
+              ))}
+            </Section>
+          )}
           {!drops.isLoading && list.length === 0 && (
             <Empty
               emoji={seg === "leftover" ? "🥡" : "⏰"}
@@ -100,7 +130,9 @@ function Drops() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section>
-      <h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-muted-foreground">{title}</h2>
+      <h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-muted-foreground">
+        {title}
+      </h2>
       <div className="space-y-4">{children}</div>
     </section>
   );

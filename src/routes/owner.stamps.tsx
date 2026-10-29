@@ -12,7 +12,10 @@ export const Route = createFileRoute("/owner/stamps")({
   head: () => ({
     meta: [
       { title: "Stamp code — Bite Business" },
-      { name: "description", content: "Show this code at your counter so customers can collect passport stamps." },
+      {
+        name: "description",
+        content: "Show this code at your counter so customers can collect passport stamps.",
+      },
       { property: "og:title", content: "Stamp code — Bite Business" },
       { property: "og:description", content: "Your counter stamp code." },
     ],
@@ -62,8 +65,15 @@ function StampCode() {
       const start = new Date();
       start.setHours(0, 0, 0, 0);
       const [today, total] = await Promise.all([
-        supabase.from("stamps").select("id", { count: "exact", head: true }).eq("restaurant_id", r.id).gte("created_at", start.toISOString()),
-        supabase.from("stamps").select("id", { count: "exact", head: true }).eq("restaurant_id", r.id),
+        supabase
+          .from("stamps")
+          .select("id", { count: "exact", head: true })
+          .eq("restaurant_id", r.id)
+          .gte("created_at", start.toISOString()),
+        supabase
+          .from("stamps")
+          .select("id", { count: "exact", head: true })
+          .eq("restaurant_id", r.id),
       ]);
       return { today: today.count ?? 0, total: total.count ?? 0 };
     },
@@ -73,7 +83,9 @@ function StampCode() {
     return (
       <div className="p-8 text-center">
         <p>Set up your restaurant first.</p>
-        <Link to="/owner/setup" className="font-semibold text-primary">Go to setup</Link>
+        <Link to="/owner/setup" className="font-semibold text-primary">
+          Go to setup
+        </Link>
       </div>
     );
 
@@ -84,10 +96,16 @@ function StampCode() {
       <p className="text-sm font-bold uppercase tracking-wider text-primary">🍁 Bite Passport</p>
       <h2 className="mt-1 text-2xl font-extrabold">Scan for a stamp</h2>
       <div className="mt-4 aspect-square w-full max-w-[320px] rounded-2xl bg-white p-3">
-        {qr ? <img src={qr} alt="Stamp QR code" className="size-full" /> : <div className="size-full animate-pulse rounded-xl bg-muted" />}
+        {qr ? (
+          <img src={qr} alt="Stamp QR code" className="size-full" />
+        ) : (
+          <div className="size-full animate-pulse rounded-xl bg-muted" />
+        )}
       </div>
       <p className="mt-4 text-sm text-muted-foreground">Or enter this code in the Passport tab</p>
-      <p className="font-mono text-4xl font-extrabold tracking-[0.3em]">{code.data?.code ?? "······"}</p>
+      <p className="font-mono text-4xl font-extrabold tracking-[0.3em]">
+        {code.data?.code ?? "······"}
+      </p>
       <p className="mt-2 text-xs text-muted-foreground">New code in {countdown(left)}</p>
     </div>
   );
@@ -95,7 +113,11 @@ function StampCode() {
   if (big)
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background p-6">
-        <button aria-label="Close" onClick={() => setBig(false)} className="absolute right-4 top-4 grid size-12 place-items-center rounded-full bg-card shadow-card">
+        <button
+          aria-label="Close"
+          onClick={() => setBig(false)}
+          className="absolute right-4 top-4 grid size-12 place-items-center rounded-full bg-card shadow-card"
+        >
           <X className="size-6" />
         </button>
         <div className="w-full max-w-[420px]">{card}</div>
@@ -107,8 +129,8 @@ function StampCode() {
       <div>
         <h1 className="text-2xl font-extrabold">Stamp code</h1>
         <p className="text-sm text-muted-foreground">
-          Put this on a tablet at your counter. Customers scan it with their phone camera to collect a passport stamp.
-          It changes every 2 minutes so it can't be shared online.
+          Put this on a tablet at your counter. Customers scan it with their phone camera to collect
+          a passport stamp. It changes every 2 minutes so it can't be shared online.
         </p>
       </div>
       {card}
@@ -117,17 +139,22 @@ function StampCode() {
       </Button>
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded-3xl bg-card p-4 shadow-card">
-          <p className="font-display text-3xl font-extrabold text-primary">{stats.data?.today ?? "–"}</p>
+          <p className="font-display text-3xl font-extrabold text-primary">
+            {stats.data?.today ?? "–"}
+          </p>
           <p className="text-sm text-muted-foreground">Stamps today</p>
         </div>
         <div className="rounded-3xl bg-card p-4 shadow-card">
-          <p className="font-display text-3xl font-extrabold text-primary">{stats.data?.total ?? "–"}</p>
+          <p className="font-display text-3xl font-extrabold text-primary">
+            {stats.data?.total ?? "–"}
+          </p>
           <p className="text-sm text-muted-foreground">All-time stamps</p>
         </div>
       </div>
       <p className="rounded-2xl bg-primary-soft p-4 text-sm text-primary">
-        <b>Rewards:</b> every 5 stamps at your spot earns a customer one reward. When they tap Redeem, their screen
-        shows a big confirmation. Honour it with something small, like a free drip coffee or cookie.
+        <b>Rewards:</b> every 5 stamps at your spot earns a customer one reward. When they tap
+        Redeem, their screen shows a big confirmation. Honour it with something small, like a free
+        drip coffee or cookie.
       </p>
     </div>
   );

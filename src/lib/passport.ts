@@ -18,7 +18,8 @@ export function nextLevel(stamps: number) {
   return LEVELS.find((l) => l.min > stamps) ?? null;
 }
 
-export const levelName = (level: number) => LEVELS[Math.max(0, Math.min(3, level))]?.name ?? "Bronze";
+export const levelName = (level: number) =>
+  LEVELS[Math.max(0, Math.min(3, level))]?.name ?? "Bronze";
 
 /** Monday-based week key in Winnipeg time, e.g. "2026-10-26". */
 function weekKey(date: Date) {
@@ -51,12 +52,17 @@ export function usePassport(userId: string | undefined) {
       const [stamps, badges, mine, redemptions] = await Promise.all([
         supabase
           .from("stamps")
-          .select("id, restaurant_id, source, created_at, restaurants(name, slug, logo_url, category, neighbourhood)")
+          .select(
+            "id, restaurant_id, source, created_at, restaurants(name, slug, logo_url, category, neighbourhood)",
+          )
           .eq("user_id", userId)
           .order("created_at", { ascending: false }),
         supabase.from("badges").select("*").order("name"),
         supabase.from("user_badges").select("badge_id, earned_at").eq("user_id", userId),
-        supabase.from("reward_redemptions").select("restaurant_id, created_at").eq("user_id", userId),
+        supabase
+          .from("reward_redemptions")
+          .select("restaurant_id, created_at")
+          .eq("user_id", userId),
       ]);
       if (stamps.error) throw stamps.error;
       return {

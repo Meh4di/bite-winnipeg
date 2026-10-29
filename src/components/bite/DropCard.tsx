@@ -67,7 +67,9 @@ export function DropCard({ d, now }: { d: DropRow; now: number }) {
         {d.photo_url ? (
           <img src={d.photo_url} alt={d.title} loading="lazy" className="size-full object-cover" />
         ) : (
-          <div className="grid size-full place-items-center bg-warm text-6xl">{leftover ? "🥡" : "🔥"}</div>
+          <div className="grid size-full place-items-center bg-warm text-6xl">
+            {leftover ? "🥡" : "🔥"}
+          </div>
         )}
         <div className="absolute left-3 top-3 flex gap-2">
           {state === "live" && (
@@ -81,10 +83,14 @@ export function DropCard({ d, now }: { d: DropRow; now: number }) {
             </span>
           )}
           {state === "soldout" && (
-            <span className="rounded-full bg-foreground/75 px-2.5 py-1 text-xs font-bold text-background">Sold out</span>
+            <span className="rounded-full bg-foreground/75 px-2.5 py-1 text-xs font-bold text-background">
+              Sold out
+            </span>
           )}
           {state === "ended" && (
-            <span className="rounded-full bg-foreground/75 px-2.5 py-1 text-xs font-bold text-background">Ended</span>
+            <span className="rounded-full bg-foreground/75 px-2.5 py-1 text-xs font-bold text-background">
+              Ended
+            </span>
           )}
           {discount > 0 && (
             <span className="rounded-full bg-success px-2.5 py-1 text-xs font-bold text-success-foreground">
@@ -112,42 +118,59 @@ export function DropCard({ d, now }: { d: DropRow; now: number }) {
         {d.description && <p className="mt-1 text-sm text-muted-foreground">{d.description}</p>}
 
         <div className="mt-3 flex items-baseline gap-2">
-          <span className="font-display text-2xl font-extrabold text-primary">{formatPrice(d.price_cents)}</span>
+          <span className="font-display text-2xl font-extrabold text-primary">
+            {formatPrice(d.price_cents)}
+          </span>
           {leftover && d.original_price_cents ? (
-            <span className="text-sm text-muted-foreground line-through">{formatPrice(d.original_price_cents)}</span>
+            <span className="text-sm text-muted-foreground line-through">
+              {formatPrice(d.original_price_cents)}
+            </span>
           ) : null}
         </div>
 
         {(state === "live" || state === "soldout") && (
           <div className="mt-3">
             <div className="flex justify-between text-xs font-semibold">
-              <span className={pctLeft <= 25 && state === "live" ? "text-primary" : "text-muted-foreground"}>
-                {state === "soldout" ? "All gone" : `${d.quantity_left} of ${d.quantity_total} left`}
+              <span
+                className={
+                  pctLeft <= 25 && state === "live" ? "text-primary" : "text-muted-foreground"
+                }
+              >
+                {state === "soldout"
+                  ? "All gone"
+                  : `${d.quantity_left} of ${d.quantity_total} left`}
               </span>
               {d.ends_at && state === "live" && (
                 <span className="flex items-center gap-1 text-muted-foreground">
                   <Timer className="size-3.5" />
-                  {leftover ? `Pick up by ${clockTime(d.ends_at)}` : `Ends in ${countdown(new Date(d.ends_at).getTime() - now)}`}
+                  {leftover
+                    ? `Pick up by ${clockTime(d.ends_at)}`
+                    : `Ends in ${countdown(new Date(d.ends_at).getTime() - now)}`}
                 </span>
               )}
             </div>
             <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-muted">
-              <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pctLeft}%` }} />
+              <div
+                className="h-full rounded-full bg-primary transition-all"
+                style={{ width: `${pctLeft}%` }}
+              />
             </div>
           </div>
         )}
 
         {state === "upcoming" && (
           <p className="mt-3 flex items-center gap-2 rounded-2xl bg-primary-soft p-3 text-sm font-bold text-primary">
-            <Clock className="size-4" /> Drops in {countdown(new Date(d.starts_at).getTime() - now)} ·{" "}
-            {d.quantity_total} available
+            <Clock className="size-4" /> Drops in {countdown(new Date(d.starts_at).getTime() - now)}{" "}
+            · {d.quantity_total} available
           </p>
         )}
 
         {state === "live" && (
           <Button size="xl" className="mt-4 w-full" onClick={onClaim} disabled={busy}>
             <Flame className="size-5" />
-            {leftover ? `Grab it · ${formatPrice(d.price_cents)}` : `Claim · ${formatPrice(d.price_cents)}`}
+            {leftover
+              ? `Grab it · ${formatPrice(d.price_cents)}`
+              : `Claim · ${formatPrice(d.price_cents)}`}
           </Button>
         )}
       </div>
@@ -157,8 +180,8 @@ export function DropCard({ d, now }: { d: DropRow; now: number }) {
           <AlertDialogHeader>
             <AlertDialogTitle>{d.title}</AlertDialogTitle>
             <AlertDialogDescription>
-              {formatPrice(d.price_cents)} at {d.restaurants?.name}. Pick up within about 15 minutes. Test mode, no real
-              charge.
+              {formatPrice(d.price_cents)} at {d.restaurants?.name}. Pick up within about 15
+              minutes. Test mode, no real charge.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
