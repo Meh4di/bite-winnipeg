@@ -38,14 +38,14 @@ function Setup() {
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
-    const payload = { ...f, hours: f.hours as never };
+    const payload = { ...f, neighbourhood: f.neighbourhood ?? null, hours: f.hours as never };
     const { error } = r
       ? await supabase.from("restaurants").update(payload).eq("id", r.id)
       : await supabase.from("restaurants").insert({
           ...payload, owner_id: userId, slug: `${slugify(f.name)}-${Math.random().toString(36).slice(2, 6)}`,
         });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Saved!");
     await qc.invalidateQueries({ queryKey: ["my-restaurant"] });
     qc.invalidateQueries({ queryKey: ["restaurants"] });

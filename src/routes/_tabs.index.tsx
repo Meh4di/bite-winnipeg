@@ -23,7 +23,7 @@ function Home() {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string | null>(null);
   const { user } = useAuth();
-  const name = (user?.user_metadata?.full_name as string | undefined)?.split(" ")[0];
+  const name = (user?.user_metadata?.["full_name"] as string | undefined)?.split(" ")[0];
 
   const { data, isLoading } = useQuery({
     queryKey: ["restaurants"],

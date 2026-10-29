@@ -25,7 +25,7 @@ export function OwnerOrders({ restaurant }: { restaurant: { id: string; acceptin
     if (error) throw error; return data;
   } });
   const accepting = useMutation({ mutationFn: async (value: boolean) => { const { error } = await supabase.from("restaurants").update({ accepting_orders: value }).eq("id", restaurant.id); if (error) throw error; }, onSuccess: () => { qc.invalidateQueries({ queryKey: ["my-restaurant"] }); qc.invalidateQueries({ queryKey: ["restaurant"] }); qc.invalidateQueries({ queryKey: ["checkout-restaurant"] }); }, onError: error => toast.error(error.message) });
-  const update = useMutation({ mutationFn: async ({ id, status }: { id: string; status: string }) => {
+  const update = useMutation({ mutationFn: async ({ id, status }: { id: string; status: "paid" | "preparing" | "ready" | "picked_up" | "pending" | "cancelled" }) => {
     const next = nextOrderStatus(status); if (!next) return;
     const { data, error } = await supabase.from("orders").update({ status: next }).eq("id", id).eq("restaurant_id", restaurant.id).eq("status", status).select("id");
     if (error) throw error; if (!data?.length) throw new Error("Order changed. Refresh and try again.");

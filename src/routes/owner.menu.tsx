@@ -52,7 +52,7 @@ function MenuManager() {
   const addCat = async () => {
     if (!newCat.trim()) return;
     const { error } = await supabase.from("menu_categories").insert({ restaurant_id: r.id, name: newCat.trim(), sort_order: cats.length });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setNewCat("");
     refresh();
   };
@@ -76,7 +76,7 @@ function MenuManager() {
     const { error } = draft.id
       ? await supabase.from("menu_items").update(row).eq("id", draft.id)
       : await supabase.from("menu_items").insert(row);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setDraft(null);
     refresh();
   };

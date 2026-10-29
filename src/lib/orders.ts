@@ -7,7 +7,7 @@ export function useLiveOrders(filter: string | undefined, onArrival?: (id: strin
     if (!filter) return;
     const channel = supabase.channel(`orders-${crypto.randomUUID()}`).on("postgres_changes", { event: "*", schema: "public", table: "orders", filter }, payload => {
       qc.invalidateQueries({ queryKey: ["orders"] });
-      if (payload.eventType === "INSERT" && payload.new.status === "paid") onArrival?.(String(payload.new.id));
+      if (payload.eventType === "INSERT" && payload.new["status"] === "paid") onArrival?.(String(payload.new["id"]));
     }).subscribe();
     return () => { void supabase.removeChannel(channel); };
   }, [filter, qc, onArrival]);

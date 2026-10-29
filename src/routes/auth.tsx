@@ -6,7 +6,10 @@ import { fetchRole, useAuth, type BiteRole } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (search: Record<string, unknown>) => ({ redirect: typeof search.redirect === "string" && (search.redirect === "/checkout" || /^\/orders\/[a-f0-9-]+$/.test(search.redirect)) ? search.redirect : undefined }),
+  validateSearch: (search: Record<string, unknown>): { redirect?: string } => {
+    const r = search["redirect"];
+    return typeof r === "string" && (r === "/checkout" || /^\/orders\/[a-f0-9-]+$/.test(r)) ? { redirect: r } : {};
+  },
   head: () => ({
     meta: [
       { title: "Sign in — Bite" },

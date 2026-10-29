@@ -63,7 +63,7 @@ export function isOpenNow(hours: unknown, date = new Date()): boolean {
 
 export function formatTime(t?: string) {
   if (!t) return "";
-  const [hh, mm] = t.split(":").map(Number);
+  const [hh = 0, mm = 0] = t.split(":").map(Number);
   const ap = hh >= 12 ? "pm" : "am";
   const h12 = hh % 12 === 0 ? 12 : hh % 12;
   return mm ? `${h12}:${String(mm).padStart(2, "0")}${ap}` : `${h12}${ap}`;

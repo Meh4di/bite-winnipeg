@@ -89,7 +89,7 @@ function Dashboard() {
   );
 }
 
-function Stat({ label, value }: { label: string; value?: number }) {
+function Stat({ label, value }: { label: string; value?: number | undefined }) {
   return (
     <div className="rounded-3xl bg-card p-4 shadow-card">
       <p className="font-display text-3xl font-extrabold text-primary">{value ?? "–"}</p>
