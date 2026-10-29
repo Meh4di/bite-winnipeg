@@ -26,6 +26,7 @@ import { Route as OwnerOrdersRouteImport } from './routes/owner.orders'
 import { Route as OwnerSetupRouteImport } from './routes/owner.setup'
 import { Route as OwnerStampsRouteImport } from './routes/owner.stamps'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
+import { Route as TabsDecideCodeRouteImport } from './routes/_tabs.decide_.$code'
 import { Route as StampSlugCodeRouteImport } from './routes/stamp.$slug.$code'
 
 const TabsRoute = TabsRouteImport.update({
@@ -112,6 +113,11 @@ const RSlugRoute = RSlugRouteImport.update({
   path: '/r/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TabsDecideCodeRoute = TabsDecideCodeRouteImport.update({
+  id: '/decide_/$code',
+  path: '/decide/$code',
+  getParentRoute: () => TabsRoute,
+} as any)
 const StampSlugCodeRoute = StampSlugCodeRouteImport.update({
   id: '/stamp/$slug/$code',
   path: '/stamp/$slug/$code',
@@ -135,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/owner/stamps': typeof OwnerStampsRoute
   '/r/$slug': typeof RSlugRoute
   '/owner/': typeof OwnerIndexRoute
+  '/decide/$code': typeof TabsDecideCodeRoute
   '/stamp/$slug/$code': typeof StampSlugCodeRoute
 }
 export interface FileRoutesByTo {
@@ -153,6 +160,7 @@ export interface FileRoutesByTo {
   '/r/$slug': typeof RSlugRoute
   '/': typeof TabsIndexRoute
   '/owner': typeof OwnerIndexRoute
+  '/decide/$code': typeof TabsDecideCodeRoute
   '/stamp/$slug/$code': typeof StampSlugCodeRoute
 }
 export interface FileRoutesById {
@@ -174,6 +182,7 @@ export interface FileRoutesById {
   '/r/$slug': typeof RSlugRoute
   '/_tabs/': typeof TabsIndexRoute
   '/owner/': typeof OwnerIndexRoute
+  '/_tabs/decide_/$code': typeof TabsDecideCodeRoute
   '/stamp/$slug/$code': typeof StampSlugCodeRoute
 }
 export interface FileRouteTypes {
@@ -195,6 +204,7 @@ export interface FileRouteTypes {
     | '/owner/stamps'
     | '/r/$slug'
     | '/owner/'
+    | '/decide/$code'
     | '/stamp/$slug/$code'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -213,6 +223,7 @@ export interface FileRouteTypes {
     | '/r/$slug'
     | '/'
     | '/owner'
+    | '/decide/$code'
     | '/stamp/$slug/$code'
   id:
     | '__root__'
@@ -233,6 +244,7 @@ export interface FileRouteTypes {
     | '/r/$slug'
     | '/_tabs/'
     | '/owner/'
+    | '/_tabs/decide_/$code'
     | '/stamp/$slug/$code'
   fileRoutesById: FileRoutesById
 }
@@ -367,6 +379,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_tabs/decide_/$code': {
+      id: '/_tabs/decide_/$code'
+      path: '/decide/$code'
+      fullPath: '/decide/$code'
+      preLoaderRoute: typeof TabsDecideCodeRouteImport
+      parentRoute: typeof TabsRoute
+    }
     '/stamp/$slug/$code': {
       id: '/stamp/$slug/$code'
       path: '/stamp/$slug/$code'
@@ -383,6 +402,7 @@ interface TabsRouteChildren {
   TabsPassportRoute: typeof TabsPassportRoute
   TabsProfileRoute: typeof TabsProfileRoute
   TabsIndexRoute: typeof TabsIndexRoute
+  TabsDecideCodeRoute: typeof TabsDecideCodeRoute
 }
 
 const TabsRouteChildren: TabsRouteChildren = {
@@ -391,6 +411,7 @@ const TabsRouteChildren: TabsRouteChildren = {
   TabsPassportRoute: TabsPassportRoute,
   TabsProfileRoute: TabsProfileRoute,
   TabsIndexRoute: TabsIndexRoute,
+  TabsDecideCodeRoute: TabsDecideCodeRoute,
 }
 
 const TabsRouteWithChildren = TabsRoute._addFileChildren(TabsRouteChildren)

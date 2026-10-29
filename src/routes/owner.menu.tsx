@@ -12,7 +12,7 @@ import { Route as OwnerRoute, useMyRestaurant } from "./owner";
 
 export const Route = createFileRoute("/owner/menu")({ component: MenuManager });
 
-type Draft = { id?: string; name: string; description: string; price: string; photo_url: string | null; is_available: boolean; category_id: string | null };
+type Draft = { id?: string; name: string; description: string; price: string; photo_url: string | null; is_available: boolean; category_id: string | null; is_secret: boolean; required_level: number };
 const field = "h-12 w-full rounded-2xl border bg-background px-4 text-base outline-none focus:border-primary";
 
 function MenuManager() {
@@ -71,7 +71,7 @@ function MenuManager() {
     if (!draft) return;
     const row = {
       restaurant_id: r.id, category_id: draft.category_id, name: draft.name, description: draft.description,
-      price_cents: Math.round(parseFloat(draft.price || "0") * 100), photo_url: draft.photo_url, is_available: draft.is_available,
+      price_cents: Math.round(parseFloat(draft.price || "0") * 100), photo_url: draft.photo_url, is_available: draft.is_available, is_secret: draft.is_secret, required_level: draft.is_secret ? draft.required_level : 0,
     };
     const { error } = draft.id
       ? await supabase.from("menu_items").update(row).eq("id", draft.id)
@@ -120,9 +120,9 @@ function MenuManager() {
                   {i.photo_url ? <img src={i.photo_url} alt="" className="size-14 rounded-xl object-cover" /> : <div className="size-14 rounded-xl bg-muted" />}
                   <button
                     className="min-w-0 flex-1 text-left"
-                    onClick={() => setDraft({ id: i.id, name: i.name, description: i.description ?? "", price: (i.price_cents / 100).toFixed(2), photo_url: i.photo_url, is_available: i.is_available, category_id: i.category_id })}
+                    onClick={() => setDraft({ id: i.id, name: i.name, description: i.description ?? "", price: (i.price_cents / 100).toFixed(2), photo_url: i.photo_url, is_available: i.is_available, category_id: i.category_id, is_secret: i.is_secret, required_level: i.required_level })}
                   >
-                    <p className="truncate font-semibold">{i.name}</p>
+                    <p className="truncate font-semibold">{i.is_secret && "🤫 "}{i.name}</p>
                     <p className="text-sm font-bold text-primary">{formatPrice(i.price_cents)}</p>
                   </button>
                   <Switch checked={i.is_available} onCheckedChange={(v) => toggleAvail(i.id, v)} aria-label="Available" />
@@ -131,7 +131,7 @@ function MenuManager() {
               ))}
               <button
                 className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed text-sm font-semibold text-muted-foreground"
-                onClick={() => setDraft({ name: "", description: "", price: "", photo_url: null, is_available: true, category_id: g.id })}
+                onClick={() => setDraft({ name: "", description: "", price: "", photo_url: null, is_available: true, category_id: g.id, is_secret: false, required_level: 1 })}
               >
                 <Plus className="size-4" /> Add item
               </button>
@@ -142,7 +142,7 @@ function MenuManager() {
 
       {draft && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40" onClick={() => setDraft(null)}>
-          <div className="w-full max-w-[430px] space-y-3 rounded-t-3xl bg-card p-5 pb-safe animate-screen" onClick={(e) => e.stopPropagation()}>
+          <div className="max-h-[92dvh] w-full max-w-[430px] space-y-3 overflow-y-auto rounded-t-3xl bg-card p-5 pb-safe animate-screen" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-xl font-bold">{draft.id ? "Edit item" : "New item"}</h3>
             <ImagePick bucket="menu-photos" userId={userId} value={draft.photo_url} onChange={(u) => setDraft({ ...draft, photo_url: u })} label="Photo" className="h-32 w-full" />
             <input className={field} placeholder="Name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
@@ -155,6 +155,22 @@ function MenuManager() {
             <label className="flex h-12 items-center justify-between font-semibold">
               Available <Switch checked={draft.is_available} onCheckedChange={(v) => setDraft({ ...draft, is_available: v })} />
             </label>
+            <label className="flex h-12 items-center justify-between font-semibold">
+              <span>🤫 Secret menu item</span>
+              <Switch checked={draft.is_secret} onCheckedChange={(v) => setDraft({ ...draft, is_secret: v })} />
+            </label>
+            {draft.is_secret && (
+              <label className="block text-sm font-semibold">
+                Who can see it
+                <select className={`${field} mt-1`} value={draft.required_level} onChange={(e) => setDraft({ ...draft, required_level: Number(e.target.value) })}>
+                  <option value={0}>Any signed-in Bite user</option>
+                  <option value={1}>🥈 Silver and up (5+ stamps)</option>
+                  <option value={2}>🥇 Gold and up (15+ stamps)</option>
+                  <option value={3}>🍁 Maple only (30+ stamps)</option>
+                </select>
+                <span className="mt-1 block text-xs font-normal text-muted-foreground">Everyone else sees a locked teaser that makes them want to level up.</span>
+              </label>
+            )}
             <Button size="xl" className="w-full" disabled={!draft.name} onClick={saveItem}>Save item</Button>
           </div>
         </div>

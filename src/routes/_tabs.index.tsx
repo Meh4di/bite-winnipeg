@@ -1,11 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Search, X } from "lucide-react";
+import { ChevronRight, Flame, Search, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { CATEGORIES } from "@/lib/bite";
 import { RestaurantCard } from "@/components/bite/RestaurantCard";
 import { useAuth } from "@/lib/auth";
+import { dropState, useDrops, useNow } from "@/lib/live";
 
 export const Route = createFileRoute("/_tabs/")({
   head: () => ({
@@ -37,6 +38,10 @@ function Home() {
       return data;
     },
   });
+
+  const now = useNow(10_000);
+  const drops = useDrops();
+  const liveDrops = (drops.data ?? []).filter((d) => dropState(d, now) === "live");
 
   const list = useMemo(() => {
     const s = q.trim().toLowerCase();
@@ -89,6 +94,26 @@ function Home() {
           );
         })}
       </div>
+
+      {liveDrops.length > 0 && (
+        <Link
+          to="/drops"
+          className="mx-5 mt-5 flex items-center gap-3 rounded-2xl bg-warm p-4 text-primary-foreground shadow-pop active:scale-[0.98]"
+        >
+          <span className="grid size-11 place-items-center rounded-xl bg-primary-foreground/20">
+            <Flame className="size-6" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="font-extrabold">
+              {liveDrops.length} {liveDrops.length === 1 ? "drop" : "drops"} live now
+            </p>
+            <p className="truncate text-sm opacity-90">
+              {liveDrops[0]?.title} at {liveDrops[0]?.restaurants?.name}
+            </p>
+          </div>
+          <ChevronRight className="size-5" />
+        </Link>
+      )}
 
       <section className="mt-6 px-5">
         <div className="mb-3 flex items-baseline justify-between">

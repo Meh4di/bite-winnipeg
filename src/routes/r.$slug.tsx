@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Clock, Heart, MapPin, Phone } from "lucide-react";
+import { ArrowLeft, Clock, Flame, Heart, Lock, MapPin, Megaphone, Phone } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -11,6 +11,8 @@ import { useCart } from "@/lib/cart";
 import { Button } from "@/components/ui/button";
 import { Quantity } from "@/components/bite/Quantity";
 import { TabBar } from "@/components/bite/TabBar";
+import { clockTime, countdown, dropState, useDrops, useNow, usePromotions } from "@/lib/live";
+import { levelName } from "@/lib/passport";
 
 export const Route = createFileRoute("/r/$slug")({
   head: () => ({
@@ -37,7 +39,7 @@ function RestaurantPage() {
   }, [slug, qc]);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["restaurant", slug],
+    queryKey: ["restaurant", slug, user?.id ?? "anon"],
     queryFn: async () => {
       const { data: r, error } = await supabase.from("restaurants").select("*").eq("slug", slug).maybeSingle();
       if (error) throw error;
@@ -51,6 +53,19 @@ function RestaurantPage() {
   });
 
   const rid = data?.r.id;
+  const now = useNow(1000);
+  const drops = useDrops(rid);
+  const promos = usePromotions(rid);
+  const teaser = useQuery({
+    queryKey: ["secret-teaser", rid, user?.id ?? "anon"],
+    enabled: !!rid,
+    queryFn: async () => {
+      if (!rid) return null;
+      const { data, error } = await supabase.rpc("secret_menu_teaser", { p_restaurant_id: rid });
+      if (error) throw error;
+      return data?.[0] ?? null;
+    },
+  });
   const following = useQuery({
     queryKey: ["following", user?.id, rid],
     enabled: !!user && !!rid,
@@ -199,7 +214,67 @@ function RestaurantPage() {
           </details>
         </div>
 
+        {(() => {
+          const happening = (drops.data ?? []).filter((d) => ["live", "upcoming"].includes(dropState(d, now)));
+          const deals = promos.data ?? [];
+          if (!happening.length && !deals.length) return null;
+          return (
+            <section className="mt-8">
+              <h2 className="text-2xl font-extrabold">Happening now</h2>
+              <div className="mt-3 space-y-2">
+                {happening.map((d) => {
+                  const live = dropState(d, now) === "live";
+                  return (
+                    <Link key={d.id} to="/drops" className="flex items-center gap-3 rounded-2xl bg-primary-soft p-3 active:scale-[0.98]">
+                      <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground">
+                        <Flame className="size-5" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-bold">{d.title}</p>
+                        <p className="text-sm text-primary">
+                          {live
+                            ? `${d.kind === "leftover" ? "Last call" : "Live drop"} · ${d.quantity_left} left${d.ends_at ? ` · ${countdown(new Date(d.ends_at).getTime() - now)}` : ""}`
+                            : `Drops ${clockTime(d.starts_at)}`}
+                        </p>
+                      </div>
+                      <span className="font-bold text-primary">{formatPrice(d.price_cents)}</span>
+                    </Link>
+                  );
+                })}
+                {deals.map((p) => (
+                  <Link key={p.id} to="/drops" className="flex items-center gap-3 rounded-2xl bg-card p-3 shadow-card active:scale-[0.98]">
+                    <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary">
+                      <Megaphone className="size-5" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-bold">{p.title}</p>
+                      {p.promo_code && <p className="font-mono text-sm font-bold text-primary">{p.promo_code}</p>}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          );
+        })()}
+
         <h2 className="mt-8 text-2xl font-extrabold">Menu</h2>
+        {teaser.data && teaser.data.locked_count > 0 && (
+          <Link
+            to="/passport"
+            className="mt-3 flex items-center gap-3 rounded-2xl border-2 border-dashed border-primary/40 bg-primary-soft/60 p-4 active:scale-[0.98]"
+          >
+            <span className="text-3xl">🤫</span>
+            <div className="flex-1">
+              <p className="font-bold">
+                {teaser.data.locked_count} secret {teaser.data.locked_count === 1 ? "item" : "items"} here
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {user ? `Reach ${levelName(teaser.data.next_level)} in your Passport to unlock` : "Sign in and collect stamps to unlock"}
+              </p>
+            </div>
+            <Lock className="size-5 text-primary" />
+          </Link>
+        )}
         {!r.accepting_orders && <p className="mt-3 rounded-xl bg-secondary p-4 font-semibold text-muted-foreground">Not taking orders right now</p>}
         {groups.length === 0 && <p className="mt-2 text-muted-foreground">Menu coming soon.</p>}
         {groups.map((g) => (
@@ -212,6 +287,11 @@ function RestaurantPage() {
                   className={`flex gap-3 rounded-2xl bg-card p-3 shadow-card ${i.is_available ? "" : "opacity-50"}`}
                 >
                   <div className="min-w-0 flex-1 py-1">
+                    {i.is_secret && (
+                      <span className="mb-1 inline-flex items-center gap-1 rounded-full bg-foreground px-2 py-0.5 text-[11px] font-bold text-background">
+                        🤫 Secret menu{i.required_level > 0 ? ` · ${levelName(i.required_level)}+` : ""}
+                      </span>
+                    )}
                     <p className="font-semibold leading-snug">{i.name}</p>
                     {i.description && (
                       <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{i.description}</p>
@@ -220,7 +300,7 @@ function RestaurantPage() {
                       {formatPrice(i.price_cents)}
                       {!i.is_available && <span className="ml-2 text-xs text-muted-foreground">Sold out</span>}
                     </p>
-                    {i.is_available && r.accepting_orders && !i.is_secret && (
+                    {i.is_available && r.accepting_orders && (
                       <div className="mt-3">
                         {cart.cart?.restaurant.id === r.id && cart.cart.items.some(item => item.id === i.id) ? (
                           <Quantity name={i.name} quantity={cart.cart.items.find(item => item.id === i.id)?.quantity ?? 0} onChange={delta => cart.change(i.id, delta)} />
