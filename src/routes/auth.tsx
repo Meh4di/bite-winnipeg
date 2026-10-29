@@ -6,17 +6,23 @@ import { fetchRole, useAuth, type BiteRole } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (search: Record<string, unknown>): { redirect?: string } => {
+  validateSearch: (search: Record<string, unknown>): { redirect?: string; as?: "owner" } => {
     const r = search["redirect"];
     const ok =
       typeof r === "string" &&
-      /^\/(checkout|drops|passport|decide(\/[A-Za-z0-9]{5})?|stamp\/[a-z0-9-]+\/[A-Za-z0-9]{6}|orders\/[a-f0-9-]+)$/.test(r);
-    return ok ? { redirect: r } : {};
+      /^\/(checkout|drops|passport|decide(\/[A-Za-z0-9]{5})?|stamp\/[a-z0-9-]+\/[A-Za-z0-9]{6}|orders\/[a-f0-9-]+)$/.test(
+        r,
+      );
+    const as = search["as"] === "owner" ? ("owner" as const) : undefined;
+    return { ...(ok ? { redirect: r } : {}), ...(as ? { as } : {}) };
   },
   head: () => ({
     meta: [
       { title: "Sign in — Bite" },
-      { name: "description", content: "Sign in or create your Bite account as a foodie or restaurant owner." },
+      {
+        name: "description",
+        content: "Sign in or create your Bite account as a foodie or restaurant owner.",
+      },
       { property: "og:title", content: "Sign in — Bite" },
       { property: "og:description", content: "Join Bite, Winnipeg's food app." },
     ],
@@ -28,9 +34,9 @@ const field =
   "h-13 w-full rounded-2xl border bg-card px-4 text-base outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15";
 
 function AuthPage() {
-  const { redirect } = Route.useSearch();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [role, setRole] = useState<BiteRole>("customer");
+  const { redirect, as } = Route.useSearch();
+  const [mode, setMode] = useState<"signin" | "signup">(as === "owner" ? "signup" : "signin");
+  const [role, setRole] = useState<BiteRole>(as === "owner" ? "restaurant_owner" : "customer");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -41,7 +47,10 @@ function AuthPage() {
 
   useEffect(() => {
     if (!loading && user && currentRole)
-      navigate({ to: redirect ?? (currentRole === "restaurant_owner" ? "/owner" : "/"), replace: true });
+      navigate({
+        to: redirect ?? (currentRole === "restaurant_owner" ? "/owner" : "/"),
+        replace: true,
+      });
   }, [loading, user, currentRole, navigate, redirect]);
 
   const submit = async (e: React.FormEvent) => {
@@ -77,7 +86,14 @@ function AuthPage() {
         <p className="mt-2 text-muted-foreground">
           We sent a confirmation link to <b>{email}</b>. Tap it to finish creating your account.
         </p>
-        <Button variant="ghost" className="mt-6" onClick={() => { setSent(false); setMode("signin"); }}>
+        <Button
+          variant="ghost"
+          className="mt-6"
+          onClick={() => {
+            setSent(false);
+            setMode("signin");
+          }}
+        >
           Back to sign in
         </Button>
       </div>
@@ -121,10 +137,24 @@ function AuthPage() {
                 </button>
               ))}
             </div>
-            <input className={field} placeholder="Your name" required value={name} onChange={(e) => setName(e.target.value)} />
+            <input
+              className={field}
+              placeholder="Your name"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </>
         )}
-        <input className={field} type="email" placeholder="Email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+        <input
+          className={field}
+          type="email"
+          placeholder="Email"
+          autoComplete="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
         <input
           className={field}
           type="password"

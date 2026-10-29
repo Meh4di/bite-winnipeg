@@ -1108,6 +1108,17 @@ export type Database = {
           twins: number
         }[]
       }
+      trending_spots: {
+        Args: { p_days?: number }
+        Returns: {
+          follows: number
+          orders: number
+          restaurant_id: string
+          reviews: number
+          score: number
+          stamps: number
+        }[]
+      }
     }
     Enums: {
       app_role: "customer" | "restaurant_owner" | "admin"

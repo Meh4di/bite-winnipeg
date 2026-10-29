@@ -176,6 +176,12 @@ function Settings() {
         >
           <Footprints className="size-5 text-primary" /> Food crawls
         </Link>
+        <Link
+          to="/for-restaurants"
+          className="col-span-2 flex items-center gap-2 rounded-2xl bg-secondary p-4 font-semibold"
+        >
+          <span className="text-lg">👩‍🍳</span> Own a restaurant? List it free
+        </Link>
       </div>
       <h2 className="pt-3 text-xl font-bold">Appearance</h2>
       <div

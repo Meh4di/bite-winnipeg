@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TabsRouteImport } from './routes/_tabs'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as ForRestaurantsRouteImport } from './routes/for-restaurants'
 import { Route as OwnerRouteImport } from './routes/owner'
 import { Route as TabsIndexRouteImport } from './routes/_tabs.index'
 import { Route as TabsBestRouteImport } from './routes/_tabs.best'
@@ -45,6 +46,11 @@ const AuthRoute = AuthRouteImport.update({
 const CheckoutRoute = CheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForRestaurantsRoute = ForRestaurantsRouteImport.update({
+  id: '/for-restaurants',
+  path: '/for-restaurants',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OwnerRoute = OwnerRouteImport.update({
@@ -152,6 +158,7 @@ export interface FileRoutesByFullPath {
   '/': typeof TabsIndexRoute
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
+  '/for-restaurants': typeof ForRestaurantsRoute
   '/owner': typeof OwnerRouteWithChildren
   '/best': typeof TabsBestRoute
   '/crawls': typeof TabsCrawlsRoute
@@ -175,6 +182,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
+  '/for-restaurants': typeof ForRestaurantsRoute
   '/best': typeof TabsBestRoute
   '/crawls': typeof TabsCrawlsRoute
   '/decide': typeof TabsDecideRoute
@@ -200,6 +208,7 @@ export interface FileRoutesById {
   '/_tabs': typeof TabsRouteWithChildren
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
+  '/for-restaurants': typeof ForRestaurantsRoute
   '/owner': typeof OwnerRouteWithChildren
   '/_tabs/best': typeof TabsBestRoute
   '/_tabs/crawls': typeof TabsCrawlsRoute
@@ -227,6 +236,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/checkout'
+    | '/for-restaurants'
     | '/owner'
     | '/best'
     | '/crawls'
@@ -250,6 +260,7 @@ export interface FileRouteTypes {
   to:
     | '/auth'
     | '/checkout'
+    | '/for-restaurants'
     | '/best'
     | '/crawls'
     | '/decide'
@@ -274,6 +285,7 @@ export interface FileRouteTypes {
     | '/_tabs'
     | '/auth'
     | '/checkout'
+    | '/for-restaurants'
     | '/owner'
     | '/_tabs/best'
     | '/_tabs/crawls'
@@ -300,6 +312,7 @@ export interface RootRouteChildren {
   TabsRoute: typeof TabsRouteWithChildren
   AuthRoute: typeof AuthRoute
   CheckoutRoute: typeof CheckoutRoute
+  ForRestaurantsRoute: typeof ForRestaurantsRoute
   OwnerRoute: typeof OwnerRouteWithChildren
   OrdersIdRoute: typeof OrdersIdRoute
   RSlugRoute: typeof RSlugRoute
@@ -327,6 +340,13 @@ declare module '@tanstack/react-router' {
       path: '/checkout'
       fullPath: '/checkout'
       preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/for-restaurants': {
+      id: '/for-restaurants'
+      path: '/for-restaurants'
+      fullPath: '/for-restaurants'
+      preLoaderRoute: typeof ForRestaurantsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/owner': {
@@ -524,6 +544,7 @@ const rootRouteChildren: RootRouteChildren = {
   TabsRoute: TabsRouteWithChildren,
   AuthRoute: AuthRoute,
   CheckoutRoute: CheckoutRoute,
+  ForRestaurantsRoute: ForRestaurantsRoute,
   OwnerRoute: OwnerRouteWithChildren,
   OrdersIdRoute: OrdersIdRoute,
   RSlugRoute: RSlugRoute,

@@ -5,7 +5,8 @@ import { ChevronRight, MapPin, Search, Star, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { CATEGORIES, emojiFor, formatPrice } from "@/lib/bite";
 import { RestaurantCard, type CardExtras } from "@/components/bite/RestaurantCard";
-import { VortexBanner } from "@/components/bite/Vortex";
+import { VortexBanner, useVortexDeals } from "@/components/bite/Vortex";
+import { HomeHero, type HeroSlide } from "@/components/bite/HomeHero";
 import { useAuth } from "@/lib/auth";
 import { clockTime, countdown, dropState, useDrops, useNow } from "@/lib/live";
 import { liveBusy, useHouseSpecials, useRatings } from "@/lib/community";
@@ -44,6 +45,16 @@ function Home() {
   const specials = useHouseSpecials();
   const board = useDishLeaderboard();
   const crawls = useCrawls();
+  const vortexDeals = useVortexDeals();
+  const trending = useQuery({
+    queryKey: ["trending"],
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("trending_spots", { p_days: 7 });
+      if (error) throw error;
+      return (data ?? []).filter((t) => t.score > 0);
+    },
+  });
 
   const { data, isLoading } = useQuery({
     queryKey: ["restaurants", "home"],
@@ -108,6 +119,74 @@ function Home() {
     .map((t) => ({ r: byId.get(t.restaurant_id), n: t.twins }))
     .filter((t) => t.r);
   const specialSpots = (data ?? []).filter((r) => specials.data?.has(r.id));
+  const trendingSpots = (trending.data ?? [])
+    .map((t) => ({ t, r: byId.get(t.restaurant_id) }))
+    .filter((x) => x.r);
+
+  const slides: HeroSlide[] = [];
+  if (vortexDeals.vortex.active)
+    slides.push({
+      key: "vortex",
+      eyebrow: "🥶 Polar Vortex mode",
+      title: `Feels like ${vortexDeals.vortex.feelsLike}°C. Warm-up deals unlocked.`,
+      sub: `${vortexDeals.unlocked.length} deals live right now`,
+      image: null,
+      emoji: "❄️",
+      tone: "blue",
+      to: "/drops",
+      search: { tab: "vortex" },
+    });
+  const topDrop = liveDrops[0];
+  if (topDrop)
+    slides.push({
+      key: "drop",
+      eyebrow: "🔥 Live drop",
+      title: topDrop.title,
+      sub: `${topDrop.restaurants?.name} · only ${topDrop.quantity_left} left · ${formatPrice(topDrop.price_cents)}`,
+      image: topDrop.photo_url,
+      emoji: "🔥",
+      tone: "red",
+      to: "/drops",
+    });
+  const topRescue = rescue[0];
+  if (topRescue)
+    slides.push({
+      key: "rescue",
+      eyebrow: "♻️ Save food tonight",
+      title: `${topRescue.original_price_cents ? Math.round((1 - topRescue.price_cents / topRescue.original_price_cents) * 100) + "% off " : ""}${topRescue.title.toLowerCase()}`,
+      sub: `${topRescue.restaurants?.name} · rescue it before close`,
+      image: topRescue.photo_url,
+      emoji: "♻️",
+      tone: "green",
+      to: "/drops",
+      search: { tab: "leftover" },
+    });
+  const topTrend = trendingSpots[0]?.r;
+  if (topTrend)
+    slides.push({
+      key: "trend",
+      eyebrow: "📈 #1 trending this week",
+      title: topTrend.name,
+      sub: `${topTrend.category} · ${topTrend.neighbourhood}`,
+      image: topTrend.cover_url,
+      emoji: "📈",
+      tone: "dark",
+      to: "/map",
+    });
+  const topCrawl = crawls.data?.[0];
+  if (topCrawl)
+    slides.push({
+      key: "crawl",
+      eyebrow: "🗺️ Food crawl",
+      title: topCrawl.title,
+      sub: topCrawl.reward
+        ? `Finish it: ${topCrawl.reward.toLowerCase()}`
+        : "Hit every stop for a reward",
+      image: topCrawl.cover_url,
+      emoji: "🗺️",
+      tone: "dark",
+      to: "/crawls",
+    });
 
   return (
     <div className="animate-screen pb-4">
@@ -180,8 +259,63 @@ function Home() {
 
       {!searching && (
         <>
-          <div className="mt-5 px-5">
-            <VortexBanner />
+          <HomeHero slides={slides} />
+
+          {trendingSpots.length > 0 && (
+            <Rail title="📈 Trending this week" sub="Where Winnipeg is eating right now">
+              {trendingSpots.map(({ r, t }, n) =>
+                r ? (
+                  <Link
+                    key={r.id}
+                    to="/r/$slug"
+                    params={{ slug: r.slug }}
+                    className="relative flex w-[200px] shrink-0 items-end active:scale-[0.98]"
+                  >
+                    <span
+                      className="absolute -left-1 bottom-6 z-10 select-none font-extrabold leading-none text-background"
+                      style={{
+                        fontSize: "112px",
+                        WebkitTextStroke: "3px var(--foreground)",
+                        letterSpacing: "-0.08em",
+                      }}
+                      aria-hidden
+                    >
+                      {n + 1}
+                    </span>
+                    <div className="ml-12 w-full">
+                      <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-muted shadow-card">
+                        {r.cover_url ? (
+                          <img
+                            src={r.cover_url}
+                            alt=""
+                            loading="lazy"
+                            className="size-full object-cover"
+                          />
+                        ) : (
+                          <div className="grid size-full place-items-center text-5xl">
+                            {emojiFor(r.category)}
+                          </div>
+                        )}
+                        {n < 3 && (
+                          <span className="absolute right-2 top-2 rounded-full bg-primary px-2 py-0.5 text-[11px] font-extrabold text-primary-foreground">
+                            🔥 Hot
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-1.5 truncate text-sm font-bold">{r.name}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {t.stamps + t.orders} visits · {t.reviews} new{" "}
+                        {t.reviews === 1 ? "review" : "reviews"}
+                      </p>
+                    </div>
+                  </Link>
+                ) : null,
+              )}
+            </Rail>
+          )}
+
+          <div className="mt-6 px-5">
+            <VortexBanner compact />
           </div>
 
           {liveDrops.length > 0 && (
@@ -344,7 +478,8 @@ function Home() {
                       {c.emoji} {c.title}
                     </p>
                     <p className="text-xs opacity-90">
-                      {c.crawl_stops.length} {c.crawl_stops.length === 1 ? "stop" : "stops"}{c.reward ? ` · 🎁 ${c.reward}` : ""}
+                      {c.crawl_stops.length} {c.crawl_stops.length === 1 ? "stop" : "stops"}
+                      {c.reward ? ` · 🎁 ${c.reward}` : ""}
                     </p>
                   </div>
                 </Link>
@@ -389,6 +524,27 @@ function Home() {
           )}
 
           <div className="mt-7 px-5">
+            <Link
+              to="/for-restaurants"
+              className="relative block overflow-hidden rounded-2xl bg-foreground p-5 text-background active:scale-[0.99]"
+            >
+              <span className="absolute -right-3 -top-4 text-8xl opacity-20">👩‍🍳</span>
+              <p className="text-xs font-extrabold uppercase tracking-wider opacity-70">
+                For restaurants
+              </p>
+              <p className="mt-1 text-xl font-extrabold leading-tight">
+                Own a spot? Join Bite free for 3 months.
+              </p>
+              <p className="mt-1 text-sm opacity-80">
+                Pickup orders, drops and Save food deals with no fees.
+              </p>
+              <span className="mt-3 inline-flex h-10 items-center rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground">
+                See how it works
+              </span>
+            </Link>
+          </div>
+
+          <div className="mt-4 px-5">
             <Link
               to="/map"
               className="relative block overflow-hidden rounded-2xl bg-secondary p-4 active:scale-[0.99]"
