@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronRight, Eye, LockOpen, LogOut, QrCode, Store, UtensilsCrossed, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { isOpenNow } from "@/lib/bite";
+import { openState } from "@/lib/bite";
 import { OpenBadge } from "@/components/bite/RestaurantCard";
 import { useMyRestaurant } from "./owner";
 import { OwnerOrders } from "@/components/bite/OwnerOrders";
@@ -33,6 +33,24 @@ function Dashboard() {
     },
   });
 
+  const claim = useQuery({
+    queryKey: ["my-pending-claim"],
+    enabled: !isLoading && !r,
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return null;
+      const { data } = await supabase
+        .from("business_verifications")
+        .select("id, status, restaurants(name, slug)")
+        .eq("submitted_by", u.user.id)
+        .eq("kind", "claim")
+        .eq("status", "pending")
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+  });
+
   const signOut = async () => {
     await qc.cancelQueries();
     qc.clear();
@@ -41,6 +59,23 @@ function Dashboard() {
   };
 
   if (isLoading) return <div className="m-5 h-40 animate-pulse rounded-3xl bg-muted" />;
+
+  if (!r && claim.data)
+    return (
+      <div className="px-6 pt-12 text-center animate-screen">
+        <p className="text-6xl">⏳</p>
+        <h1 className="mt-4 text-3xl font-extrabold">
+          Your claim for {claim.data.restaurants?.name ?? "your restaurant"} is in review
+        </h1>
+        <p className="mt-2 text-muted-foreground">
+          We'll call the restaurant's listed number to confirm it's you. Usually 1 to 2 business
+          days. As soon as you're approved, your dashboard opens up here.
+        </p>
+        <Button variant="ghost" className="mt-6" onClick={signOut}>
+          Log out
+        </Button>
+      </div>
+    );
 
   if (!r)
     return (
@@ -73,7 +108,7 @@ function Dashboard() {
         <div className="relative h-32 bg-muted">
           {r.cover_url && <img src={r.cover_url} alt="" className="size-full object-cover" />}
           <div className="absolute left-3 top-3">
-            <OpenBadge open={isOpenNow(r.hours)} />
+            <OpenBadge open={openState(r.hours)} />
           </div>
         </div>
         <div className="p-4">

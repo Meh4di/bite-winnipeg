@@ -4,7 +4,8 @@ import { ArrowLeft, Clock, Flame, Heart, Lock, MapPin, Megaphone, Phone } from "
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { DAYS, emojiFor, formatPrice, formatTime, isOpenNow, winnipegNow, type Hours } from "@/lib/bite";
+import { DAYS, displayAddress, emojiFor, formatPrice, formatTime, hasHours, openState, winnipegNow, type Hours } from "@/lib/bite";
+import { ReportListing, SampleBanner, UnclaimedCard } from "@/components/bite/Listing";
 import { OpenBadge } from "@/components/bite/RestaurantCard";
 import { useEffect } from "react";
 import { useCart } from "@/lib/cart";
@@ -141,7 +142,8 @@ function RestaurantPage() {
 
   const { r, cats, items } = data;
   const hours = (r.hours ?? {}) as Hours;
-  const open = isOpenNow(hours);
+  const open = openState(hours);
+  const unclaimed = r.verification_status === "unclaimed";
   const today = winnipegNow().day;
   const groups = [
     ...cats.map((c) => ({ id: c.id, name: c.name, items: items.filter((i) => i.category_id === c.id) })),
@@ -172,7 +174,11 @@ function RestaurantPage() {
             </div>
           )}
           <div className="pb-1">
-            <OpenBadge open={open} />
+            {unclaimed ? (
+              <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-bold">Not on Bite yet</span>
+            ) : (
+              <OpenBadge open={open} />
+            )}
           </div>
         </div>
         <h1 className="mt-4 text-3xl font-extrabold leading-tight">{r.name}</h1>
@@ -180,7 +186,7 @@ function RestaurantPage() {
           {emojiFor(r.category)} {r.category} · {r.neighbourhood}
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
-          <RatingPill avg={ratings.data?.get(r.id)?.avg ?? 0} count={ratings.data?.get(r.id)?.count ?? 0} />
+          {!unclaimed && <RatingPill avg={ratings.data?.get(r.id)?.avg ?? 0} count={ratings.data?.get(r.id)?.count ?? 0} />}
           {open && <BusyLine busy={liveBusy(r, now)} queue={queue.data?.get(r.id)} />}
         </div>
         {r.description && <p className="mt-3 text-[15px] leading-relaxed">{r.description}</p>}
@@ -195,17 +201,19 @@ function RestaurantPage() {
           <Heart className={`size-5 ${following.data ? "fill-current" : ""}`} />
           {following.data ? "Following" : "Follow"}
         </button>
+        {unclaimed && <UnclaimedCard id={r.id} name={r.name} />}
+        {r.is_sample && <SampleBanner />}
 
         <div className="mt-5 space-y-3 rounded-3xl bg-card p-4 shadow-card">
           {r.address && (
             <a
-              href={`https://maps.google.com/?q=${encodeURIComponent(`${r.address}, Winnipeg, MB`)}`}
+              href={`https://maps.google.com/?q=${encodeURIComponent(`${displayAddress(r.address)}, MB`)}`}
               target="_blank"
               rel="noreferrer"
               className="flex items-center gap-3 text-sm"
             >
               <MapPin className="size-5 text-primary" />
-              {r.address}, Winnipeg
+              {displayAddress(r.address)}
             </a>
           )}
           {r.phone && (
@@ -214,6 +222,11 @@ function RestaurantPage() {
               {r.phone}
             </a>
           )}
+          {!hasHours(hours) ? (
+            <p className="flex items-center gap-3 text-sm text-muted-foreground">
+              <Clock className="size-5 text-primary" /> Hours not listed yet
+            </p>
+          ) : (
           <details className="group">
             <summary className="flex cursor-pointer list-none items-center gap-3 text-sm">
               <Clock className="size-5 text-primary" />
@@ -239,6 +252,7 @@ function RestaurantPage() {
               })}
             </ul>
           </details>
+          )}
         </div>
 
         {(() => {
@@ -284,7 +298,7 @@ function RestaurantPage() {
           );
         })()}
 
-        <h2 className="mt-8 text-2xl font-extrabold">Menu</h2>
+        {!unclaimed && <h2 className="mt-8 text-2xl font-extrabold">Menu</h2>}
         {teaser.data && teaser.data.locked_count > 0 && (
           <Link
             to="/passport"
@@ -302,7 +316,7 @@ function RestaurantPage() {
             <Lock className="size-5 text-primary" />
           </Link>
         )}
-        {!r.accepting_orders && <p className="mt-3 rounded-xl bg-secondary p-4 font-semibold text-muted-foreground">Not taking orders right now</p>}
+        {!r.accepting_orders && !unclaimed && <p className="mt-3 rounded-xl bg-secondary p-4 font-semibold text-muted-foreground">Not taking orders right now</p>}
         {(() => {
           const special = items.find((i) => i.is_house_special && i.is_available);
           if (!special) return null;
@@ -336,7 +350,7 @@ function RestaurantPage() {
             </div>
           );
         })()}
-        {groups.length === 0 && <p className="mt-2 text-muted-foreground">Menu coming soon.</p>}
+        {groups.length === 0 && !unclaimed && <p className="mt-2 text-muted-foreground">Menu coming soon.</p>}
         {groups.map((g) => (
           <section key={g.id} className="mt-5">
             <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-muted-foreground">{g.name}</h3>
@@ -396,7 +410,8 @@ function RestaurantPage() {
       </div>
       <div className="px-5">
         {r.pay_it_forward && <PayForwardCard restaurantId={r.id} slug={r.slug} name={r.name} />}
-        <ReviewsSection restaurantId={r.id} restaurantName={r.name} isOwner={!!user && r.owner_id === user.id} />
+        {!unclaimed && <ReviewsSection restaurantId={r.id} restaurantName={r.name} isOwner={!!user && r.owner_id === user.id} />}
+        {!r.is_sample && <ReportListing restaurantId={r.id} />}
       </div>
       {cart.count > 0 && <div className="fixed inset-x-0 bottom-[calc(4rem+max(env(safe-area-inset-bottom),0.5rem))] z-30 mx-auto max-w-[430px] bg-background/95 p-4 backdrop-blur"><Button asChild size="xl" className="w-full"><Link to="/checkout">View cart · {cart.count} {cart.count === 1 ? "item" : "items"} · {formatPrice(cart.total)}</Link></Button></div>}
       <TabBar />

@@ -120,6 +120,7 @@ export type Database = {
           created_at: string
           doc_paths: string[]
           id: string
+          kind: string
           legal_name: string
           permit_number: string | null
           restaurant_id: string
@@ -139,6 +140,7 @@ export type Database = {
           created_at?: string
           doc_paths?: string[]
           id?: string
+          kind?: string
           legal_name: string
           permit_number?: string | null
           restaurant_id: string
@@ -158,6 +160,7 @@ export type Database = {
           created_at?: string
           doc_paths?: string[]
           id?: string
+          kind?: string
           legal_name?: string
           permit_number?: string | null
           restaurant_id?: string
@@ -538,6 +541,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "forward_meals_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      listing_reports: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          reason: string
+          reporter_id: string
+          resolved: boolean
+          restaurant_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          reason: string
+          reporter_id?: string
+          resolved?: boolean
+          restaurant_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          reason?: string
+          reporter_id?: string
+          resolved?: boolean
+          restaurant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_reports_restaurant_id_fkey"
             columns: ["restaurant_id"]
             isOneToOne: false
             referencedRelation: "restaurants"
@@ -950,6 +991,7 @@ export type Database = {
           hours: Json
           id: string
           is_active: boolean
+          is_sample: boolean
           lat: number | null
           lng: number | null
           logo_url: string | null
@@ -976,6 +1018,7 @@ export type Database = {
           hours?: Json
           id?: string
           is_active?: boolean
+          is_sample?: boolean
           lat?: number | null
           lng?: number | null
           logo_url?: string | null
@@ -1002,6 +1045,7 @@ export type Database = {
           hours?: Json
           id?: string
           is_active?: boolean
+          is_sample?: boolean
           lat?: number | null
           lng?: number | null
           logo_url?: string | null
@@ -1413,6 +1457,21 @@ export type Database = {
       }
     }
     Functions: {
+      admin_listing_reports: {
+        Args: never
+        Returns: {
+          closed_reports: number
+          is_active: boolean
+          last_at: string
+          notes: string[]
+          reports: number
+          restaurant_id: string
+          restaurant_name: string
+          restaurant_slug: string
+          verification_status: string
+        }[]
+      }
+      admin_resolve_listing: { Args: { p_hide: boolean; p_restaurant_id: string }; Returns: undefined }
       are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
       blocked_between: { Args: { _a: string; _b: string }; Returns: boolean }
       buy_forward: {
@@ -1623,6 +1682,7 @@ export type Database = {
         Args: never
         Returns: {
           admin_note: string | null
+          kind: string
           business_email: string | null
           business_number: string | null
           business_phone: string

@@ -151,6 +151,10 @@ function ForRestaurants() {
           Bite is Winnipeg's food app for pickup orders, hype drops and rescuing end-of-day food.
         </p>
         <div className="mt-6">{cta}</div>
+        <p className="mt-3 text-center text-sm opacity-80">
+          Your spot might already be listed. Search for it on Home, open it and tap{" "}
+          <b>Claim it</b>.
+        </p>
       </section>
 
       <section className="px-5 pt-8">

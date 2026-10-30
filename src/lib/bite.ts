@@ -8,6 +8,9 @@ export const CATEGORIES = [
   { name: "Asian", emoji: "🍜" },
   { name: "Brunch", emoji: "🥞" },
   { name: "Dessert", emoji: "🍰" },
+  { name: "Burgers", emoji: "🍔" },
+  { name: "Bistro", emoji: "🍷" },
+  { name: "World", emoji: "🌍" },
 ] as const;
 
 export const NEIGHBOURHOODS = [
@@ -21,6 +24,12 @@ export const NEIGHBOURHOODS = [
   "Wolseley",
   "St. Vital",
   "Transcona",
+  "West Broadway",
+  "Fort Rouge",
+  "River Heights",
+  "North End",
+  "St. James",
+  "Elmwood",
 ];
 
 export const DAYS = [
@@ -53,6 +62,22 @@ export function winnipegNow(date = new Date()) {
   return { day: get("weekday").toLowerCase().slice(0, 3), time: `${get("hour")}:${get("minute")}` };
 }
 
+/** True when the spot has told us its hours (unclaimed listings haven't). */
+export function hasHours(hours: unknown): boolean {
+  return Object.values((hours ?? {}) as Hours).some((d) => d && (d.closed || (d.open && d.close)));
+}
+
+/** Open/closed, or null when we don't know the hours (show nothing rather than "Closed"). */
+export function openState(hours: unknown, date = new Date()): boolean | null {
+  return hasHours(hours) ? isOpenNow(hours, date) : null;
+}
+
+/** "123 Main St, Winnipeg" whether or not the stored address already ends with the city. */
+export function displayAddress(address: string) {
+  const a = address.replace(/,\s*Winnipeg(,\s*MB)?\s*$/i, "");
+  return `${a}, Winnipeg`;
+}
+
 export function isOpenNow(hours: unknown, date = new Date()): boolean {
   const h = (hours ?? {}) as Hours;
   const { day, time } = winnipegNow(date);
@@ -77,13 +102,16 @@ export const slugify = (s: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 
-export type ImageBucket = "restaurant-logos" | "restaurant-covers" | "menu-photos" | "review-photos";
+export type ImageBucket =
+  "restaurant-logos" | "restaurant-covers" | "menu-photos" | "review-photos";
 
 /** Uploads into the owner's folder and returns a long-lived signed URL (buckets are private). */
 export async function uploadImage(bucket: ImageBucket, userId: string, file: File) {
   const ext = file.name.split(".").pop() || "jpg";
   const path = `${userId}/${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage.from(bucket).upload(path, file, { contentType: file.type });
+  const { error } = await supabase.storage
+    .from(bucket)
+    .upload(path, file, { contentType: file.type });
   if (error) throw error;
   const { data, error: e2 } = await supabase.storage
     .from(bucket)

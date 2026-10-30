@@ -42,3 +42,9 @@
 - `menu_items.is_small_plate` powers the Small plates filter. `/eats` (Under $15 / Under $10 / Small plates) uses `useValueItems` in `src/lib/eats.ts`.
 - Unlock deals (`unlock_deals`, `unlock_pledges`): joining is free and only via `join_unlock`/`leave_unlock`; the deal is on when pledges ≥ goal. You can't leave once it's unlocked. Price/goal/times can't be edited after posting (column grants). Customers pay at the counter with the code from `unlock_code`; owners mark pickup with `redeem_unlock` and see `unlock_pledge_list`. Pages: `/unlock/$id`, Drops > Unlock, Home rail, `/owner/unlock`.
 - DEMO DATA: unlock deals `22222222-bbbb-*` and their pledges/activity.
+
+## Real listings + claiming (migration 0010)
+- 78 real Winnipeg spots are `verification_status = 'unclaimed'`: public facts only (name, category, neighbourhood, address), no owner, no menu/deals/orders, no coordinates (they don't show on the map until claimed). Checked against current public listings in Oct 2026; customers can report closures (`listing_reports`), admins hide them from /admin.
+- Owners claim at `/claim/$id` (same `submit_verification` RPC, `kind = 'claim'`; grants the restaurant_owner role). Approval sets `owner_id` to the claimer and verifies; a rejected claim leaves the listing unclaimed.
+- `restaurants.is_sample` marks the 6 made-up demo spots (shown with a "Sample" badge). Delete them before launch.
+- Unknown hours: use `openState()` (null = don't show Open/Closed) and `displayAddress()` from `src/lib/bite.ts`.

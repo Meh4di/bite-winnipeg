@@ -5,7 +5,7 @@ import L from "leaflet";
 import { CircleMarker, MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
 import { Flame, LocateFixed, Navigation, X } from "lucide-react";
 import { toast } from "sonner";
-import { emojiFor, formatPrice, isOpenNow } from "@/lib/bite";
+import { emojiFor, formatPrice, isOpenNow, openState } from "@/lib/bite";
 import { BUSY, liveBusy, type BusyLevel } from "@/lib/community";
 import { BusyLine, RatingPill } from "@/components/bite/Busy";
 import { OpenBadge } from "@/components/bite/RestaurantCard";
@@ -226,7 +226,7 @@ export default function MapView({
                 {emojiFor(selected.category)} {selected.category} · {selected.neighbourhood}
               </p>
               <div className="mt-1 flex flex-wrap items-center gap-2">
-                <OpenBadge open={isOpenNow(selected.hours)} />
+                <OpenBadge open={openState(selected.hours)} />
                 <RatingPill
                   avg={extras.ratings.get(selected.id)?.avg ?? 0}
                   count={extras.ratings.get(selected.id)?.count ?? 0}

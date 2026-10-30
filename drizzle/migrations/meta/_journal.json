@@ -71,6 +71,13 @@
       "when": 1793320000000,
       "tag": "0009_honest_unlock",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793322000000,
+      "tag": "0010_unclaimed_listings",
+      "breakpoints": true
     }
   ]
 }

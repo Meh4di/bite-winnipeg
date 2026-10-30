@@ -86,7 +86,78 @@ function Admin() {
           />
         ))}
       </div>
+      <ListingReports />
     </div>
+  );
+}
+
+function ListingReports() {
+  const qc = useQueryClient();
+  const reports = useQuery({
+    queryKey: ["listing-reports"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_listing_reports");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const resolve = async (id: string, hide: boolean) => {
+    const { error } = await supabase.rpc("admin_resolve_listing", {
+      p_restaurant_id: id,
+      p_hide: hide,
+    });
+    if (error) return void toast.error(error.message);
+    toast.success(hide ? "Listing hidden" : "Marked as fine");
+    qc.invalidateQueries({ queryKey: ["listing-reports"] });
+  };
+  return (
+    <section className="mt-10">
+      <h2 className="text-2xl font-extrabold">Listing reports</h2>
+      <p className="text-sm text-muted-foreground">
+        People telling us a spot closed or its details are wrong.
+      </p>
+      <div className="mt-3 space-y-3">
+        {reports.data?.length === 0 && (
+          <p className="rounded-3xl bg-card p-5 text-center text-sm text-muted-foreground shadow-card">
+            No reports. 👍
+          </p>
+        )}
+        {reports.data?.map((r) => (
+          <article key={r.restaurant_id} className="rounded-3xl bg-card p-4 shadow-card">
+            <div className="flex items-start justify-between gap-2">
+              <Link to="/r/$slug" params={{ slug: r.restaurant_slug }} className="font-extrabold">
+                {r.restaurant_name}
+              </Link>
+              <span className="shrink-0 text-xs font-bold text-muted-foreground">
+                {r.reports} report{r.reports === 1 ? "" : "s"}
+                {r.closed_reports ? ` · ${r.closed_reports} say closed` : ""}
+              </span>
+            </div>
+            {r.notes.slice(0, 3).map((n, i) => (
+              <p key={i} className="mt-2 rounded-xl bg-secondary p-2 text-sm">
+                “{n}”
+              </p>
+            ))}
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <Button
+                variant="outline"
+                className="rounded-2xl shadow-none"
+                onClick={() => resolve(r.restaurant_id, false)}
+              >
+                It's fine
+              </Button>
+              <Button
+                variant="destructive"
+                className="rounded-2xl"
+                onClick={() => resolve(r.restaurant_id, true)}
+              >
+                Hide listing
+              </Button>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -136,7 +207,14 @@ function Application({ v, onDone }: { v: Row; onDone: () => void }) {
     <article className="rounded-3xl bg-card p-4 shadow-card">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="text-xl font-extrabold">{v.restaurant_name}</p>
+          <p className="text-xl font-extrabold">
+            {v.restaurant_name}
+            {v.kind === "claim" && (
+              <span className="ml-2 rounded-full bg-primary-soft px-2 py-0.5 align-middle text-[11px] font-bold text-primary">
+                CLAIM
+              </span>
+            )}
+          </p>
           <p className="text-sm text-muted-foreground">{v.restaurant_address ?? "No address"}</p>
         </div>
         <span

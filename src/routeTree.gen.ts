@@ -25,6 +25,7 @@ import { Route as TabsMapRouteImport } from './routes/_tabs.map'
 import { Route as TabsPassportRouteImport } from './routes/_tabs.passport'
 import { Route as TabsProfileRouteImport } from './routes/_tabs.profile'
 import { Route as TabsSocialRouteImport } from './routes/_tabs.social'
+import { Route as ClaimIdRouteImport } from './routes/claim.$id'
 import { Route as OrdersIdRouteImport } from './routes/orders.$id'
 import { Route as OwnerIndexRouteImport } from './routes/owner.index'
 import { Route as OwnerDropsRouteImport } from './routes/owner.drops'
@@ -120,6 +121,11 @@ const TabsSocialRoute = TabsSocialRouteImport.update({
   path: '/social',
   getParentRoute: () => TabsRoute,
 } as any)
+const ClaimIdRoute = ClaimIdRouteImport.update({
+  id: '/claim/$id',
+  path: '/claim/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OrdersIdRoute = OrdersIdRouteImport.update({
   id: '/orders/$id',
   path: '/orders/$id',
@@ -212,6 +218,7 @@ export interface FileRoutesByFullPath {
   '/passport': typeof TabsPassportRoute
   '/profile': typeof TabsProfileRoute
   '/social': typeof TabsSocialRoute
+  '/claim/$id': typeof ClaimIdRoute
   '/orders/$id': typeof OrdersIdRoute
   '/owner/drops': typeof OwnerDropsRoute
   '/owner/menu': typeof OwnerMenuRoute
@@ -242,6 +249,7 @@ export interface FileRoutesByTo {
   '/passport': typeof TabsPassportRoute
   '/profile': typeof TabsProfileRoute
   '/social': typeof TabsSocialRoute
+  '/claim/$id': typeof ClaimIdRoute
   '/orders/$id': typeof OrdersIdRoute
   '/owner/drops': typeof OwnerDropsRoute
   '/owner/menu': typeof OwnerMenuRoute
@@ -276,6 +284,7 @@ export interface FileRoutesById {
   '/_tabs/passport': typeof TabsPassportRoute
   '/_tabs/profile': typeof TabsProfileRoute
   '/_tabs/social': typeof TabsSocialRoute
+  '/claim/$id': typeof ClaimIdRoute
   '/orders/$id': typeof OrdersIdRoute
   '/owner/drops': typeof OwnerDropsRoute
   '/owner/menu': typeof OwnerMenuRoute
@@ -311,6 +320,7 @@ export interface FileRouteTypes {
     | '/passport'
     | '/profile'
     | '/social'
+    | '/claim/$id'
     | '/orders/$id'
     | '/owner/drops'
     | '/owner/menu'
@@ -341,6 +351,7 @@ export interface FileRouteTypes {
     | '/passport'
     | '/profile'
     | '/social'
+    | '/claim/$id'
     | '/orders/$id'
     | '/owner/drops'
     | '/owner/menu'
@@ -374,6 +385,7 @@ export interface FileRouteTypes {
     | '/_tabs/passport'
     | '/_tabs/profile'
     | '/_tabs/social'
+    | '/claim/$id'
     | '/orders/$id'
     | '/owner/drops'
     | '/owner/menu'
@@ -399,6 +411,7 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   ForRestaurantsRoute: typeof ForRestaurantsRoute
   OwnerRoute: typeof OwnerRouteWithChildren
+  ClaimIdRoute: typeof ClaimIdRoute
   OrdersIdRoute: typeof OrdersIdRoute
   RSlugRoute: typeof RSlugRoute
   StampSlugCodeRoute: typeof StampSlugCodeRoute
@@ -517,6 +530,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/social'
       preLoaderRoute: typeof TabsSocialRouteImport
       parentRoute: typeof TabsRoute
+    }
+    '/claim/$id': {
+      id: '/claim/$id'
+      path: '/claim/$id'
+      fullPath: '/claim/$id'
+      preLoaderRoute: typeof ClaimIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/orders/$id': {
       id: '/orders/$id'
@@ -693,6 +713,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   ForRestaurantsRoute: ForRestaurantsRoute,
   OwnerRoute: OwnerRouteWithChildren,
+  ClaimIdRoute: ClaimIdRoute,
   OrdersIdRoute: OrdersIdRoute,
   RSlugRoute: RSlugRoute,
   StampSlugCodeRoute: StampSlugCodeRoute,

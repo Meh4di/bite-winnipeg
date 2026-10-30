@@ -5,7 +5,7 @@ import { ArrowLeft, Heart, MapPin, Share2, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { emojiFor, isOpenNow } from "@/lib/bite";
+import { emojiFor, openState } from "@/lib/bite";
 import { Button } from "@/components/ui/button";
 import { OpenBadge } from "@/components/bite/RestaurantCard";
 import { useRestaurants } from "./_tabs.decide";
@@ -360,7 +360,7 @@ function SwipeCard({ r, onVote }: { r: SwipeRestaurant; onVote: (liked: boolean)
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
           <div className="absolute left-4 top-4">
-            <OpenBadge open={isOpenNow(r.hours)} />
+            <OpenBadge open={openState(r.hours)} />
           </div>
           {dx > 40 && <Stamp className="left-4 border-success text-success" text="YUM" />}
           {dx < -40 && <Stamp className="right-4 border-white text-white" text="NAH" />}

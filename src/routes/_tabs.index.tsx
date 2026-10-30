@@ -71,7 +71,7 @@ function Home() {
       const { data, error } = await supabase
         .from("restaurants")
         .select(
-          "id, slug, name, category, neighbourhood, cover_url, logo_url, hours, busy_level, wait_minutes, busy_updated_at",
+          "id, slug, name, category, neighbourhood, cover_url, logo_url, hours, busy_level, wait_minutes, busy_updated_at, verification_status, is_sample",
         )
         .eq("is_active", true)
         .order("created_at");
@@ -110,11 +110,18 @@ function Home() {
   const searching = !!q.trim() || !!cat;
   const list = useMemo(() => {
     const s = q.trim().toLowerCase();
-    return (data ?? []).filter(
-      (r) =>
-        (!cat || r.category === cat) &&
-        (!s || [r.name, r.category, r.neighbourhood].some((v) => v?.toLowerCase().includes(s))),
-    );
+    // Spots that are on Bite (deals, ordering) first, then the rest of the city.
+    return (data ?? [])
+      .filter(
+        (r) =>
+          (!cat || r.category === cat) &&
+          (!s || [r.name, r.category, r.neighbourhood].some((v) => v?.toLowerCase().includes(s))),
+      )
+      .sort(
+        (a, b) =>
+          Number(a.verification_status === "unclaimed") -
+          Number(b.verification_status === "unclaimed"),
+      );
   }, [data, q, cat]);
 
   const topDishes = useMemo(() => {

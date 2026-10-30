@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { emojiFor, isOpenNow } from "@/lib/bite";
+import { emojiFor, openState } from "@/lib/bite";
 import { BUSY, type BusyInfo } from "@/lib/community";
 
 export type RestaurantSummary = {
@@ -11,6 +11,8 @@ export type RestaurantSummary = {
   cover_url: string | null;
   logo_url: string | null;
   hours: unknown;
+  verification_status?: string;
+  is_sample?: boolean;
 };
 
 export type CardExtras = {
@@ -20,7 +22,8 @@ export type CardExtras = {
   deal?: "drop" | "rescue" | null | undefined;
 };
 
-export function OpenBadge({ open }: { open: boolean }) {
+export function OpenBadge({ open }: { open: boolean | null }) {
+  if (open === null) return null;
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold backdrop-blur ${
@@ -45,7 +48,8 @@ export function RestaurantCard({
   x?: CardExtras;
   compact?: boolean;
 }) {
-  const open = isOpenNow(r.hours);
+  const open = openState(r.hours);
+  const unclaimed = r.verification_status === "unclaimed";
   const busy = x?.busy?.level ? BUSY[x.busy.level] : null;
   return (
     <Link
@@ -61,7 +65,7 @@ export function RestaurantCard({
             src={r.cover_url}
             alt=""
             loading="lazy"
-            className={`size-full object-cover ${open ? "" : "grayscale-[40%]"}`}
+            className={`size-full object-cover ${open === false ? "grayscale-[40%]" : ""}`}
           />
         ) : (
           <div className="grid size-full place-items-center text-6xl">{emojiFor(r.category)}</div>
@@ -73,7 +77,9 @@ export function RestaurantCard({
           {x?.deal === "rescue" && (
             <Badge className="bg-success text-success-foreground">♻️ Save food</Badge>
           )}
-          {!open && <Badge className="bg-foreground/75 text-background">Closed</Badge>}
+          {open === false && <Badge className="bg-foreground/75 text-background">Closed</Badge>}
+          {unclaimed && <Badge className="bg-background/90 text-foreground">Not on Bite yet</Badge>}
+          {r.is_sample && <Badge className="bg-amber-400 text-black">Sample</Badge>}
           {open && busy && (
             <Badge className={busy.pill}>
               {busy.label}
