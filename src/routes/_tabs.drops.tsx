@@ -6,13 +6,17 @@ import { useState } from "react";
 import { DropCard } from "@/components/bite/DropCard";
 import { PromoCard } from "@/components/bite/PromoCard";
 import { dropState, useDrops, useNow, usePromotions } from "@/lib/live";
+import { unlockState, useUnlockDeals } from "@/lib/unlock";
+import { UnlockCard } from "@/components/bite/UnlockCard";
 
-type Seg = "drops" | "leftover" | "deals" | "vortex";
+type Seg = "drops" | "unlock" | "leftover" | "deals" | "vortex";
 
 export const Route = createFileRoute("/_tabs/drops")({
   validateSearch: (s: Record<string, unknown>): { tab?: Seg } => {
     const t = s["tab"];
-    return t === "drops" || t === "leftover" || t === "deals" || t === "vortex" ? { tab: t } : {};
+    return t === "drops" || t === "unlock" || t === "leftover" || t === "deals" || t === "vortex"
+      ? { tab: t }
+      : {};
   },
   head: () => ({
     meta: [
@@ -30,6 +34,7 @@ export const Route = createFileRoute("/_tabs/drops")({
 
 const SEGMENTS: { key: Seg; label: string }[] = [
   { key: "drops", label: "🔥 Drops" },
+  { key: "unlock", label: "🔓 Unlock" },
   { key: "leftover", label: "♻️ Save" },
   { key: "deals", label: "📣 Deals" },
   { key: "vortex", label: "🥶 Vortex" },
@@ -52,6 +57,13 @@ function Drops() {
     },
   });
   const deals = (promos.data ?? []).filter((p) => !p.vortex_only);
+  const unlocks = useUnlockDeals();
+  const unlockLive = (unlocks.data ?? []).filter((d) =>
+    ["open", "unlocked"].includes(unlockState(d, now)),
+  );
+  const unlockDone = (unlocks.data ?? []).filter(
+    (d) => !["open", "unlocked", "cancelled"].includes(unlockState(d, now)),
+  );
 
   const kind = seg === "leftover" ? "leftover" : "drop";
   const list = (drops.data ?? []).filter((d) => d.kind === kind);
@@ -61,12 +73,14 @@ function Drops() {
   const count = (k: string) =>
     k === "deals"
       ? deals.length
-      : k === "vortex"
-        ? vortexDeals.unlocked.length
-        : (drops.data ?? []).filter(
-            (d) =>
-              d.kind === (k === "leftover" ? "leftover" : "drop") && dropState(d, now) === "live",
-          ).length;
+      : k === "unlock"
+        ? unlockLive.length
+        : k === "vortex"
+          ? vortexDeals.unlocked.length
+          : (drops.data ?? []).filter(
+              (d) =>
+                d.kind === (k === "leftover" ? "leftover" : "drop") && dropState(d, now) === "live",
+            ).length;
 
   return (
     <div className="animate-screen px-5 pt-[max(env(safe-area-inset-top),1.25rem)]">
@@ -75,14 +89,14 @@ function Drops() {
         Limited runs, food rescue deals, promos and cold-weather specials.
       </p>
 
-      <div className="mt-4 grid grid-cols-4 gap-1 rounded-2xl bg-muted p-1" role="tablist">
+      <div className="mt-4 grid grid-cols-5 gap-1 rounded-2xl bg-muted p-1" role="tablist">
         {SEGMENTS.map((s) => (
           <button
             key={s.key}
             role="tab"
             aria-selected={seg === s.key}
             onClick={() => setSeg(s.key)}
-            className={`relative h-11 rounded-xl text-[13px] font-bold transition-all ${
+            className={`relative h-11 rounded-xl text-[12px] font-bold transition-all ${
               seg === s.key ? "bg-card text-foreground shadow-card" : "text-muted-foreground"
             }`}
           >
@@ -115,7 +129,39 @@ function Drops() {
           </div>
         )}
 
-      {seg === "vortex" ? (
+      {seg === "unlock" ? (
+        <div className="mt-5 space-y-6">
+          <div className="rounded-3xl bg-foreground p-4 text-background">
+            <p className="font-extrabold">🔓 Unlock deals</p>
+            <p className="mt-1 text-sm opacity-80">
+              Big discounts that switch on when enough people join. Joining is free, and if the goal
+              isn't reached, nobody pays.
+            </p>
+          </div>
+          {unlocks.isLoading && <div className="h-72 animate-pulse rounded-3xl bg-muted" />}
+          {unlockLive.length > 0 && (
+            <Section title="Join now">
+              {unlockLive.map((d) => (
+                <UnlockCard key={d.id} deal={d} now={now} wide />
+              ))}
+            </Section>
+          )}
+          {unlockDone.length > 0 && (
+            <Section title="Recently closed">
+              {unlockDone.map((d) => (
+                <UnlockCard key={d.id} deal={d} now={now} wide />
+              ))}
+            </Section>
+          )}
+          {!unlocks.isLoading && !unlockLive.length && !unlockDone.length && (
+            <Empty
+              emoji="🔓"
+              title="No unlock deals right now"
+              line="Restaurants post these for slow nights. Check back soon."
+            />
+          )}
+        </div>
+      ) : seg === "vortex" ? (
         <div className="mt-5">
           <VortexDealsList />
         </div>

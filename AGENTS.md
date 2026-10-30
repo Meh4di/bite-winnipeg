@@ -36,3 +36,9 @@
 - Owners apply at `/owner/verify` (`submit_verification`, private `verification-docs` bucket). Admins review at `/admin` (`verification_queue`, `review_verification`); approval starts the 3 free months.
 - Drops/promotions writes need a verified restaurant (restrictive RLS); stamps need an active restaurant. The Drops and Stamps owner tabs show a lock screen until then.
 - Admins = `user_roles.role = 'admin'` (`is_admin()`).
+
+## Honest prices + Unlock deals (migration 0009)
+- Bite's promise: menu prices include tax, no service fees, no tip screen. Owners enter tax-included prices (menu editor says so); checkout shows "Total" with that line.
+- `menu_items.is_small_plate` powers the Small plates filter. `/eats` (Under $15 / Under $10 / Small plates) uses `useValueItems` in `src/lib/eats.ts`.
+- Unlock deals (`unlock_deals`, `unlock_pledges`): joining is free and only via `join_unlock`/`leave_unlock`; the deal is on when pledges ≥ goal. You can't leave once it's unlocked. Price/goal/times can't be edited after posting (column grants). Customers pay at the counter with the code from `unlock_code`; owners mark pickup with `redeem_unlock` and see `unlock_pledge_list`. Pages: `/unlock/$id`, Drops > Unlock, Home rail, `/owner/unlock`.
+- DEMO DATA: unlock deals `22222222-bbbb-*` and their pledges/activity.

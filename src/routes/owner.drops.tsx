@@ -260,6 +260,19 @@ function OwnerDrops() {
           Bring people in on slow hours and sell what's left at close.
         </p>
       </div>
+      <Link
+        to="/owner/unlock"
+        className="flex items-center gap-3 rounded-2xl bg-foreground p-4 text-background active:scale-[0.98]"
+      >
+        <span className="text-2xl">🔓</span>
+        <span className="flex-1">
+          <span className="block font-bold">Unlock deals</span>
+          <span className="block text-xs opacity-80">
+            A discount that only switches on if enough people commit
+          </span>
+        </span>
+        <span aria-hidden>→</span>
+      </Link>
 
       <div className="grid grid-cols-2 gap-2">
         {(Object.keys(KIND_INFO) as Kind[]).map((k) => {

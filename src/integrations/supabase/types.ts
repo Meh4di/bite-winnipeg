@@ -654,6 +654,7 @@ export type Database = {
           is_available: boolean
           is_house_special: boolean
           is_secret: boolean
+          is_small_plate: boolean
           name: string
           photo_url: string | null
           price_cents: number
@@ -669,6 +670,7 @@ export type Database = {
           is_available?: boolean
           is_house_special?: boolean
           is_secret?: boolean
+          is_small_plate?: boolean
           name: string
           photo_url?: string | null
           price_cents?: number
@@ -684,6 +686,7 @@ export type Database = {
           is_available?: boolean
           is_house_special?: boolean
           is_secret?: boolean
+          is_small_plate?: boolean
           name?: string
           photo_url?: string | null
           price_cents?: number
@@ -1167,6 +1170,94 @@ export type Database = {
           },
         ]
       }
+      unlock_deals: {
+        Row: {
+          cancelled: boolean
+          created_at: string
+          deal_price_cents: number
+          description: string | null
+          ends_at: string
+          goal: number
+          id: string
+          max_spots: number
+          photo_url: string | null
+          pickup_until: string
+          regular_price_cents: number
+          restaurant_id: string
+          title: string
+        }
+        Insert: {
+          cancelled?: boolean
+          created_at?: string
+          deal_price_cents: number
+          description?: string | null
+          ends_at: string
+          goal: number
+          id?: string
+          max_spots: number
+          photo_url?: string | null
+          pickup_until: string
+          regular_price_cents: number
+          restaurant_id: string
+          title: string
+        }
+        Update: {
+          cancelled?: boolean
+          created_at?: string
+          deal_price_cents?: number
+          description?: string | null
+          ends_at?: string
+          goal?: number
+          id?: string
+          max_spots?: number
+          photo_url?: string | null
+          pickup_until?: string
+          regular_price_cents?: number
+          restaurant_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unlock_deals_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      unlock_pledges: {
+        Row: {
+          created_at: string
+          deal_id: string
+          id: string
+          redeemed_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          deal_id: string
+          id?: string
+          redeemed_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          deal_id?: string
+          id?: string
+          redeemed_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unlock_pledges_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "unlock_deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_badges: {
         Row: {
           badge_id: string
@@ -1400,7 +1491,9 @@ export type Database = {
       is_verified_restaurant: { Args: { _restaurant_id: string }; Returns: boolean }
       join_decide_session: { Args: { p_code: string }; Returns: string }
       join_meetup: { Args: { p_meetup_id: string }; Returns: undefined }
+      join_unlock: { Args: { p_deal_id: string }; Returns: number }
       leave_meetup: { Args: { p_meetup_id: string }; Returns: undefined }
+      leave_unlock: { Args: { p_deal_id: string }; Returns: undefined }
       level_for: { Args: { _stamps: number }; Returns: number }
       list_meetups: {
         Args: never
@@ -1433,6 +1526,7 @@ export type Database = {
           id: string
         }[]
       }
+      redeem_unlock: { Args: { p_pledge_id: string }; Returns: undefined }
       reply_to_review: {
         Args: { p_reply: string; p_review_id: string }
         Returns: undefined
@@ -1502,6 +1596,27 @@ export type Database = {
           reviews: number
           score: number
           stamps: number
+        }[]
+      }
+      unlock_code: { Args: { _pledge: string }; Returns: string }
+      unlock_pledge_list: {
+        Args: { p_deal_id: string }
+        Returns: {
+          code: string
+          created_at: string
+          first_name: string
+          pledge_id: string
+          redeemed_at: string | null
+        }[]
+      }
+      unlock_progress: {
+        Args: never
+        Returns: {
+          deal_id: string
+          joined: number
+          mine: boolean
+          my_code: string | null
+          redeemed: boolean
         }[]
       }
       verification_queue: {

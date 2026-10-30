@@ -355,6 +355,11 @@ function RestaurantPage() {
                     <p className="font-semibold leading-snug">
                       {i.is_house_special && <span className="mr-1">⭐</span>}
                       {i.name}
+                      {i.is_small_plate && (
+                        <span className="ml-1.5 rounded-full bg-success/15 px-1.5 py-0.5 align-middle text-[10px] font-extrabold text-success">
+                          SMALL PLATE
+                        </span>
+                      )}
                     </p>
                     {i.description && (
                       <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{i.description}</p>

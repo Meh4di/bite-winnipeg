@@ -13,7 +13,7 @@ import { Route as OwnerRoute, useMyRestaurant } from "./owner";
 
 export const Route = createFileRoute("/owner/menu")({ component: MenuManager });
 
-type Draft = { id?: string; name: string; description: string; price: string; photo_url: string | null; is_available: boolean; category_id: string | null; is_secret: boolean; required_level: number; is_house_special: boolean; dish_type: string | null };
+type Draft = { id?: string; name: string; description: string; price: string; photo_url: string | null; is_available: boolean; category_id: string | null; is_secret: boolean; required_level: number; is_house_special: boolean; dish_type: string | null; is_small_plate: boolean };
 const field = "h-12 w-full rounded-2xl border bg-background px-4 text-base outline-none focus:border-primary";
 
 function MenuManager() {
@@ -72,7 +72,7 @@ function MenuManager() {
     if (!draft) return;
     const row = {
       restaurant_id: r.id, category_id: draft.category_id, name: draft.name, description: draft.description,
-      price_cents: Math.round(parseFloat(draft.price || "0") * 100), photo_url: draft.photo_url, is_available: draft.is_available, is_secret: draft.is_secret, required_level: draft.is_secret ? draft.required_level : 0, is_house_special: draft.is_house_special && !draft.is_secret, dish_type: draft.dish_type,
+      price_cents: Math.round(parseFloat(draft.price || "0") * 100), photo_url: draft.photo_url, is_available: draft.is_available, is_secret: draft.is_secret, required_level: draft.is_secret ? draft.required_level : 0, is_house_special: draft.is_house_special && !draft.is_secret, dish_type: draft.dish_type, is_small_plate: draft.is_small_plate,
     };
     if (row.is_house_special) {
       let clear = supabase.from("menu_items").update({ is_house_special: false }).eq("restaurant_id", r.id).eq("is_house_special", true);
@@ -127,7 +127,7 @@ function MenuManager() {
                   {i.photo_url ? <img src={i.photo_url} alt="" className="size-14 rounded-xl object-cover" /> : <div className="size-14 rounded-xl bg-muted" />}
                   <button
                     className="min-w-0 flex-1 text-left"
-                    onClick={() => setDraft({ id: i.id, name: i.name, description: i.description ?? "", price: (i.price_cents / 100).toFixed(2), photo_url: i.photo_url, is_available: i.is_available, category_id: i.category_id, is_secret: i.is_secret, required_level: i.required_level, is_house_special: i.is_house_special, dish_type: i.dish_type })}
+                    onClick={() => setDraft({ id: i.id, name: i.name, description: i.description ?? "", price: (i.price_cents / 100).toFixed(2), photo_url: i.photo_url, is_available: i.is_available, category_id: i.category_id, is_secret: i.is_secret, required_level: i.required_level, is_house_special: i.is_house_special, dish_type: i.dish_type, is_small_plate: i.is_small_plate })}
                   >
                     <p className="truncate font-semibold">{i.is_house_special && "⭐ "}{i.is_secret && "🤫 "}{i.name}</p>
                     <p className="text-sm font-bold text-primary">{formatPrice(i.price_cents)}</p>
@@ -138,7 +138,7 @@ function MenuManager() {
               ))}
               <button
                 className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed text-sm font-semibold text-muted-foreground"
-                onClick={() => setDraft({ name: "", description: "", price: "", photo_url: null, is_available: true, category_id: g.id, is_secret: false, required_level: 1, is_house_special: false, dish_type: null })}
+                onClick={() => setDraft({ name: "", description: "", price: "", photo_url: null, is_available: true, category_id: g.id, is_secret: false, required_level: 1, is_house_special: false, dish_type: null, is_small_plate: false })}
               >
                 <Plus className="size-4" /> Add item
               </button>
@@ -154,7 +154,7 @@ function MenuManager() {
             <ImagePick bucket="menu-photos" userId={userId} value={draft.photo_url} onChange={(u) => setDraft({ ...draft, photo_url: u })} label="Photo" className="h-32 w-full" />
             <input className={field} placeholder="Name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
             <input className={field} placeholder="Description" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
-            <input className={field} placeholder="Price (e.g. 6.50)" inputMode="decimal" value={draft.price} onChange={(e) => setDraft({ ...draft, price: e.target.value })} />
+            <input className={field} placeholder="Final price incl. GST & PST (e.g. 6.50)" inputMode="decimal" value={draft.price} onChange={(e) => setDraft({ ...draft, price: e.target.value })} />
             <select className={field} value={draft.category_id ?? ""} onChange={(e) => setDraft({ ...draft, category_id: e.target.value || null })}>
               <option value="">Uncategorised</option>
               {cats.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -175,6 +175,13 @@ function MenuManager() {
                 <span className="block text-xs font-normal text-muted-foreground">Featured at the top of your page and on the map</span>
               </span>
               <Switch checked={draft.is_house_special} onCheckedChange={(v) => setDraft({ ...draft, is_house_special: v, is_secret: v ? false : draft.is_secret })} />
+            </label>
+            <label className="flex h-12 items-center justify-between font-semibold">
+              <span>
+                🥗 Small plate
+                <span className="block text-xs font-normal text-muted-foreground">A lighter portion at a lower price</span>
+              </span>
+              <Switch checked={draft.is_small_plate} onCheckedChange={(v) => setDraft({ ...draft, is_small_plate: v })} />
             </label>
             <label className="flex h-12 items-center justify-between font-semibold">
               <span>🤫 Secret menu item</span>

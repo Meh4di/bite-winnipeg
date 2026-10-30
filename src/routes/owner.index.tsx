@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronRight, Eye, LogOut, QrCode, Store, UtensilsCrossed, Zap } from "lucide-react";
+import { ChevronRight, Eye, LockOpen, LogOut, QrCode, Store, UtensilsCrossed, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { isOpenNow } from "@/lib/bite";
@@ -95,6 +95,7 @@ function Dashboard() {
         </Link>
       </Button>
       <Row to="/owner/drops" icon={Zap} label="Post a drop or deal" />
+      <Row to="/owner/unlock" icon={LockOpen} label="Unlock deals (fill slow nights)" />
       <Row to="/owner/stamps" icon={QrCode} label="Counter stamp code" />
       <Row to="/owner/menu" icon={UtensilsCrossed} label="Manage menu" />
       <Row to="/owner/setup" icon={Store} label="Edit details, hours & photos" />
@@ -114,7 +115,7 @@ function Stat({ label, value }: { label: string; value?: number | undefined }) {
   );
 }
 
-function Row({ to, icon: Icon, label }: { to: "/owner/menu" | "/owner/setup" | "/owner/drops" | "/owner/stamps"; icon: typeof Store; label: string }) {
+function Row({ to, icon: Icon, label }: { to: "/owner/menu" | "/owner/setup" | "/owner/drops" | "/owner/stamps" | "/owner/unlock"; icon: typeof Store; label: string }) {
   return (
     <Link to={to} className="flex h-16 items-center gap-3 rounded-2xl bg-card px-4 shadow-card active:scale-[0.98]">
       <Icon className="size-5 text-primary" />

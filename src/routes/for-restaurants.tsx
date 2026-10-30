@@ -56,6 +56,7 @@ const FEATURES = [
     t: "Pickup pre-orders",
     d: "Customers order ahead and pay in the app. You get a live kitchen screen.",
   },
+  { e: "🔓", t: "Unlock deals", d: "A discount that only switches on if enough people commit. Guaranteed volume on slow nights." },
   { e: "🔥", t: "Drops", d: "Limited items at a set time. Builds hype and fills slow hours." },
   { e: "♻️", t: "Save food", d: "Sell end-of-day food at 60–70% off instead of throwing it out." },
   {
@@ -99,6 +100,14 @@ const FAQ = [
     a: "So nobody can make a fake page for your restaurant or post deals in your name. Your page stays private until we've confirmed you run the business.",
   },
   {
+    q: "Do you take a cut of my sales?",
+    a: "No. Delivery apps can take 20 to 30% of every order. Bite will charge a flat monthly fee instead, so you keep 100% of every sale. And your first 3 months are free.",
+  },
+  {
+    q: "Why do customers like Bite?",
+    a: "Honest prices: what they see is what they pay, with taxes included, no service fees and no tip screen. Set your menu prices with tax included.",
+  },
+  {
     q: "What does it cost?",
     a: "Nothing for your first 3 months after you're verified: no fees on orders, drops, Save food deals or promotions. We'll tell you the pricing well before your free period ends, and you can leave any time.",
   },
@@ -136,7 +145,7 @@ function ForRestaurants() {
           For restaurants & cafes
         </p>
         <h1 className="mt-2 text-[2.25rem] font-extrabold leading-[1.05]">
-          More customers. Less waste. <span className="text-primary">Zero fees</span> for 3 months.
+          More customers. Less waste. <span className="text-primary">Keep 100%</span> of your sales.
         </h1>
         <p className="mt-3 text-[15px] opacity-80">
           Bite is Winnipeg's food app for pickup orders, hype drops and rescuing end-of-day food.

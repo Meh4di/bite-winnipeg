@@ -64,6 +64,13 @@
       "when": 1793318000000,
       "tag": "0008_business_verification",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793320000000,
+      "tag": "0009_honest_unlock",
+      "breakpoints": true
     }
   ]
 }

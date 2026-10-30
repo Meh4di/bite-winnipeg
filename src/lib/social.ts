@@ -188,6 +188,8 @@ export function feedLine(kind: string): { verb: string; emoji: string } {
       return { verb: "earned a badge", emoji: "🏅" };
     case "forward":
       return { verb: "paid a meal forward at", emoji: "💛" };
+    case "unlock":
+      return { verb: "joined an unlock deal at", emoji: "🔓" };
     case "table":
       return { verb: "opened a table at", emoji: "🍽️" };
     default:

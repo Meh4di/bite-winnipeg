@@ -13,6 +13,10 @@ import { liveBusy, useHouseSpecials, useRatings } from "@/lib/community";
 import { dishEmoji, useDishLeaderboard } from "@/lib/dishes";
 import { useCrawls } from "@/lib/crawls";
 import { useWinnipegWeather } from "@/lib/weather";
+import { unlockState, useUnlockDeals } from "@/lib/unlock";
+import { UnlockCard } from "@/components/bite/UnlockCard";
+import { HONEST_PROMISES, useValueItems } from "@/lib/eats";
+import { ValueCard } from "@/components/bite/ValueCard";
 
 export const Route = createFileRoute("/_tabs/")({
   head: () => ({
@@ -46,6 +50,11 @@ function Home() {
   const board = useDishLeaderboard();
   const crawls = useCrawls();
   const vortexDeals = useVortexDeals();
+  const unlocks = useUnlockDeals();
+  const value = useValueItems(1500);
+  const liveUnlocks = (unlocks.data ?? []).filter((d) =>
+    ["open", "unlocked"].includes(unlockState(d, now)),
+  );
   const trending = useQuery({
     queryKey: ["trending"],
     staleTime: 5 * 60_000,
@@ -261,6 +270,30 @@ function Home() {
         <>
           <HomeHero slides={slides} />
 
+          <div className="no-scrollbar mt-4 flex gap-2 overflow-x-auto px-5">
+            {HONEST_PROMISES.map((p) => (
+              <span
+                key={p.text}
+                className="shrink-0 rounded-full bg-secondary px-3 py-1.5 text-xs font-bold"
+              >
+                {p.emoji} {p.text}
+              </span>
+            ))}
+          </div>
+
+          {liveUnlocks.length > 0 && (
+            <Rail
+              title="🔓 Unlock together"
+              sub="Big deals that switch on when enough people join"
+              to="/drops"
+              search={{ tab: "unlock" }}
+            >
+              {liveUnlocks.map((d) => (
+                <UnlockCard key={d.id} deal={d} now={now} />
+              ))}
+            </Rail>
+          )}
+
           {trendingSpots.length > 0 && (
             <Rail title="📈 Trending this week" sub="Where Winnipeg is eating right now">
               {trendingSpots.map(({ r, t }, n) =>
@@ -317,6 +350,14 @@ function Home() {
           <div className="mt-6 px-5">
             <VortexBanner compact />
           </div>
+
+          {(value.data?.length ?? 0) > 0 && (
+            <Rail title="💸 Eat well under $15" sub="Honest prices, no tip screen" to="/eats">
+              {value.data!.slice(0, 12).map((i) => (
+                <ValueCard key={i.id} item={i} fixed />
+              ))}
+            </Rail>
+          )}
 
           {liveDrops.length > 0 && (
             <Rail title="🔥 Live drops" to="/drops">
@@ -596,8 +637,8 @@ function Rail({
 }: {
   title: string;
   sub?: string;
-  to?: "/drops" | "/best" | "/crawls";
-  search?: { tab?: "leftover" };
+  to?: "/drops" | "/best" | "/crawls" | "/eats";
+  search?: { tab?: "leftover" | "unlock" };
   children: React.ReactNode;
 }) {
   return (

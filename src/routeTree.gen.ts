@@ -20,6 +20,7 @@ import { Route as TabsBestRouteImport } from './routes/_tabs.best'
 import { Route as TabsCrawlsRouteImport } from './routes/_tabs.crawls'
 import { Route as TabsDecideRouteImport } from './routes/_tabs.decide'
 import { Route as TabsDropsRouteImport } from './routes/_tabs.drops'
+import { Route as TabsEatsRouteImport } from './routes/_tabs.eats'
 import { Route as TabsMapRouteImport } from './routes/_tabs.map'
 import { Route as TabsPassportRouteImport } from './routes/_tabs.passport'
 import { Route as TabsProfileRouteImport } from './routes/_tabs.profile'
@@ -31,11 +32,13 @@ import { Route as OwnerMenuRouteImport } from './routes/owner.menu'
 import { Route as OwnerOrdersRouteImport } from './routes/owner.orders'
 import { Route as OwnerSetupRouteImport } from './routes/owner.setup'
 import { Route as OwnerStampsRouteImport } from './routes/owner.stamps'
+import { Route as OwnerUnlockRouteImport } from './routes/owner.unlock'
 import { Route as OwnerVerifyRouteImport } from './routes/owner.verify'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
 import { Route as TabsCrawlsSlugRouteImport } from './routes/_tabs.crawls_.$slug'
 import { Route as TabsDecideCodeRouteImport } from './routes/_tabs.decide_.$code'
 import { Route as TabsPeopleIdRouteImport } from './routes/_tabs.people.$id'
+import { Route as TabsUnlockIdRouteImport } from './routes/_tabs.unlock.$id'
 import { Route as StampSlugCodeRouteImport } from './routes/stamp.$slug.$code'
 
 const TabsRoute = TabsRouteImport.update({
@@ -90,6 +93,11 @@ const TabsDecideRoute = TabsDecideRouteImport.update({
 const TabsDropsRoute = TabsDropsRouteImport.update({
   id: '/drops',
   path: '/drops',
+  getParentRoute: () => TabsRoute,
+} as any)
+const TabsEatsRoute = TabsEatsRouteImport.update({
+  id: '/eats',
+  path: '/eats',
   getParentRoute: () => TabsRoute,
 } as any)
 const TabsMapRoute = TabsMapRouteImport.update({
@@ -147,6 +155,11 @@ const OwnerStampsRoute = OwnerStampsRouteImport.update({
   path: '/stamps',
   getParentRoute: () => OwnerRoute,
 } as any)
+const OwnerUnlockRoute = OwnerUnlockRouteImport.update({
+  id: '/unlock',
+  path: '/unlock',
+  getParentRoute: () => OwnerRoute,
+} as any)
 const OwnerVerifyRoute = OwnerVerifyRouteImport.update({
   id: '/verify',
   path: '/verify',
@@ -172,6 +185,11 @@ const TabsPeopleIdRoute = TabsPeopleIdRouteImport.update({
   path: '/people/$id',
   getParentRoute: () => TabsRoute,
 } as any)
+const TabsUnlockIdRoute = TabsUnlockIdRouteImport.update({
+  id: '/unlock/$id',
+  path: '/unlock/$id',
+  getParentRoute: () => TabsRoute,
+} as any)
 const StampSlugCodeRoute = StampSlugCodeRouteImport.update({
   id: '/stamp/$slug/$code',
   path: '/stamp/$slug/$code',
@@ -189,6 +207,7 @@ export interface FileRoutesByFullPath {
   '/crawls': typeof TabsCrawlsRoute
   '/decide': typeof TabsDecideRoute
   '/drops': typeof TabsDropsRoute
+  '/eats': typeof TabsEatsRoute
   '/map': typeof TabsMapRoute
   '/passport': typeof TabsPassportRoute
   '/profile': typeof TabsProfileRoute
@@ -199,12 +218,14 @@ export interface FileRoutesByFullPath {
   '/owner/orders': typeof OwnerOrdersRoute
   '/owner/setup': typeof OwnerSetupRoute
   '/owner/stamps': typeof OwnerStampsRoute
+  '/owner/unlock': typeof OwnerUnlockRoute
   '/owner/verify': typeof OwnerVerifyRoute
   '/r/$slug': typeof RSlugRoute
   '/owner/': typeof OwnerIndexRoute
   '/crawls/$slug': typeof TabsCrawlsSlugRoute
   '/decide/$code': typeof TabsDecideCodeRoute
   '/people/$id': typeof TabsPeopleIdRoute
+  '/unlock/$id': typeof TabsUnlockIdRoute
   '/stamp/$slug/$code': typeof StampSlugCodeRoute
 }
 export interface FileRoutesByTo {
@@ -216,6 +237,7 @@ export interface FileRoutesByTo {
   '/crawls': typeof TabsCrawlsRoute
   '/decide': typeof TabsDecideRoute
   '/drops': typeof TabsDropsRoute
+  '/eats': typeof TabsEatsRoute
   '/map': typeof TabsMapRoute
   '/passport': typeof TabsPassportRoute
   '/profile': typeof TabsProfileRoute
@@ -226,6 +248,7 @@ export interface FileRoutesByTo {
   '/owner/orders': typeof OwnerOrdersRoute
   '/owner/setup': typeof OwnerSetupRoute
   '/owner/stamps': typeof OwnerStampsRoute
+  '/owner/unlock': typeof OwnerUnlockRoute
   '/owner/verify': typeof OwnerVerifyRoute
   '/r/$slug': typeof RSlugRoute
   '/': typeof TabsIndexRoute
@@ -233,6 +256,7 @@ export interface FileRoutesByTo {
   '/crawls/$slug': typeof TabsCrawlsSlugRoute
   '/decide/$code': typeof TabsDecideCodeRoute
   '/people/$id': typeof TabsPeopleIdRoute
+  '/unlock/$id': typeof TabsUnlockIdRoute
   '/stamp/$slug/$code': typeof StampSlugCodeRoute
 }
 export interface FileRoutesById {
@@ -247,6 +271,7 @@ export interface FileRoutesById {
   '/_tabs/crawls': typeof TabsCrawlsRoute
   '/_tabs/decide': typeof TabsDecideRoute
   '/_tabs/drops': typeof TabsDropsRoute
+  '/_tabs/eats': typeof TabsEatsRoute
   '/_tabs/map': typeof TabsMapRoute
   '/_tabs/passport': typeof TabsPassportRoute
   '/_tabs/profile': typeof TabsProfileRoute
@@ -257,6 +282,7 @@ export interface FileRoutesById {
   '/owner/orders': typeof OwnerOrdersRoute
   '/owner/setup': typeof OwnerSetupRoute
   '/owner/stamps': typeof OwnerStampsRoute
+  '/owner/unlock': typeof OwnerUnlockRoute
   '/owner/verify': typeof OwnerVerifyRoute
   '/r/$slug': typeof RSlugRoute
   '/_tabs/': typeof TabsIndexRoute
@@ -264,6 +290,7 @@ export interface FileRoutesById {
   '/_tabs/crawls_/$slug': typeof TabsCrawlsSlugRoute
   '/_tabs/decide_/$code': typeof TabsDecideCodeRoute
   '/_tabs/people/$id': typeof TabsPeopleIdRoute
+  '/_tabs/unlock/$id': typeof TabsUnlockIdRoute
   '/stamp/$slug/$code': typeof StampSlugCodeRoute
 }
 export interface FileRouteTypes {
@@ -279,6 +306,7 @@ export interface FileRouteTypes {
     | '/crawls'
     | '/decide'
     | '/drops'
+    | '/eats'
     | '/map'
     | '/passport'
     | '/profile'
@@ -289,12 +317,14 @@ export interface FileRouteTypes {
     | '/owner/orders'
     | '/owner/setup'
     | '/owner/stamps'
+    | '/owner/unlock'
     | '/owner/verify'
     | '/r/$slug'
     | '/owner/'
     | '/crawls/$slug'
     | '/decide/$code'
     | '/people/$id'
+    | '/unlock/$id'
     | '/stamp/$slug/$code'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -306,6 +336,7 @@ export interface FileRouteTypes {
     | '/crawls'
     | '/decide'
     | '/drops'
+    | '/eats'
     | '/map'
     | '/passport'
     | '/profile'
@@ -316,6 +347,7 @@ export interface FileRouteTypes {
     | '/owner/orders'
     | '/owner/setup'
     | '/owner/stamps'
+    | '/owner/unlock'
     | '/owner/verify'
     | '/r/$slug'
     | '/'
@@ -323,6 +355,7 @@ export interface FileRouteTypes {
     | '/crawls/$slug'
     | '/decide/$code'
     | '/people/$id'
+    | '/unlock/$id'
     | '/stamp/$slug/$code'
   id:
     | '__root__'
@@ -336,6 +369,7 @@ export interface FileRouteTypes {
     | '/_tabs/crawls'
     | '/_tabs/decide'
     | '/_tabs/drops'
+    | '/_tabs/eats'
     | '/_tabs/map'
     | '/_tabs/passport'
     | '/_tabs/profile'
@@ -346,6 +380,7 @@ export interface FileRouteTypes {
     | '/owner/orders'
     | '/owner/setup'
     | '/owner/stamps'
+    | '/owner/unlock'
     | '/owner/verify'
     | '/r/$slug'
     | '/_tabs/'
@@ -353,6 +388,7 @@ export interface FileRouteTypes {
     | '/_tabs/crawls_/$slug'
     | '/_tabs/decide_/$code'
     | '/_tabs/people/$id'
+    | '/_tabs/unlock/$id'
     | '/stamp/$slug/$code'
   fileRoutesById: FileRoutesById
 }
@@ -447,6 +483,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TabsDropsRouteImport
       parentRoute: typeof TabsRoute
     }
+    '/_tabs/eats': {
+      id: '/_tabs/eats'
+      path: '/eats'
+      fullPath: '/eats'
+      preLoaderRoute: typeof TabsEatsRouteImport
+      parentRoute: typeof TabsRoute
+    }
     '/_tabs/map': {
       id: '/_tabs/map'
       path: '/map'
@@ -524,6 +567,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OwnerStampsRouteImport
       parentRoute: typeof OwnerRoute
     }
+    '/owner/unlock': {
+      id: '/owner/unlock'
+      path: '/unlock'
+      fullPath: '/owner/unlock'
+      preLoaderRoute: typeof OwnerUnlockRouteImport
+      parentRoute: typeof OwnerRoute
+    }
     '/owner/verify': {
       id: '/owner/verify'
       path: '/verify'
@@ -559,6 +609,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TabsPeopleIdRouteImport
       parentRoute: typeof TabsRoute
     }
+    '/_tabs/unlock/$id': {
+      id: '/_tabs/unlock/$id'
+      path: '/unlock/$id'
+      fullPath: '/unlock/$id'
+      preLoaderRoute: typeof TabsUnlockIdRouteImport
+      parentRoute: typeof TabsRoute
+    }
     '/stamp/$slug/$code': {
       id: '/stamp/$slug/$code'
       path: '/stamp/$slug/$code'
@@ -574,6 +631,7 @@ interface TabsRouteChildren {
   TabsCrawlsRoute: typeof TabsCrawlsRoute
   TabsDecideRoute: typeof TabsDecideRoute
   TabsDropsRoute: typeof TabsDropsRoute
+  TabsEatsRoute: typeof TabsEatsRoute
   TabsMapRoute: typeof TabsMapRoute
   TabsPassportRoute: typeof TabsPassportRoute
   TabsProfileRoute: typeof TabsProfileRoute
@@ -582,6 +640,7 @@ interface TabsRouteChildren {
   TabsCrawlsSlugRoute: typeof TabsCrawlsSlugRoute
   TabsDecideCodeRoute: typeof TabsDecideCodeRoute
   TabsPeopleIdRoute: typeof TabsPeopleIdRoute
+  TabsUnlockIdRoute: typeof TabsUnlockIdRoute
 }
 
 const TabsRouteChildren: TabsRouteChildren = {
@@ -589,6 +648,7 @@ const TabsRouteChildren: TabsRouteChildren = {
   TabsCrawlsRoute: TabsCrawlsRoute,
   TabsDecideRoute: TabsDecideRoute,
   TabsDropsRoute: TabsDropsRoute,
+  TabsEatsRoute: TabsEatsRoute,
   TabsMapRoute: TabsMapRoute,
   TabsPassportRoute: TabsPassportRoute,
   TabsProfileRoute: TabsProfileRoute,
@@ -597,6 +657,7 @@ const TabsRouteChildren: TabsRouteChildren = {
   TabsCrawlsSlugRoute: TabsCrawlsSlugRoute,
   TabsDecideCodeRoute: TabsDecideCodeRoute,
   TabsPeopleIdRoute: TabsPeopleIdRoute,
+  TabsUnlockIdRoute: TabsUnlockIdRoute,
 }
 
 const TabsRouteWithChildren = TabsRoute._addFileChildren(TabsRouteChildren)
@@ -607,6 +668,7 @@ interface OwnerRouteChildren {
   OwnerOrdersRoute: typeof OwnerOrdersRoute
   OwnerSetupRoute: typeof OwnerSetupRoute
   OwnerStampsRoute: typeof OwnerStampsRoute
+  OwnerUnlockRoute: typeof OwnerUnlockRoute
   OwnerVerifyRoute: typeof OwnerVerifyRoute
   OwnerIndexRoute: typeof OwnerIndexRoute
 }
@@ -617,6 +679,7 @@ const OwnerRouteChildren: OwnerRouteChildren = {
   OwnerOrdersRoute: OwnerOrdersRoute,
   OwnerSetupRoute: OwnerSetupRoute,
   OwnerStampsRoute: OwnerStampsRoute,
+  OwnerUnlockRoute: OwnerUnlockRoute,
   OwnerVerifyRoute: OwnerVerifyRoute,
   OwnerIndexRoute: OwnerIndexRoute,
 }
