@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { LockedTool, isVerified } from "@/components/bite/Verification";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
@@ -20,7 +21,7 @@ export const Route = createFileRoute("/owner/stamps")({
       { property: "og:description", content: "Your counter stamp code." },
     ],
   }),
-  component: StampCode,
+  component: Gated,
 });
 
 function StampCode() {
@@ -158,4 +159,11 @@ function StampCode() {
       </p>
     </div>
   );
+}
+
+function Gated() {
+  const { data: r, isLoading } = useMyRestaurant();
+  if (isLoading) return <div className="m-5 h-40 animate-pulse rounded-3xl bg-muted" />;
+  if (r && !isVerified(r)) return <LockedTool title="Passport stamps" status={r.verification_status} />;
+  return <StampCode />;
 }

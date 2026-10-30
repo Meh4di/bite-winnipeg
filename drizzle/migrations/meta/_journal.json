@@ -57,6 +57,13 @@
       "when": 1793302274710,
       "tag": "0007_social",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793318000000,
+      "tag": "0008_business_verification",
+      "breakpoints": true
     }
   ]
 }

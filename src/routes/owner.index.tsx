@@ -10,6 +10,7 @@ import { OwnerOrders } from "@/components/bite/OwnerOrders";
 import { OwnerInsights } from "@/components/bite/OwnerInsights";
 import { FreeBanner, OwnerBusy, OwnerForward } from "@/components/bite/OwnerBusy";
 import { OwnerReviews } from "@/components/bite/OwnerReviews";
+import { isVerified, VerifyStatusCard } from "@/components/bite/Verification";
 
 export const Route = createFileRoute("/owner/")({
   component: Dashboard,
@@ -59,10 +60,15 @@ function Dashboard() {
   return (
     <div className="space-y-4 px-5 pt-5 animate-screen">
       <h1 className="text-2xl font-extrabold">{r.name}</h1>
-      <FreeBanner freeUntil={r.free_until} />
-      <OwnerBusy restaurant={r} />
-      <OwnerForward restaurantId={r.id} enabled={r.pay_it_forward} />
-      <OwnerOrders restaurant={r} />
+      <VerifyStatusCard restaurant={r} />
+      {isVerified(r) && (
+        <>
+          <FreeBanner freeUntil={r.free_until} />
+          <OwnerBusy restaurant={r} />
+          <OwnerForward restaurantId={r.id} enabled={r.pay_it_forward} />
+          <OwnerOrders restaurant={r} />
+        </>
+      )}
       <div className="overflow-hidden rounded-3xl bg-card shadow-card">
         <div className="relative h-32 bg-muted">
           {r.cover_url && <img src={r.cover_url} alt="" className="size-full object-cover" />}
@@ -77,8 +83,8 @@ function Dashboard() {
           </p>
         </div>
       </div>
-      <OwnerInsights restaurantId={r.id} />
-      <OwnerReviews restaurantId={r.id} />
+      {isVerified(r) && <OwnerInsights restaurantId={r.id} />}
+      {isVerified(r) && <OwnerReviews restaurantId={r.id} />}
       <div className="grid grid-cols-2 gap-3">
         <Stat label="Menu items" value={stats.data?.items} />
         <Stat label="Followers" value={stats.data?.follows} />

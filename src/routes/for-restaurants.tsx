@@ -35,11 +35,16 @@ const STEPS = [
   },
   {
     n: 3,
-    title: "Go live",
-    line: "Turn on pickup orders and post your first drop, Save food deal or promo.",
+    title: "Get verified",
+    line: "Upload one proof (like your food permit) and we call your restaurant's listed number. Takes 1 to 2 days, and stops anyone pretending to be you.",
   },
   {
     n: 4,
+    title: "Go live",
+    line: "Turn on pickup orders and post your first drop, Save food deal or promo. Your 3 free months start now.",
+  },
+  {
+    n: 5,
     title: "Grow",
     line: "Watch orders, reviews, stamps and repeat customers in your dashboard.",
   },
@@ -90,8 +95,12 @@ const FAQ = [
     a: "Once payments go live, you'll connect a payout account in your dashboard and order money is sent straight to your bank. Bite never holds your menu prices.",
   },
   {
+    q: "Why do you verify restaurants?",
+    a: "So nobody can make a fake page for your restaurant or post deals in your name. Your page stays private until we've confirmed you run the business.",
+  },
+  {
     q: "What does it cost?",
-    a: "Nothing for your first 3 months: no fees on orders, drops, Save food deals or promotions. We'll tell you the pricing well before your free period ends, and you can leave any time.",
+    a: "Nothing for your first 3 months after you're verified: no fees on orders, drops, Save food deals or promotions. We'll tell you the pricing well before your free period ends, and you can leave any time.",
   },
   {
     q: "Do you do delivery?",

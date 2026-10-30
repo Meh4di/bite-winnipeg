@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { LockedTool, isVerified } from "@/components/bite/Verification";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Flame, Megaphone, Package, Snowflake, Trash2 } from "lucide-react";
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/owner/drops")({
       { property: "og:description", content: "Post drops and deals on Bite." },
     ],
   }),
-  component: OwnerDrops,
+  component: Gated,
 });
 
 const field =
@@ -554,4 +555,11 @@ function OwnerDrops() {
       )}
     </div>
   );
+}
+
+function Gated() {
+  const { data: r, isLoading } = useMyRestaurant();
+  if (isLoading) return <div className="m-5 h-40 animate-pulse rounded-3xl bg-muted" />;
+  if (r && !isVerified(r)) return <LockedTool title="Drops and deals" status={r.verification_status} />;
+  return <OwnerDrops />;
 }

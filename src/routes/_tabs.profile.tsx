@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronRight, LogOut, Store } from "lucide-react";
+import { ChevronRight, LogOut, ShieldCheck, Store } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -47,6 +47,15 @@ function Profile() {
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
+    },
+  });
+
+  const isAdmin = useQuery({
+    queryKey: ["is-admin", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase.rpc("is_admin");
+      return !!data;
     },
   });
 
@@ -101,6 +110,17 @@ function Profile() {
           <Store className="size-5 text-primary" />
           <span className="flex-1 font-semibold">Restaurant dashboard</span>
           <ChevronRight className="size-5 text-muted-foreground" />
+        </Link>
+      )}
+
+      {isAdmin.data && (
+        <Link
+          to="/admin"
+          className="mt-4 flex h-16 items-center gap-3 rounded-2xl bg-foreground px-4 text-background shadow-card active:scale-[0.98]"
+        >
+          <ShieldCheck className="size-5 text-primary" />
+          <span className="flex-1 font-semibold">Admin: verify businesses</span>
+          <ChevronRight className="size-5 opacity-60" />
         </Link>
       )}
 

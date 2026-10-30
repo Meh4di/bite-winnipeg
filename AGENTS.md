@@ -30,3 +30,9 @@
 - Tables (`meetups`): 18+ (`profile_private.birth_date`, owner-only), 3–8 seats, Bite restaurants only, always via RPCs.
 - Blocking hides everything both ways; reports go to `user_reports` (insert-only for users).
 - DEMO DATA to delete before launch: auth users `00000000-0000-0000-0000-00000000de01..06` (sample.*@bite.example), their follows/activity, meetups `11111111-aaaa-*`, crawl `date-night` and promo `DATE2` (keep those two if you like them).
+
+## Business verification (migration 0008)
+- Anyone can sign up as a restaurant and draft a page, but `restaurants_guard` keeps it private (`is_active`/`accepting_orders` forced false) until `verification_status = 'verified'`. Owners can't change status, `verified_at` or `free_until`.
+- Owners apply at `/owner/verify` (`submit_verification`, private `verification-docs` bucket). Admins review at `/admin` (`verification_queue`, `review_verification`); approval starts the 3 free months.
+- Drops/promotions writes need a verified restaurant (restrictive RLS); stamps need an active restaurant. The Drops and Stamps owner tabs show a lock screen until then.
+- Admins = `user_roles.role = 'admin'` (`is_admin()`).

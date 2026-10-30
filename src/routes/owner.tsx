@@ -3,6 +3,7 @@ import { ShoppingBag, Store, UtensilsCrossed, Eye, Zap, QrCode } from "lucide-re
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchRole } from "@/lib/auth";
+import { VerifiedChip } from "@/components/bite/Verification";
 
 export const Route = createFileRoute("/owner")({
   ssr: false,
@@ -59,6 +60,7 @@ function OwnerLayout() {
           <span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-secondary-foreground">
             Business
           </span>
+          {r && <VerifiedChip status={r.verification_status} />}
         </div>
         {r && (
           <Link

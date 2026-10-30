@@ -109,6 +109,74 @@ export type Database = {
         }
         Relationships: []
       }
+      business_verifications: {
+        Row: {
+          admin_note: string | null
+          business_email: string | null
+          business_number: string | null
+          business_phone: string
+          contact_name: string
+          contact_role: string
+          created_at: string
+          doc_paths: string[]
+          id: string
+          legal_name: string
+          permit_number: string | null
+          restaurant_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submitted_by: string
+          website: string | null
+        }
+        Insert: {
+          admin_note?: string | null
+          business_email?: string | null
+          business_number?: string | null
+          business_phone: string
+          contact_name: string
+          contact_role: string
+          created_at?: string
+          doc_paths?: string[]
+          id?: string
+          legal_name: string
+          permit_number?: string | null
+          restaurant_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_by?: string
+          website?: string | null
+        }
+        Update: {
+          admin_note?: string | null
+          business_email?: string | null
+          business_number?: string | null
+          business_phone?: string
+          contact_name?: string
+          contact_role?: string
+          created_at?: string
+          doc_paths?: string[]
+          id?: string
+          legal_name?: string
+          permit_number?: string | null
+          restaurant_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_by?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_verifications_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       crawl_stops: {
         Row: {
           crawl_id: string
@@ -888,6 +956,8 @@ export type Database = {
           pay_it_forward: boolean
           phone: string | null
           slug: string
+          verification_status: string
+          verified_at: string | null
           wait_minutes: number | null
         }
         Insert: {
@@ -912,6 +982,8 @@ export type Database = {
           pay_it_forward?: boolean
           phone?: string | null
           slug: string
+          verification_status?: string
+          verified_at?: string | null
           wait_minutes?: number | null
         }
         Update: {
@@ -936,6 +1008,8 @@ export type Database = {
           pay_it_forward?: boolean
           phone?: string | null
           slug?: string
+          verification_status?: string
+          verified_at?: string | null
           wait_minutes?: number | null
         }
         Relationships: []
@@ -1319,9 +1393,11 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin: { Args: never; Returns: boolean }
       is_adult: { Args: { _user: string }; Returns: boolean }
       is_decide_member: { Args: { _session_id: string }; Returns: boolean }
       is_meetup_member: { Args: { _meetup: string }; Returns: boolean }
+      is_verified_restaurant: { Args: { _restaurant_id: string }; Returns: boolean }
       join_decide_session: { Args: { p_code: string }; Returns: string }
       join_meetup: { Args: { p_meetup_id: string }; Returns: undefined }
       leave_meetup: { Args: { p_meetup_id: string }; Returns: undefined }
@@ -1361,6 +1437,10 @@ export type Database = {
         Args: { p_reply: string; p_review_id: string }
         Returns: undefined
       }
+      review_verification: {
+        Args: { p_approve: boolean; p_id: string; p_note: string }
+        Returns: undefined
+      }
       secret_menu_teaser: {
         Args: { p_restaurant_id: string }
         Returns: {
@@ -1380,6 +1460,21 @@ export type Database = {
           spots: number
           stamps: number
         }[]
+      }
+      submit_verification: {
+        Args: {
+          p_business_email: string
+          p_business_number: string
+          p_business_phone: string
+          p_contact_name: string
+          p_contact_role: string
+          p_doc_paths: string[]
+          p_legal_name: string
+          p_permit_number: string
+          p_restaurant_id: string
+          p_website: string
+        }
+        Returns: string
       }
       taste_match: { Args: { p_other: string }; Returns: number | null }
       taste_match_people: {
@@ -1407,6 +1502,30 @@ export type Database = {
           reviews: number
           score: number
           stamps: number
+        }[]
+      }
+      verification_queue: {
+        Args: never
+        Returns: {
+          admin_note: string | null
+          business_email: string | null
+          business_number: string | null
+          business_phone: string
+          contact_name: string
+          contact_role: string
+          created_at: string
+          doc_paths: string[]
+          id: string
+          legal_name: string
+          owner_email: string | null
+          permit_number: string | null
+          restaurant_address: string | null
+          restaurant_id: string
+          restaurant_name: string
+          restaurant_phone: string | null
+          restaurant_slug: string
+          status: string
+          website: string | null
         }[]
       }
     }

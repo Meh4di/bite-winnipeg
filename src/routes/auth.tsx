@@ -120,7 +120,7 @@ function AuthPage() {
               {(
                 [
                   ["customer", "😋", "Foodie", "Find & order food"],
-                  ["restaurant_owner", "👩‍🍳", "Restaurant", "List my spot"],
+                  ["restaurant_owner", "👩‍🍳", "Restaurant", "List my spot (we verify you)"],
                 ] as const
               ).map(([value, emoji, title, sub]) => (
                 <button

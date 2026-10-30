@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TabsRouteImport } from './routes/_tabs'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ForRestaurantsRouteImport } from './routes/for-restaurants'
@@ -30,6 +31,7 @@ import { Route as OwnerMenuRouteImport } from './routes/owner.menu'
 import { Route as OwnerOrdersRouteImport } from './routes/owner.orders'
 import { Route as OwnerSetupRouteImport } from './routes/owner.setup'
 import { Route as OwnerStampsRouteImport } from './routes/owner.stamps'
+import { Route as OwnerVerifyRouteImport } from './routes/owner.verify'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
 import { Route as TabsCrawlsSlugRouteImport } from './routes/_tabs.crawls_.$slug'
 import { Route as TabsDecideCodeRouteImport } from './routes/_tabs.decide_.$code'
@@ -38,6 +40,11 @@ import { Route as StampSlugCodeRouteImport } from './routes/stamp.$slug.$code'
 
 const TabsRoute = TabsRouteImport.update({
   id: '/_tabs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -140,6 +147,11 @@ const OwnerStampsRoute = OwnerStampsRouteImport.update({
   path: '/stamps',
   getParentRoute: () => OwnerRoute,
 } as any)
+const OwnerVerifyRoute = OwnerVerifyRouteImport.update({
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => OwnerRoute,
+} as any)
 const RSlugRoute = RSlugRouteImport.update({
   id: '/r/$slug',
   path: '/r/$slug',
@@ -168,6 +180,7 @@ const StampSlugCodeRoute = StampSlugCodeRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof TabsIndexRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/for-restaurants': typeof ForRestaurantsRoute
@@ -186,6 +199,7 @@ export interface FileRoutesByFullPath {
   '/owner/orders': typeof OwnerOrdersRoute
   '/owner/setup': typeof OwnerSetupRoute
   '/owner/stamps': typeof OwnerStampsRoute
+  '/owner/verify': typeof OwnerVerifyRoute
   '/r/$slug': typeof RSlugRoute
   '/owner/': typeof OwnerIndexRoute
   '/crawls/$slug': typeof TabsCrawlsSlugRoute
@@ -194,6 +208,7 @@ export interface FileRoutesByFullPath {
   '/stamp/$slug/$code': typeof StampSlugCodeRoute
 }
 export interface FileRoutesByTo {
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/for-restaurants': typeof ForRestaurantsRoute
@@ -211,6 +226,7 @@ export interface FileRoutesByTo {
   '/owner/orders': typeof OwnerOrdersRoute
   '/owner/setup': typeof OwnerSetupRoute
   '/owner/stamps': typeof OwnerStampsRoute
+  '/owner/verify': typeof OwnerVerifyRoute
   '/r/$slug': typeof RSlugRoute
   '/': typeof TabsIndexRoute
   '/owner': typeof OwnerIndexRoute
@@ -222,6 +238,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_tabs': typeof TabsRouteWithChildren
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
   '/for-restaurants': typeof ForRestaurantsRoute
@@ -240,6 +257,7 @@ export interface FileRoutesById {
   '/owner/orders': typeof OwnerOrdersRoute
   '/owner/setup': typeof OwnerSetupRoute
   '/owner/stamps': typeof OwnerStampsRoute
+  '/owner/verify': typeof OwnerVerifyRoute
   '/r/$slug': typeof RSlugRoute
   '/_tabs/': typeof TabsIndexRoute
   '/owner/': typeof OwnerIndexRoute
@@ -252,6 +270,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/auth'
     | '/checkout'
     | '/for-restaurants'
@@ -270,6 +289,7 @@ export interface FileRouteTypes {
     | '/owner/orders'
     | '/owner/setup'
     | '/owner/stamps'
+    | '/owner/verify'
     | '/r/$slug'
     | '/owner/'
     | '/crawls/$slug'
@@ -278,6 +298,7 @@ export interface FileRouteTypes {
     | '/stamp/$slug/$code'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/admin'
     | '/auth'
     | '/checkout'
     | '/for-restaurants'
@@ -295,6 +316,7 @@ export interface FileRouteTypes {
     | '/owner/orders'
     | '/owner/setup'
     | '/owner/stamps'
+    | '/owner/verify'
     | '/r/$slug'
     | '/'
     | '/owner'
@@ -305,6 +327,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_tabs'
+    | '/admin'
     | '/auth'
     | '/checkout'
     | '/for-restaurants'
@@ -323,6 +346,7 @@ export interface FileRouteTypes {
     | '/owner/orders'
     | '/owner/setup'
     | '/owner/stamps'
+    | '/owner/verify'
     | '/r/$slug'
     | '/_tabs/'
     | '/owner/'
@@ -334,6 +358,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   TabsRoute: typeof TabsRouteWithChildren
+  AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   CheckoutRoute: typeof CheckoutRoute
   ForRestaurantsRoute: typeof ForRestaurantsRoute
@@ -350,6 +375,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof TabsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -492,6 +524,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OwnerStampsRouteImport
       parentRoute: typeof OwnerRoute
     }
+    '/owner/verify': {
+      id: '/owner/verify'
+      path: '/verify'
+      fullPath: '/owner/verify'
+      preLoaderRoute: typeof OwnerVerifyRouteImport
+      parentRoute: typeof OwnerRoute
+    }
     '/r/$slug': {
       id: '/r/$slug'
       path: '/r/$slug'
@@ -568,6 +607,7 @@ interface OwnerRouteChildren {
   OwnerOrdersRoute: typeof OwnerOrdersRoute
   OwnerSetupRoute: typeof OwnerSetupRoute
   OwnerStampsRoute: typeof OwnerStampsRoute
+  OwnerVerifyRoute: typeof OwnerVerifyRoute
   OwnerIndexRoute: typeof OwnerIndexRoute
 }
 
@@ -577,6 +617,7 @@ const OwnerRouteChildren: OwnerRouteChildren = {
   OwnerOrdersRoute: OwnerOrdersRoute,
   OwnerSetupRoute: OwnerSetupRoute,
   OwnerStampsRoute: OwnerStampsRoute,
+  OwnerVerifyRoute: OwnerVerifyRoute,
   OwnerIndexRoute: OwnerIndexRoute,
 }
 
@@ -584,6 +625,7 @@ const OwnerRouteWithChildren = OwnerRoute._addFileChildren(OwnerRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   TabsRoute: TabsRouteWithChildren,
+  AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   CheckoutRoute: CheckoutRoute,
   ForRestaurantsRoute: ForRestaurantsRoute,
