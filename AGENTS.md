@@ -30,7 +30,7 @@
 - Friends = mutual follows. Feed (`activity`) is filled by triggers and RLS only shows friends' items older than 1 hour.
 - Tables (`meetups`): 18+ (`profile_private.birth_date`, owner-only), 3–8 seats, Bite restaurants only, always via RPCs.
 - Blocking hides everything both ways; reports go to `user_reports` (insert-only for users).
-- DEMO DATA to delete before launch: auth users `00000000-0000-0000-0000-00000000de01..06` (sample.*@bite.example), their follows/activity, meetups `11111111-aaaa-*`, crawl `date-night` and promo `DATE2` (keep those two if you like them).
+- DEMO DATA to delete before launch: auth users `00000000-0000-0000-0000-00000000de01..06` (sample.*@bite.example), their follows/activity, meetups `11111111-aaaa-*`. (The date-night crawl and DATE2 promo were removed on 2026-10-30; no dating or date-night features.)
 
 ## Business verification (migration 0008)
 - Anyone can sign up as a restaurant and draft a page, but `restaurants_guard` keeps it private (`is_active`/`accepting_orders` forced false) until `verification_status = 'verified'`. Owners can't change status, `verified_at` or `free_until`.

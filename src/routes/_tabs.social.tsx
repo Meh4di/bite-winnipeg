@@ -79,26 +79,17 @@ function Social() {
         <p className="mt-1 text-sm text-muted-foreground">Eat with people who share your taste.</p>
       </header>
 
-      <div className="no-scrollbar mt-4 flex gap-3 overflow-x-auto px-5">
-        <Link
-          to="/crawls/$slug"
-          params={{ slug: "date-night" }}
-          className="relative flex w-[68%] shrink-0 items-center gap-3 overflow-hidden rounded-2xl bg-gradient-to-br from-rose-500 to-primary p-4 text-white shadow-card"
-        >
-          <span className="text-4xl">💑</span>
-          <span>
-            <span className="block font-extrabold leading-tight">Date night</span>
-            <span className="block text-xs opacity-90">A 3-stop crawl made for two</span>
-          </span>
-        </Link>
+      <div className="mt-4 px-5">
         <Link
           to="/decide"
-          className="flex w-[60%] shrink-0 items-center gap-3 rounded-2xl bg-secondary p-4 shadow-card"
+          className="flex items-center gap-3 rounded-2xl bg-secondary p-4 shadow-card"
         >
           <span className="text-4xl">🎲</span>
           <span>
-            <span className="block font-extrabold leading-tight">Can't decide?</span>
-            <span className="block text-xs text-muted-foreground">Swipe on spots together</span>
+            <span className="block font-extrabold leading-tight">Can't decide where to eat?</span>
+            <span className="block text-xs text-muted-foreground">
+              Spin the wheel or swipe on spots with friends
+            </span>
           </span>
         </Link>
       </div>
