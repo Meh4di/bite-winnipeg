@@ -1473,6 +1473,7 @@ export type Database = {
       }
       admin_resolve_listing: { Args: { p_hide: boolean; p_restaurant_id: string }; Returns: undefined }
       are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
+      become_restaurant_owner: { Args: never; Returns: undefined }
       blocked_between: { Args: { _a: string; _b: string }; Returns: boolean }
       buy_forward: {
         Args: { p_amount_cents: number; p_label: string; p_restaurant_id: string }

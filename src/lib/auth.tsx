@@ -9,9 +9,16 @@ type AuthState = {
   user: User | null;
   role: BiteRole | null;
   loading: boolean;
+  refreshRole: () => Promise<BiteRole | null>;
 };
 
-const AuthCtx = createContext<AuthState>({ session: null, user: null, role: null, loading: true });
+const AuthCtx = createContext<AuthState>({
+  session: null,
+  user: null,
+  role: null,
+  loading: true,
+  refreshRole: async () => null,
+});
 
 export async function fetchRole(userId: string): Promise<BiteRole> {
   const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
@@ -45,8 +52,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, [uid]);
 
+  const refreshRole = async () => {
+    if (!uid) return null;
+    const r = await fetchRole(uid);
+    setRole(r);
+    return r;
+  };
+
   return (
-    <AuthCtx.Provider value={{ session, user: session?.user ?? null, role, loading }}>
+    <AuthCtx.Provider value={{ session, user: session?.user ?? null, role, loading, refreshRole }}>
       {children}
     </AuthCtx.Provider>
   );

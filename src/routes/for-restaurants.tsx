@@ -56,7 +56,11 @@ const FEATURES = [
     t: "Pickup pre-orders",
     d: "Customers order ahead and pay in the app. You get a live kitchen screen.",
   },
-  { e: "🔓", t: "Unlock deals", d: "A discount that only switches on if enough people commit. Guaranteed volume on slow nights." },
+  {
+    e: "🔓",
+    t: "Unlock deals",
+    d: "A discount that only switches on if enough people commit. Guaranteed volume on slow nights.",
+  },
   { e: "🔥", t: "Drops", d: "Limited items at a set time. Builds hype and fills slow hours." },
   { e: "♻️", t: "Save food", d: "Sell end-of-day food at 60–70% off instead of throwing it out." },
   {
@@ -120,6 +124,7 @@ const FAQ = [
 function ForRestaurants() {
   const { user, role } = useAuth();
   const isOwner = !!user && role === "restaurant_owner";
+  const signedInCustomer = !!user && role === "customer";
   const cta = isOwner ? (
     <Button asChild size="xl" className="w-full">
       <Link to="/owner">Go to my dashboard</Link>
@@ -127,7 +132,7 @@ function ForRestaurants() {
   ) : (
     <Button asChild size="xl" className="w-full">
       <Link to="/auth" search={{ as: "owner" }}>
-        List my restaurant, free
+        {signedInCustomer ? "Add my restaurant to my account" : "List my restaurant, free"}
       </Link>
     </Button>
   );
@@ -152,8 +157,7 @@ function ForRestaurants() {
         </p>
         <div className="mt-6">{cta}</div>
         <p className="mt-3 text-center text-sm opacity-80">
-          Your spot might already be listed. Search for it on Home, open it and tap{" "}
-          <b>Claim it</b>.
+          Your spot might already be listed. Search for it on Home, open it and tap <b>Claim it</b>.
         </p>
       </section>
 

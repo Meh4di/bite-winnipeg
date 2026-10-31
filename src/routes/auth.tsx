@@ -43,15 +43,30 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
   const navigate = useNavigate();
-  const { user, role: currentRole, loading } = useAuth();
+  const { user, role: currentRole, loading, refreshRole } = useAuth();
+  // A signed-in customer who came here to list a restaurant gets the choice instead of a bounce.
+  const addingBusiness = as === "owner" && !!user && currentRole === "customer";
 
   useEffect(() => {
-    if (!loading && user && currentRole)
+    if (!loading && user && currentRole && !addingBusiness)
       navigate({
         to: redirect ?? (currentRole === "restaurant_owner" ? "/owner" : "/"),
         replace: true,
       });
-  }, [loading, user, currentRole, navigate, redirect]);
+  }, [loading, user, currentRole, navigate, redirect, addingBusiness]);
+
+  const addBusiness = async () => {
+    setBusy(true);
+    const { error } = await supabase.rpc("become_restaurant_owner");
+    if (error) {
+      setBusy(false);
+      toast.error(error.message);
+      return;
+    }
+    await refreshRole();
+    setBusy(false);
+    navigate({ to: redirect ?? "/owner", replace: true });
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,6 +92,40 @@ function AuthPage() {
       setBusy(false);
     }
   };
+
+  if (addingBusiness)
+    return (
+      <div className="flex min-h-dvh flex-col justify-center px-6 animate-screen">
+        <p className="text-6xl">👩‍🍳</p>
+        <h1 className="mt-4 text-3xl font-extrabold leading-tight">List your restaurant</h1>
+        <p className="mt-2 text-muted-foreground">
+          You're signed in as <b>{user?.email}</b>. Add a business to this account, or use a
+          different email for the restaurant.
+        </p>
+        <Button size="xl" className="mt-6 w-full" disabled={busy} onClick={addBusiness}>
+          {busy ? "One sec…" : "Add a business to this account"}
+        </Button>
+        <Button
+          variant="outline"
+          size="xl"
+          className="mt-3 w-full shadow-none"
+          disabled={busy}
+          onClick={async () => {
+            await supabase.auth.signOut();
+            setMode("signup");
+            setRole("restaurant_owner");
+          }}
+        >
+          Use a different email
+        </Button>
+        <button
+          onClick={() => navigate({ to: "/" })}
+          className="mt-4 h-12 text-sm text-muted-foreground"
+        >
+          Not now
+        </button>
+      </div>
+    );
 
   if (sent)
     return (
