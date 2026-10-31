@@ -20,12 +20,12 @@ export const Route = createFileRoute("/_tabs/drops")({
   },
   head: () => ({
     meta: [
-      { title: "Drops — Bite" },
+      { title: "Drops — Bity" },
       {
         name: "description",
         content: "Limited food drops, last-call deals and promos from Winnipeg spots.",
       },
-      { property: "og:title", content: "Drops — Bite" },
+      { property: "og:title", content: "Drops — Bity" },
       { property: "og:description", content: "Limited-quantity food drops from Winnipeg spots." },
     ],
   }),

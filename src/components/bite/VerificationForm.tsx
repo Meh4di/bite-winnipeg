@@ -12,7 +12,7 @@ const DOC_IDEAS = [
   "City of Winnipeg food service permit (photo of the one on your wall is fine)",
   "Manitoba business registration or CRA business number letter",
   "A recent utility bill or lease for the restaurant address",
-  "A photo of you inside the restaurant holding a paper with “Bite” and today's date",
+  "A photo of you inside the restaurant holding a paper with “Bity” and today's date",
 ];
 
 type Doc = { path: string; name: string };
@@ -254,7 +254,7 @@ export function VerificationForm({
           checked={agree}
           onChange={(e) => setAgree(e.target.checked)}
         />
-        <span>I own or manage this restaurant and I'm allowed to list it on Bite.</span>
+        <span>I own or manage this restaurant and I'm allowed to list it on Bity.</span>
       </label>
 
       <Button type="submit" size="xl" className="w-full" disabled={busy || uploading}>

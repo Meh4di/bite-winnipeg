@@ -14,10 +14,10 @@ import { Route as OwnerRoute, useMyRestaurant } from "./owner";
 export const Route = createFileRoute("/owner/drops")({
   head: () => ({
     meta: [
-      { title: "Drops & deals — Bite Business" },
+      { title: "Drops & deals — Bity Business" },
       { name: "description", content: "Post limited drops, last-call deals and promotions." },
-      { property: "og:title", content: "Drops & deals — Bite Business" },
-      { property: "og:description", content: "Post drops and deals on Bite." },
+      { property: "og:title", content: "Drops & deals — Bity Business" },
+      { property: "og:description", content: "Post drops and deals on Bity." },
     ],
   }),
   component: Gated,

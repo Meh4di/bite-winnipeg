@@ -47,7 +47,7 @@ function Verify() {
       userId={userId}
       restaurant={r}
       title={`Verify ${r.name}`}
-      intro="This keeps fake restaurants off Bite and makes sure nobody else can post deals in your name. Only the Bite team sees this."
+      intro="This keeps fake restaurants off Bity and makes sure nobody else can post deals in your name. Only the Bity team sees this."
       onDone={async () => {
         await qc.invalidateQueries({ queryKey: ["my-restaurant"] });
         qc.invalidateQueries({ queryKey: ["verification"] });

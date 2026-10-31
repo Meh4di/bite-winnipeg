@@ -15,10 +15,10 @@ export const Route = createFileRoute("/owner")({
   },
   head: () => ({
     meta: [
-      { title: "Restaurant dashboard — Bite" },
-      { name: "description", content: "Manage your restaurant page and menu on Bite." },
-      { property: "og:title", content: "Restaurant dashboard — Bite" },
-      { property: "og:description", content: "Manage your restaurant on Bite." },
+      { title: "Restaurant dashboard — Bity" },
+      { name: "description", content: "Manage your restaurant page and menu on Bity." },
+      { property: "og:title", content: "Restaurant dashboard — Bity" },
+      { property: "og:description", content: "Manage your restaurant on Bity." },
     ],
   }),
   component: OwnerLayout,
@@ -56,7 +56,7 @@ function OwnerLayout() {
       <header className="sticky top-0 z-30 flex items-center justify-between border-b bg-background/90 px-5 pb-3 pt-[max(env(safe-area-inset-top),1rem)] backdrop-blur-xl">
         <div className="flex items-center gap-2">
           <img src="/icons/icon-192.png" alt="" className="size-8 rounded-lg" />
-          <span className="font-display text-lg font-extrabold">bite</span>
+          <span className="font-display text-lg font-extrabold">bity</span>
           <span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-secondary-foreground">
             Business
           </span>

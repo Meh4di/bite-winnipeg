@@ -9,10 +9,10 @@ export const Route = createFileRoute("/stamp/$slug/$code")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Collect your stamp — Bite" },
-      { name: "description", content: "Collect a Bite Passport stamp." },
-      { property: "og:title", content: "Collect your stamp — Bite" },
-      { property: "og:description", content: "Collect a Bite Passport stamp." },
+      { title: "Collect your stamp — Bity" },
+      { name: "description", content: "Collect a Bity Passport stamp." },
+      { property: "og:title", content: "Collect your stamp — Bity" },
+      { property: "og:description", content: "Collect a Bity Passport stamp." },
     ],
   }),
   component: StampClaim,

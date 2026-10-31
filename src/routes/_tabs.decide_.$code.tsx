@@ -14,12 +14,12 @@ export const Route = createFileRoute("/_tabs/decide_/$code")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Swipe with friends — Bite" },
+      { title: "Swipe with friends — Bity" },
       {
         name: "description",
         content: "Swipe on Winnipeg spots with your friends until you match.",
       },
-      { property: "og:title", content: "Join my Bite group" },
+      { property: "og:title", content: "Join my Bity group" },
       { property: "og:description", content: "Swipe with me to pick where we eat." },
     ],
   }),
@@ -148,9 +148,9 @@ function Group() {
 
   const share = async () => {
     const url = `${window.location.origin}/decide/${code}`;
-    const text = `Help me pick where to eat! Join my Bite group: ${code}`;
+    const text = `Help me pick where to eat! Join my Bity group: ${code}`;
     try {
-      if (navigator.share) await navigator.share({ title: "Bite", text, url });
+      if (navigator.share) await navigator.share({ title: "Bity", text, url });
       else {
         await navigator.clipboard.writeText(`${text} ${url}`);
         toast.success("Link copied");

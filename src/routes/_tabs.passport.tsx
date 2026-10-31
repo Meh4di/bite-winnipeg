@@ -19,12 +19,12 @@ import {
 export const Route = createFileRoute("/_tabs/passport")({
   head: () => ({
     meta: [
-      { title: "Passport — Bite" },
+      { title: "Passport — Bity" },
       {
         name: "description",
         content: "Collect stamps at Winnipeg spots, level up, earn badges and unlock secret menus.",
       },
-      { property: "og:title", content: "Passport — Bite" },
+      { property: "og:title", content: "Passport — Bity" },
       { property: "og:description", content: "Your Winnipeg food passport." },
     ],
   }),
@@ -192,7 +192,7 @@ function Passport() {
           <ScanLine className="size-5 text-primary" /> Get stamped
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Scan the Bite code at the counter with your camera, or pick up any order or drop. One
+          Scan the Bity code at the counter with your camera, or pick up any order or drop. One
           visit stamp per spot per day.
         </p>
         {showCode ? (

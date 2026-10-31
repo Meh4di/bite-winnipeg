@@ -13,15 +13,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-/** Shown on a real spot that hasn't joined Bite yet: facts only, plus a way for the owner to claim it. */
+/** Shown on a real spot that hasn't joined Bity yet: facts only, plus a way for the owner to claim it. */
 export function UnclaimedCard({ id, name }: { id: string; name: string }) {
   return (
     <div className="mt-5 rounded-3xl border-2 border-dashed border-border p-5">
       <p className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground">
-        Not on Bite yet
+        Not on Bity yet
       </p>
       <p className="mt-1 text-[15px]">
-        {name} is a local Winnipeg spot that hasn't joined Bite yet, so there's no menu, deals or
+        {name} is a local Winnipeg spot that hasn't joined Bity yet, so there's no menu, deals or
         ordering here. Follow it and you'll see its first deal as soon as it joins.
       </p>
       <Button asChild variant="outline" className="mt-4 w-full rounded-2xl shadow-none" size="lg">
@@ -36,7 +36,7 @@ export function UnclaimedCard({ id, name }: { id: string; name: string }) {
 export function SampleBanner() {
   return (
     <p className="mt-4 rounded-2xl bg-amber-400/20 p-3 text-sm font-semibold">
-      🧪 Sample spot: made up to show how Bite works. It isn't a real restaurant.
+      🧪 Sample spot: made up to show how Bity works. It isn't a real restaurant.
     </p>
   );
 }
@@ -78,7 +78,7 @@ export function ReportListing({ restaurantId }: { restaurantId: string }) {
         <DialogContent className="max-w-[400px] rounded-3xl">
           <DialogHeader>
             <DialogTitle>What's wrong?</DialogTitle>
-            <DialogDescription>Help us keep Bite accurate.</DialogDescription>
+            <DialogDescription>Help us keep Bity accurate.</DialogDescription>
           </DialogHeader>
           <div className="space-y-2" role="radiogroup">
             {REASONS.map((r) => (

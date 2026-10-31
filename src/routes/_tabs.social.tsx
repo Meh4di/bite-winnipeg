@@ -46,13 +46,13 @@ export const Route = createFileRoute("/_tabs/social")({
     s["tab"] === "tables" || s["tab"] === "match" ? { tab: s["tab"] } : {},
   head: () => ({
     meta: [
-      { title: "Social — Bite" },
+      { title: "Social — Bity" },
       {
         name: "description",
         content:
           "See where your friends eat, find people with your taste, and join a table for 4 at a Winnipeg restaurant.",
       },
-      { property: "og:title", content: "Social — Bite" },
+      { property: "og:title", content: "Social — Bity" },
       { property: "og:description", content: "Eat with people who share your taste." },
     ],
   }),
@@ -369,7 +369,7 @@ function Tables({ me }: { me: string }) {
               <div className="absolute inset-x-4 bottom-3 text-white">
                 <p className="text-lg font-extrabold leading-tight">{m.title}</p>
                 <p className="text-xs font-semibold opacity-90">
-                  {spot?.name ?? "A Bite spot"} · {spot?.neighbourhood}
+                  {spot?.name ?? "A Bity spot"} · {spot?.neighbourhood}
                 </p>
               </div>
             </div>
@@ -433,7 +433,7 @@ function Tables({ me }: { me: string }) {
           <ShieldCheck className="size-4 text-primary" /> Staying safe
         </p>
         <p className="mt-1">
-          18+ only, groups of 3 or more, and always at a Bite restaurant. Only people at a table see
+          18+ only, groups of 3 or more, and always at a Bity restaurant. Only people at a table see
           who's going. Block or report anyone from their profile.
         </p>
         <button

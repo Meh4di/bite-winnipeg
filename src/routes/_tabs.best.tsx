@@ -9,13 +9,13 @@ export const Route = createFileRoute("/_tabs/best")({
     typeof s["dish"] === "string" ? { dish: s["dish"] } : {},
   head: () => ({
     meta: [
-      { title: "Best in the Peg — Bite" },
+      { title: "Best in the Peg — Bity" },
       {
         name: "description",
         content:
           "Winnipeg's top-rated dishes, ranked by real customers. Best lattes, tacos, ramen and more.",
       },
-      { property: "og:title", content: "Best in the Peg — Bite" },
+      { property: "og:title", content: "Best in the Peg — Bity" },
       { property: "og:description", content: "Winnipeg's best dishes, ranked by locals." },
     ],
   }),

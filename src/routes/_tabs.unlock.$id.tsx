@@ -21,12 +21,12 @@ import { UnlockProgress } from "@/components/bite/UnlockCard";
 export const Route = createFileRoute("/_tabs/unlock/$id")({
   head: () => ({
     meta: [
-      { title: "Unlock deal — Bite" },
+      { title: "Unlock deal — Bity" },
       {
         name: "description",
         content: "Join with others to unlock a bigger discount at a Winnipeg restaurant.",
       },
-      { property: "og:title", content: "Help unlock this deal on Bite" },
+      { property: "og:title", content: "Help unlock this deal on Bity" },
       { property: "og:description", content: "If enough people join, everyone gets the deal." },
     ],
   }),
@@ -108,7 +108,7 @@ function UnlockPage() {
 
   const share = async () => {
     const url = `${window.location.origin}/unlock/${d.id}`;
-    const text = `Help me unlock ${d.title} at ${d.restaurants?.name} on Bite: ${formatPrice(d.deal_price_cents)} instead of ${formatPrice(d.regular_price_cents)}. ${Math.max(0, d.goal - d.joined)} more people needed!`;
+    const text = `Help me unlock ${d.title} at ${d.restaurants?.name} on Bity: ${formatPrice(d.deal_price_cents)} instead of ${formatPrice(d.regular_price_cents)}. ${Math.max(0, d.goal - d.joined)} more people needed!`;
     try {
       if (navigator.share) await navigator.share({ title: d.title, text, url });
       else {

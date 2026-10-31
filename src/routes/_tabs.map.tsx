@@ -11,13 +11,13 @@ export const Route = createFileRoute("/_tabs/map")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Map — Bite" },
+      { title: "Map — Bity" },
       {
         name: "description",
         content:
           "See Winnipeg restaurants near you with ratings, live busyness, wait times and deals.",
       },
-      { property: "og:title", content: "Map — Bite" },
+      { property: "og:title", content: "Map — Bity" },
       { property: "og:description", content: "Winnipeg food map with live busyness and deals." },
     ],
   }),

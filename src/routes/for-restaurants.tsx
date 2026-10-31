@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/for-restaurants")({
   head: () => ({
     meta: [
-      { title: "Bite for restaurants — free for 3 months" },
+      { title: "Bity for restaurants — free for 3 months" },
       {
         name: "description",
         content:
-          "List your Winnipeg restaurant or cafe on Bite. Pickup orders, drops, Save food deals and promos with no fees for your first 3 months.",
+          "List your Winnipeg restaurant or cafe on Bity. Pickup orders, drops, Save food deals and promos with no fees for your first 3 months.",
       },
-      { property: "og:title", content: "Bite for restaurants" },
+      { property: "og:title", content: "Bity for restaurants" },
       {
         property: "og:description",
         content: "Free for your first 3 months. No fees on orders or deals.",
@@ -93,11 +93,11 @@ const FEATURES = [
 const FAQ = [
   {
     q: "How do customers pay?",
-    a: "In the app, by card, Apple Pay or Google Pay, when they place a pickup order or claim a drop. Right now Bite is in test mode, so no real money moves yet.",
+    a: "In the app, by card, Apple Pay or Google Pay, when they place a pickup order or claim a drop. Right now Bity is in test mode, so no real money moves yet.",
   },
   {
     q: "How do I get paid?",
-    a: "Once payments go live, you'll connect a payout account in your dashboard and order money is sent straight to your bank. Bite never holds your menu prices.",
+    a: "Once payments go live, you'll connect a payout account in your dashboard and order money is sent straight to your bank. Bity never holds your menu prices.",
   },
   {
     q: "Why do you verify restaurants?",
@@ -105,10 +105,10 @@ const FAQ = [
   },
   {
     q: "Do you take a cut of my sales?",
-    a: "No. Delivery apps can take 20 to 30% of every order. Bite will charge a flat monthly fee instead, so you keep 100% of every sale. And your first 3 months are free.",
+    a: "No. Delivery apps can take 20 to 30% of every order. Bity will charge a flat monthly fee instead, so you keep 100% of every sale. And your first 3 months are free.",
   },
   {
-    q: "Why do customers like Bite?",
+    q: "Why do customers like Bity?",
     a: "Honest prices: what they see is what they pay, with taxes included, no service fees and no tip screen. Set your menu prices with tax included.",
   },
   {
@@ -144,7 +144,7 @@ function ForRestaurants() {
           🍁
         </span>
         <Link to="/" className="inline-flex items-center gap-1 text-sm font-semibold opacity-80">
-          <ArrowLeft className="size-4" /> Bite
+          <ArrowLeft className="size-4" /> Bity
         </Link>
         <p className="mt-6 text-xs font-extrabold uppercase tracking-widest text-primary">
           For restaurants & cafes
@@ -153,7 +153,7 @@ function ForRestaurants() {
           More customers. Less waste. <span className="text-primary">Keep 100%</span> of your sales.
         </h1>
         <p className="mt-3 text-[15px] opacity-80">
-          Bite is Winnipeg's food app for pickup orders, hype drops and rescuing end-of-day food.
+          Bity is Winnipeg's food app for pickup orders, hype drops and rescuing end-of-day food.
         </p>
         <div className="mt-6">{cta}</div>
         <p className="mt-3 text-center text-sm opacity-80">

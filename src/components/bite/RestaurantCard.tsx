@@ -78,7 +78,7 @@ export function RestaurantCard({
             <Badge className="bg-success text-success-foreground">♻️ Save food</Badge>
           )}
           {open === false && <Badge className="bg-foreground/75 text-background">Closed</Badge>}
-          {unclaimed && <Badge className="bg-background/90 text-foreground">Not on Bite yet</Badge>}
+          {unclaimed && <Badge className="bg-background/90 text-foreground">Not on Bity yet</Badge>}
           {r.is_sample && <Badge className="bg-amber-400 text-black">Sample</Badge>}
           {open && busy && (
             <Badge className={busy.pill}>

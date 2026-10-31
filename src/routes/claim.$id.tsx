@@ -16,10 +16,10 @@ export const Route = createFileRoute("/claim/$id")({
   },
   head: () => ({
     meta: [
-      { title: "Claim your restaurant — Bite" },
+      { title: "Claim your restaurant — Bity" },
       {
         name: "description",
-        content: "Own this restaurant? Claim it on Bite for free and start posting deals.",
+        content: "Own this restaurant? Claim it on Bity for free and start posting deals.",
       },
     ],
   }),
@@ -123,7 +123,7 @@ function Claim() {
         </div>
       ) : claimed ? (
         <div className="mx-5 mt-5 rounded-3xl bg-secondary p-6 text-center">
-          <p className="text-lg font-extrabold">This restaurant is already on Bite</p>
+          <p className="text-lg font-extrabold">This restaurant is already on Bity</p>
           <p className="mt-1 text-sm text-muted-foreground">
             If you run it and didn't set this up, report it from the restaurant's page and we'll
             sort it out.
@@ -150,7 +150,7 @@ function Claim() {
             userId={userId}
             restaurant={{ id: r.id, name: r.name, phone: r.phone }}
             title="Prove it's yours"
-            intro="So nobody can take over your listing or post deals in your name. Only the Bite team sees this."
+            intro="So nobody can take over your listing or post deals in your name. Only the Bity team sees this."
             onDone={() => navigate({ to: "/owner" })}
           />
         </>

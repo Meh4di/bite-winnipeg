@@ -13,7 +13,7 @@ import { formatPrice } from "@/lib/bite";
 import { supabase } from "@/integrations/supabase/client";
 import { testPayment } from "@/lib/order-payment";
 export const Route = createFileRoute("/checkout")({
-  head: () => ({ meta: [{ title: "Pickup checkout — Bite" }, { name: "description", content: "Review your Bite pickup order and choose a pickup time. Test payments only." }, { property: "og:title", content: "Pickup checkout — Bite" }, { property: "og:description", content: "Your Winnipeg pickup order." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  head: () => ({ meta: [{ title: "Pickup checkout — Bity" }, { name: "description", content: "Review your Bity pickup order and choose a pickup time. Test payments only." }, { property: "og:title", content: "Pickup checkout — Bity" }, { property: "og:description", content: "Your Winnipeg pickup order." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: Checkout,
 });
 function Checkout() {

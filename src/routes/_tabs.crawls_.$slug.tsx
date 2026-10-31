@@ -8,10 +8,10 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/_tabs/crawls_/$slug")({
   head: () => ({
     meta: [
-      { title: "Food crawl — Bite" },
-      { name: "description", content: "A Winnipeg food crawl on Bite." },
-      { property: "og:title", content: "Food crawl — Bite" },
-      { property: "og:description", content: "A Winnipeg food crawl on Bite." },
+      { title: "Food crawl — Bity" },
+      { name: "description", content: "A Winnipeg food crawl on Bity." },
+      { property: "og:title", content: "Food crawl — Bity" },
+      { property: "og:description", content: "A Winnipeg food crawl on Bity." },
     ],
   }),
   component: CrawlPage,

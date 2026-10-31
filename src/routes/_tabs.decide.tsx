@@ -13,12 +13,12 @@ import { RestaurantCard } from "@/components/bite/RestaurantCard";
 export const Route = createFileRoute("/_tabs/decide")({
   head: () => ({
     meta: [
-      { title: "Decide — Bite" },
+      { title: "Decide — Bity" },
       {
         name: "description",
         content: "Can't choose where to eat? Spin the roulette or swipe with friends.",
       },
-      { property: "og:title", content: "Decide — Bite" },
+      { property: "og:title", content: "Decide — Bity" },
       { property: "og:description", content: "Spin or swipe to pick where to eat in Winnipeg." },
     ],
   }),

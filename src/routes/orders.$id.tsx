@@ -7,7 +7,7 @@ import { formatPrice } from "@/lib/bite";
 import { Button } from "@/components/ui/button";
 import { TabBar } from "@/components/bite/TabBar";
 export const Route = createFileRoute("/orders/$id")({
-  head: () => ({ meta: [{ title: "Track your pickup — Bite" }, { name: "description", content: "Follow your Bite order from paid to ready for pickup." }, { property: "og:title", content: "Track your pickup — Bite" }, { property: "og:description", content: "Your pickup order status on Bite." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  head: () => ({ meta: [{ title: "Track your pickup — Bity" }, { name: "description", content: "Follow your Bity order from paid to ready for pickup." }, { property: "og:title", content: "Track your pickup — Bity" }, { property: "og:description", content: "Your pickup order status on Bity." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: OrderTracking,
 });
 function OrderTracking() {

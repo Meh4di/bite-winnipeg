@@ -98,7 +98,7 @@ export function VerifyStatusCard({
             <p className="mt-2 text-2xl font-extrabold leading-tight">Get verified to go live</p>
             <p className="mt-1 text-sm opacity-80">
               Your page is private until we confirm you run this restaurant. That keeps fake
-              listings off Bite and protects your name.
+              listings off Bity and protects your name.
             </p>
             <Button asChild size="lg" className="mt-4 w-full rounded-2xl">
               <Link to="/owner/verify">Verify my business</Link>

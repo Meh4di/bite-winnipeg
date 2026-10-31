@@ -61,7 +61,7 @@ function Setup() {
       <h1 className="text-2xl font-extrabold">{r ? "Restaurant details" : "Set up your restaurant"}</h1>
       {!r && (
         <p className="rounded-2xl bg-primary-soft p-4 text-sm font-semibold text-primary">
-          🍁 Founding partner offer: Bite is free for your first 3 months. No fees on orders, drops, deals or promotions.
+          🍁 Founding partner offer: Bity is free for your first 3 months. No fees on orders, drops, deals or promotions.
         </p>
       )}
       <ImagePick bucket="restaurant-covers" userId={userId} value={f.cover_url} onChange={(u) => set("cover_url", u)} label="Cover photo" className="h-40 w-full" />

@@ -18,7 +18,7 @@ export const Route = createFileRoute("/admin")({
       .eq("user_id", data.user.id);
     if (!roles?.some((r) => r.role === "admin")) throw redirect({ to: "/" });
   },
-  head: () => ({ meta: [{ title: "Bite admin" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Bity admin" }, { name: "robots", content: "noindex" }] }),
   component: Admin,
 });
 
@@ -27,7 +27,7 @@ const CHECKS = [
   "Call the phone number on Google Maps (not the one they typed). Ask for the person who applied.",
   "Do the documents match the business name and address?",
   "If they gave a business number, look it up in the Manitoba Companies Office registry.",
-  "Is anyone else already verified for this restaurant on Bite?",
+  "Is anyone else already verified for this restaurant on Bity?",
 ];
 
 function Admin() {

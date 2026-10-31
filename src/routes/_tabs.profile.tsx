@@ -14,10 +14,10 @@ import { getVortexPreview, setVortexPreview, useTheme, type ThemeChoice } from "
 export const Route = createFileRoute("/_tabs/profile")({
   head: () => ({
     meta: [
-      { title: "Profile — Bite" },
-      { name: "description", content: "Your Bite profile and followed Winnipeg restaurants." },
-      { property: "og:title", content: "Profile — Bite" },
-      { property: "og:description", content: "Your Bite profile." },
+      { title: "Profile — Bity" },
+      { name: "description", content: "Your Bity profile and followed Winnipeg restaurants." },
+      { property: "og:title", content: "Profile — Bity" },
+      { property: "og:description", content: "Your Bity profile." },
     ],
   }),
   component: Profile,
@@ -63,7 +63,7 @@ function Profile() {
     return (
       <div className="flex min-h-[80vh] flex-col items-center justify-center px-8 text-center animate-screen">
         <div className="text-6xl">🍩</div>
-        <h1 className="mt-4 text-3xl font-extrabold">Join Bite</h1>
+        <h1 className="mt-4 text-3xl font-extrabold">Join Bity</h1>
         <p className="mt-2 text-muted-foreground">
           Follow your favourite spots and start collecting stamps.
         </p>

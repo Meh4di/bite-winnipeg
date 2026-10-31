@@ -12,12 +12,12 @@ import { useMyRestaurant } from "./owner";
 export const Route = createFileRoute("/owner/stamps")({
   head: () => ({
     meta: [
-      { title: "Stamp code — Bite Business" },
+      { title: "Stamp code — Bity Business" },
       {
         name: "description",
         content: "Show this code at your counter so customers can collect passport stamps.",
       },
-      { property: "og:title", content: "Stamp code — Bite Business" },
+      { property: "og:title", content: "Stamp code — Bity Business" },
       { property: "og:description", content: "Your counter stamp code." },
     ],
   }),
@@ -94,7 +94,7 @@ function StampCode() {
 
   const card = (
     <div className="flex flex-col items-center rounded-3xl bg-card p-6 text-center shadow-card">
-      <p className="text-sm font-bold uppercase tracking-wider text-primary">🍁 Bite Passport</p>
+      <p className="text-sm font-bold uppercase tracking-wider text-primary">🍁 Bity Passport</p>
       <h2 className="mt-1 text-2xl font-extrabold">Scan for a stamp</h2>
       <div className="mt-4 aspect-square w-full max-w-[320px] rounded-2xl bg-white p-3">
         {qr ? (

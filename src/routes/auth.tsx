@@ -18,13 +18,13 @@ export const Route = createFileRoute("/auth")({
   },
   head: () => ({
     meta: [
-      { title: "Sign in — Bite" },
+      { title: "Sign in — Bity" },
       {
         name: "description",
-        content: "Sign in or create your Bite account as a foodie or restaurant owner.",
+        content: "Sign in or create your Bity account as a foodie or restaurant owner.",
       },
-      { property: "og:title", content: "Sign in — Bite" },
-      { property: "og:description", content: "Join Bite, Winnipeg's food app." },
+      { property: "og:title", content: "Sign in — Bity" },
+      { property: "og:description", content: "Join Bity, Winnipeg's food app." },
     ],
   }),
   component: AuthPage,
@@ -151,8 +151,8 @@ function AuthPage() {
   return (
     <div className="flex min-h-dvh flex-col px-6 pb-10 pt-[max(env(safe-area-inset-top),3rem)] animate-screen">
       <div className="flex items-center gap-3">
-        <img src="/icons/icon-192.png" alt="Bite" className="size-14 rounded-2xl shadow-pop" />
-        <span className="font-display text-3xl font-extrabold">bite</span>
+        <img src="/icons/icon-192.png" alt="Bity" className="size-14 rounded-2xl shadow-pop" />
+        <span className="font-display text-3xl font-extrabold">bity</span>
       </div>
       <h1 className="mt-8 text-4xl font-extrabold leading-[1.05]">
         {mode === "signin" ? "Welcome back." : "Winnipeg's tastiest app."}

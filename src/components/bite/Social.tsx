@@ -96,7 +96,7 @@ export const TABLE_RULES = [
   [
     "🍽️",
     "Public spots only",
-    "Every table is at a restaurant on Bite, never a home or private place.",
+    "Every table is at a restaurant on Bity, never a home or private place.",
   ],
   ["🙈", "Your info stays private", "Only people who join a table see who else is going."],
   [

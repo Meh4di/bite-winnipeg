@@ -9,6 +9,7 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
+- The app is called **Bity** (renamed from Bite on 2026-10-30). Code paths and identifiers still say `bite`; only user-facing text changed.
 - Pickup checkout uses the authenticated `checkout_test_order` database function for atomic price calculation, availability, scheduling, and initial paid status; browser totals are never authoritative.
 - Fulfillment status is updated under owner RLS with column-level grants and a transition trigger; pickup stamps are created by an idempotent database trigger.
 - Cart state is shared at the app root and persists client-side for sign-in returns; payment providers are isolated behind the payment adapter.

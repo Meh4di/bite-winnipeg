@@ -21,13 +21,13 @@ import { ValueCard } from "@/components/bite/ValueCard";
 export const Route = createFileRoute("/_tabs/")({
   head: () => ({
     meta: [
-      { title: "Bite — Discover Winnipeg restaurants & cafes" },
+      { title: "Bity — Discover Winnipeg restaurants & cafes" },
       {
         name: "description",
         content:
           "Winnipeg food drops, food rescue deals, the best dishes in the Peg, food crawls and live wait times.",
       },
-      { property: "og:title", content: "Bite — Discover Winnipeg restaurants & cafes" },
+      { property: "og:title", content: "Bity — Discover Winnipeg restaurants & cafes" },
       {
         property: "og:description",
         content: "Find Winnipeg cafes, bakeries, taco spots and more.",
@@ -110,7 +110,7 @@ function Home() {
   const searching = !!q.trim() || !!cat;
   const list = useMemo(() => {
     const s = q.trim().toLowerCase();
-    // Spots that are on Bite (deals, ordering) first, then the rest of the city.
+    // Spots that are on Bity (deals, ordering) first, then the rest of the city.
     return (data ?? [])
       .filter(
         (r) =>
@@ -581,7 +581,7 @@ function Home() {
                 For restaurants
               </p>
               <p className="mt-1 text-xl font-extrabold leading-tight">
-                Own a spot? Join Bite free for 3 months.
+                Own a spot? Join Bity free for 3 months.
               </p>
               <p className="mt-1 text-sm opacity-80">
                 Pickup orders, drops and Save food deals with no fees.

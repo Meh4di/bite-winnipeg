@@ -10,13 +10,13 @@ export const Route = createFileRoute("/_tabs/eats")({
     s["f"] === "10" || s["f"] === "small" ? { f: s["f"] } : {},
   head: () => ({
     meta: [
-      { title: "Eat well for less — Bite" },
+      { title: "Eat well for less — Bity" },
       {
         name: "description",
         content:
           "Good food under $15 and small plates from local Winnipeg spots. The price you see is the price you pay.",
       },
-      { property: "og:title", content: "Eat well for less in Winnipeg — Bite" },
+      { property: "og:title", content: "Eat well for less in Winnipeg — Bity" },
       { property: "og:description", content: "Honest prices from local spots." },
     ],
   }),

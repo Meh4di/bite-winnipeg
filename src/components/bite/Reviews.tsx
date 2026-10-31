@@ -177,7 +177,7 @@ export function ReviewsSection({
             </Button>
           ) : verified.isSuccess ? (
             <p className="rounded-2xl bg-card p-4 text-sm text-muted-foreground shadow-card">
-              ✅ Reviews on Bite are from real customers. Order, grab a drop, or scan the counter
+              ✅ Reviews on Bity are from real customers. Order, grab a drop, or scan the counter
               code here once and you can review.
             </p>
           ) : null}

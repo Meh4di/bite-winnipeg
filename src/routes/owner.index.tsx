@@ -81,7 +81,7 @@ function Dashboard() {
     return (
       <div className="px-6 pt-12 text-center animate-screen">
         <p className="text-6xl">👩‍🍳</p>
-        <h1 className="mt-4 text-3xl font-extrabold">Let's get your spot on Bite</h1>
+        <h1 className="mt-4 text-3xl font-extrabold">Let's get your spot on Bity</h1>
         <p className="mt-2 text-muted-foreground">Add your details, hours and photos. Takes about 3 minutes.</p>
         <Button asChild size="xl" className="mt-6 w-full">
           <Link to="/owner/setup">Set up my restaurant</Link>

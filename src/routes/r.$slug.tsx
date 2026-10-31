@@ -24,10 +24,10 @@ import { useDishLeaderboard, useDishRatings } from "@/lib/dishes";
 export const Route = createFileRoute("/r/$slug")({
   head: () => ({
     meta: [
-      { title: "Restaurant menu — Bite" },
-      { name: "description", content: "Menu, hours and location for a Winnipeg spot on Bite." },
-      { property: "og:title", content: "Restaurant menu — Bite" },
-      { property: "og:description", content: "Menu, hours and location on Bite." },
+      { title: "Restaurant menu — Bity" },
+      { name: "description", content: "Menu, hours and location for a Winnipeg spot on Bity." },
+      { property: "og:title", content: "Restaurant menu — Bity" },
+      { property: "og:description", content: "Menu, hours and location on Bity." },
     ],
   }),
   component: RestaurantPage,
@@ -175,7 +175,7 @@ function RestaurantPage() {
           )}
           <div className="pb-1">
             {unclaimed ? (
-              <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-bold">Not on Bite yet</span>
+              <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-bold">Not on Bity yet</span>
             ) : (
               <OpenBadge open={open} />
             )}

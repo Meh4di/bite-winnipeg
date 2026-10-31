@@ -191,7 +191,7 @@ function MenuManager() {
               <label className="block text-sm font-semibold">
                 Who can see it
                 <select className={`${field} mt-1`} value={draft.required_level} onChange={(e) => setDraft({ ...draft, required_level: Number(e.target.value) })}>
-                  <option value={0}>Any signed-in Bite user</option>
+                  <option value={0}>Any signed-in Bity user</option>
                   <option value={1}>🥈 Silver and up (5+ stamps)</option>
                   <option value={2}>🥇 Gold and up (15+ stamps)</option>
                   <option value={3}>🍁 Maple only (30+ stamps)</option>

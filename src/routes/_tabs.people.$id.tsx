@@ -45,8 +45,8 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export const Route = createFileRoute("/_tabs/people/$id")({
   head: () => ({
     meta: [
-      { title: "Foodie — Bite" },
-      { name: "description", content: "A foodie on Bite, Winnipeg's food app." },
+      { title: "Foodie — Bity" },
+      { name: "description", content: "A foodie on Bity, Winnipeg's food app." },
     ],
   }),
   component: PersonPage,

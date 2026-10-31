@@ -116,7 +116,7 @@ export function FreeBanner({ freeUntil }: { freeUntil: string | null }) {
     <section className="rounded-3xl bg-warm p-4 text-primary-foreground shadow-pop">
       <p className="text-xs font-bold uppercase tracking-wider opacity-90">🍁 Founding partner</p>
       <p className="mt-1 text-lg font-extrabold leading-tight">
-        Bite is free for you until{" "}
+        Bity is free for you until{" "}
         {end.toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" })}
       </p>
       <p className="mt-1 text-sm opacity-90">

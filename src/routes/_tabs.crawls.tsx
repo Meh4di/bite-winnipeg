@@ -6,12 +6,12 @@ import { useCrawls, useStampedSpots } from "@/lib/crawls";
 export const Route = createFileRoute("/_tabs/crawls")({
   head: () => ({
     meta: [
-      { title: "Food crawls — Bite" },
+      { title: "Food crawls — Bity" },
       {
         name: "description",
         content: "Curated Winnipeg food crawls. Visit every stop, collect stamps, earn rewards.",
       },
-      { property: "og:title", content: "Food crawls — Bite" },
+      { property: "og:title", content: "Food crawls — Bity" },
       { property: "og:description", content: "Winnipeg food crawls and quests." },
     ],
   }),
