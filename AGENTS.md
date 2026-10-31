@@ -49,3 +49,10 @@
 - Owners claim at `/claim/$id` (same `submit_verification` RPC, `kind = 'claim'`; grants the restaurant_owner role). Approval sets `owner_id` to the claimer and verifies; a rejected claim leaves the listing unclaimed.
 - `restaurants.is_sample` marks the 6 made-up demo spots (shown with a "Sample" badge). Delete them before launch.
 - Unknown hours: use `openState()` (null = don't show Open/Closed) and `displayAddress()` from `src/lib/bite.ts`.
+
+## Bity Map (migration 0013)
+- Tab bar: Home, Map, Drops, Social, Profile. Passport is a card in Profile (route `/passport` still exists).
+- Map: heat glow from `map_heat()` (stamps, orders, reviews, unlock joins, directions taps, votes in the last 7 days), "Best in the Peg" layers from community votes (`spot_votes`, `vote_spot`, `best_spots`; one vote per person per category, votes from people with a stamp there count double; owners can't vote for themselves; sample spots can't be voted for).
+- Interest counts: `log_spot_event(view|directions)` for signed-in users, once per person per spot per hour; never location tracking. Owner sees totals via `owner_report()` ("Bity sent you" card); verified visits = counter stamps + pickups + unlock redemptions.
+- Admin > Map pins fills missing lat/lng from OpenStreetMap Nominatim (1 lookup/sec, Winnipeg bounds enforced by `admin_set_location`).
+- Rule: rankings are never for sale. Anything paid on the map must be labelled Sponsored and kept out of rankings.

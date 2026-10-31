@@ -92,6 +92,13 @@
       "when": 1793401000000,
       "tag": "0012_friends_only_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793402000000,
+      "tag": "0013_bity_map",
+      "breakpoints": true
     }
   ]
 }

@@ -102,6 +102,18 @@ function Profile() {
         </span>
       </div>
 
+      <Link
+        to="/passport"
+        className="mt-4 flex items-center gap-3 rounded-2xl bg-gradient-to-br from-primary to-[oklch(0.45_0.2_28)] p-4 text-primary-foreground shadow-pop active:scale-[0.98]"
+      >
+        <span className="text-3xl">🍁</span>
+        <span className="flex-1">
+          <span className="block font-extrabold">My Passport</span>
+          <span className="block text-xs opacity-90">Stamps, rewards, badges and crawls</span>
+        </span>
+        <ChevronRight className="size-5" />
+      </Link>
+
       {role === "restaurant_owner" && (
         <Link
           to="/owner"

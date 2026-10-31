@@ -4,6 +4,7 @@ import { lazy, Suspense, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useHouseSpecials, useLiveQueue, useRatings } from "@/lib/community";
 import { dropState, useDrops, useNow } from "@/lib/live";
+import { useHeat } from "@/lib/map";
 
 const MapView = lazy(() => import("@/components/bite/MapView"));
 
@@ -15,7 +16,7 @@ export const Route = createFileRoute("/_tabs/map")({
       {
         name: "description",
         content:
-          "See Winnipeg restaurants near you with ratings, live busyness, wait times and deals.",
+          "Winnipeg's live food map: the best spots voted by locals, what's hot this week, what's open now, and deals.",
       },
       { property: "og:title", content: "Map — Bity" },
       { property: "og:description", content: "Winnipeg food map with live busyness and deals." },
@@ -31,6 +32,7 @@ function MapPage() {
   const queue = useLiveQueue();
   const specials = useHouseSpecials();
   const drops = useDrops();
+  const heat = useHeat();
 
   const spots = useQuery({
     queryKey: ["restaurants", "map"],
@@ -38,7 +40,7 @@ function MapPage() {
       const { data, error } = await supabase
         .from("restaurants")
         .select(
-          "id, slug, name, category, neighbourhood, address, cover_url, lat, lng, hours, busy_level, wait_minutes, busy_updated_at",
+          "id, slug, name, category, neighbourhood, address, cover_url, lat, lng, hours, busy_level, wait_minutes, busy_updated_at, verification_status, is_sample",
         )
         .eq("is_active", true);
       if (error) throw error;
@@ -84,6 +86,7 @@ function MapPage() {
           queue: queue.data ?? new Map(),
           specials: specials.data ?? new Map(),
           deals,
+          heat: heat.data ?? new Map(),
         }}
       />
     </Suspense>

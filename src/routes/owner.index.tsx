@@ -1,6 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronRight, Eye, LockOpen, LogOut, QrCode, Store, UtensilsCrossed, Zap } from "lucide-react";
+import {
+  ChevronRight,
+  Eye,
+  LockOpen,
+  LogOut,
+  QrCode,
+  Store,
+  UtensilsCrossed,
+  Zap,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { openState } from "@/lib/bite";
@@ -11,6 +20,7 @@ import { OwnerInsights } from "@/components/bite/OwnerInsights";
 import { FreeBanner, OwnerBusy, OwnerForward } from "@/components/bite/OwnerBusy";
 import { OwnerReviews } from "@/components/bite/OwnerReviews";
 import { isVerified, VerifyStatusCard } from "@/components/bite/Verification";
+import { OwnerTraffic } from "@/components/bite/OwnerTraffic";
 
 export const Route = createFileRoute("/owner/")({
   component: Dashboard,
@@ -26,8 +36,14 @@ function Dashboard() {
     queryFn: async () => {
       if (!r) return { items: 0, follows: 0 };
       const [items, follows] = await Promise.all([
-        supabase.from("menu_items").select("id", { count: "exact", head: true }).eq("restaurant_id", r.id),
-        supabase.from("follows").select("user_id", { count: "exact", head: true }).eq("restaurant_id", r.id),
+        supabase
+          .from("menu_items")
+          .select("id", { count: "exact", head: true })
+          .eq("restaurant_id", r.id),
+        supabase
+          .from("follows")
+          .select("user_id", { count: "exact", head: true })
+          .eq("restaurant_id", r.id),
       ]);
       return { items: items.count ?? 0, follows: follows.count ?? 0 };
     },
@@ -82,7 +98,9 @@ function Dashboard() {
       <div className="px-6 pt-12 text-center animate-screen">
         <p className="text-6xl">👩‍🍳</p>
         <h1 className="mt-4 text-3xl font-extrabold">Let's get your spot on Bity</h1>
-        <p className="mt-2 text-muted-foreground">Add your details, hours and photos. Takes about 3 minutes.</p>
+        <p className="mt-2 text-muted-foreground">
+          Add your details, hours and photos. Takes about 3 minutes.
+        </p>
         <Button asChild size="xl" className="mt-6 w-full">
           <Link to="/owner/setup">Set up my restaurant</Link>
         </Button>
@@ -99,6 +117,7 @@ function Dashboard() {
       {isVerified(r) && (
         <>
           <FreeBanner freeUntil={r.free_until} />
+          <OwnerTraffic restaurantId={r.id} />
           <OwnerBusy restaurant={r} />
           <OwnerForward restaurantId={r.id} enabled={r.pay_it_forward} />
           <OwnerOrders restaurant={r} />
@@ -134,7 +153,10 @@ function Dashboard() {
       <Row to="/owner/stamps" icon={QrCode} label="Counter stamp code" />
       <Row to="/owner/menu" icon={UtensilsCrossed} label="Manage menu" />
       <Row to="/owner/setup" icon={Store} label="Edit details, hours & photos" />
-      <button onClick={signOut} className="flex h-14 w-full items-center gap-3 px-4 text-muted-foreground">
+      <button
+        onClick={signOut}
+        className="flex h-14 w-full items-center gap-3 px-4 text-muted-foreground"
+      >
         <LogOut className="size-5" /> Log out
       </button>
     </div>
@@ -150,9 +172,20 @@ function Stat({ label, value }: { label: string; value?: number | undefined }) {
   );
 }
 
-function Row({ to, icon: Icon, label }: { to: "/owner/menu" | "/owner/setup" | "/owner/drops" | "/owner/stamps" | "/owner/unlock"; icon: typeof Store; label: string }) {
+function Row({
+  to,
+  icon: Icon,
+  label,
+}: {
+  to: "/owner/menu" | "/owner/setup" | "/owner/drops" | "/owner/stamps" | "/owner/unlock";
+  icon: typeof Store;
+  label: string;
+}) {
   return (
-    <Link to={to} className="flex h-16 items-center gap-3 rounded-2xl bg-card px-4 shadow-card active:scale-[0.98]">
+    <Link
+      to={to}
+      className="flex h-16 items-center gap-3 rounded-2xl bg-card px-4 shadow-card active:scale-[0.98]"
+    >
       <Icon className="size-5 text-primary" />
       <span className="flex-1 font-semibold">{label}</span>
       <ChevronRight className="size-5 text-muted-foreground" />

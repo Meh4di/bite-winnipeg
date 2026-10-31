@@ -86,8 +86,94 @@ function Admin() {
           />
         ))}
       </div>
+      <MapPinFinder />
       <ListingReports />
     </div>
+  );
+}
+
+/** One-time helper: finds map pins for listings from their street address (OpenStreetMap). */
+function MapPinFinder() {
+  const qc = useQueryClient();
+  const missing = useQuery({
+    queryKey: ["missing-pins"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("restaurants")
+        .select("id, name, address")
+        .eq("is_active", true)
+        .is("lat", null)
+        .not("address", "is", null)
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+  const [running, setRunning] = useState(false);
+  const [done, setDone] = useState(0);
+  const [failed, setFailed] = useState<string[]>([]);
+
+  const run = async () => {
+    const list = missing.data ?? [];
+    setRunning(true);
+    setDone(0);
+    setFailed([]);
+    for (const r of list) {
+      // OpenStreetMap asks for at most one lookup per second.
+      await new Promise((res) => setTimeout(res, 1100));
+      const street = (r.address ?? "")
+        .replace(/,\s*(Unit|Suite)\s+[^,]+/gi, "")
+        .replace(/,\s*Concourse Level/gi, "")
+        .replace(/,\s*Winnipeg(,\s*MB)?\s*$/i, "");
+      try {
+        const url =
+          "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=ca&bounded=1" +
+          "&viewbox=-97.45,50.05,-96.85,49.70&q=" +
+          encodeURIComponent(`${street}, Winnipeg, Manitoba`);
+        const res = await fetch(url, { headers: { Accept: "application/json" } });
+        const hits = (await res.json()) as { lat: string; lon: string }[];
+        const hit = hits[0];
+        if (!hit) throw new Error("not found");
+        const { error } = await supabase.rpc("admin_set_location", {
+          p_restaurant_id: r.id,
+          p_lat: Number(hit.lat),
+          p_lng: Number(hit.lon),
+        });
+        if (error) throw error;
+      } catch {
+        setFailed((f) => [...f, r.name]);
+      }
+      setDone((n) => n + 1);
+    }
+    setRunning(false);
+    qc.invalidateQueries({ queryKey: ["missing-pins"] });
+    qc.invalidateQueries({ queryKey: ["restaurants"] });
+    toast.success("Map pins updated");
+  };
+
+  const total = missing.data?.length ?? 0;
+  return (
+    <section className="mt-10">
+      <h2 className="text-2xl font-extrabold">Map pins</h2>
+      <p className="text-sm text-muted-foreground">
+        {total
+          ? `${total} spots have an address but no pin on the map yet.`
+          : "Every listed spot is on the map. 🗺️"}
+      </p>
+      {total > 0 && (
+        <Button className="mt-3 w-full rounded-2xl" size="lg" disabled={running} onClick={run}>
+          {running ? `Finding pins… ${done} of ${total}` : `Find map pins for ${total} spots`}
+        </Button>
+      )}
+      {failed.length > 0 && (
+        <p className="mt-2 rounded-2xl bg-secondary p-3 text-xs">
+          Couldn't find: {failed.join(", ")}. Owners can drop their pin when they claim the spot.
+        </p>
+      )}
+      <p className="mt-2 text-[11px] text-muted-foreground">
+        Locations from OpenStreetMap. Takes about a second per spot.
+      </p>
+    </section>
   );
 }
 

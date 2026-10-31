@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { DAYS, displayAddress, emojiFor, formatPrice, formatTime, hasHours, openState, winnipegNow, type Hours } from "@/lib/bite";
 import { ReportListing, SampleBanner, UnclaimedCard } from "@/components/bite/Listing";
+import { logSpotEvent } from "@/lib/map";
 import { OpenBadge } from "@/components/bite/RestaurantCard";
 import { useEffect } from "react";
 import { useCart } from "@/lib/cart";
@@ -60,6 +61,10 @@ function RestaurantPage() {
   });
 
   const rid = data?.r.id;
+  // Counts toward the owner's "Bity sent you" report (once per person per hour, no tracking).
+  useEffect(() => {
+    if (rid) logSpotEvent(rid, "view");
+  }, [rid]);
   const now = useNow(1000);
   const drops = useDrops(rid);
   const promos = usePromotions(rid);
@@ -208,6 +213,7 @@ function RestaurantPage() {
           {r.address && (
             <a
               href={`https://maps.google.com/?q=${encodeURIComponent(`${displayAddress(r.address)}, MB`)}`}
+              onClick={() => logSpotEvent(r.id, "directions")}
               target="_blank"
               rel="noreferrer"
               className="flex items-center gap-3 text-sm"

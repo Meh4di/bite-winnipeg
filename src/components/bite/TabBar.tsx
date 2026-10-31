@@ -1,12 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { Home, Zap, Stamp, Users, User } from "lucide-react";
+import { Home, Map as MapIcon, Zap, Users, User } from "lucide-react";
 import { useVortex } from "@/lib/weather";
 
 const TABS = [
   { to: "/", label: "Home", icon: Home },
+  { to: "/map", label: "Map", icon: MapIcon },
   { to: "/drops", label: "Drops", icon: Zap },
   { to: "/social", label: "Social", icon: Users },
-  { to: "/passport", label: "Passport", icon: Stamp },
   { to: "/profile", label: "Profile", icon: User },
 ] as const;
 

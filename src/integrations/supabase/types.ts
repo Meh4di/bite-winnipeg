@@ -1172,6 +1172,35 @@ export type Database = {
           },
         ]
       }
+      spot_votes: {
+        Row: {
+          category: string
+          restaurant_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          restaurant_id: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          category?: string
+          restaurant_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spot_votes_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stamps: {
         Row: {
           created_at: string
@@ -1472,8 +1501,13 @@ export type Database = {
         }[]
       }
       admin_resolve_listing: { Args: { p_hide: boolean; p_restaurant_id: string }; Returns: undefined }
+      admin_set_location: { Args: { p_lat: number; p_lng: number; p_restaurant_id: string }; Returns: undefined }
       are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
       become_restaurant_owner: { Args: never; Returns: undefined }
+      best_spots: {
+        Args: { p_category: string }
+        Returns: { restaurant_id: string; score: number; verified: number; votes: number }[]
+      }
       blocked_between: { Args: { _a: string; _b: string }; Returns: boolean }
       buy_forward: {
         Args: { p_amount_cents: number; p_label: string; p_restaurant_id: string }
@@ -1506,6 +1540,7 @@ export type Database = {
         }
         Returns: string
       }
+      clear_vote: { Args: { p_category: string }; Returns: undefined }
       create_decide_session: {
         Args: { p_category?: string }
         Returns: {
@@ -1577,7 +1612,25 @@ export type Database = {
           restaurant_id: string
         }[]
       }
+      log_spot_event: { Args: { p_kind: string; p_restaurant_id: string }; Returns: undefined }
+      map_heat: {
+        Args: never
+        Returns: { heat: number; hot_item: string | null; restaurant_id: string; reviews: number; visits_week: number }[]
+      }
       my_level: { Args: never; Returns: number }
+      owner_report: {
+        Args: { p_days?: number; p_restaurant_id: string }
+        Returns: {
+          best_rank: string | null
+          directions: number
+          new_followers: number
+          pickups: number
+          redemptions: number
+          verified_visits: number
+          views: number
+          votes: number
+        }[]
+      }
       owns_restaurant: { Args: { _restaurant_id: string }; Returns: boolean }
       redeem_reward: {
         Args: { p_restaurant_id: string }
@@ -1704,6 +1757,7 @@ export type Database = {
           website: string | null
         }[]
       }
+      vote_spot: { Args: { p_category: string; p_restaurant_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "customer" | "restaurant_owner" | "admin"
