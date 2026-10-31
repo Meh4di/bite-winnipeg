@@ -90,8 +90,8 @@ export const TABLE_RULES = [
   ["🔞", "18+ only", "Everyone at a table has added a birthday showing they're 18 or older."],
   [
     "👥",
-    "Groups of 3 or more",
-    "Tables need at least 3 seats. No one-on-one meetups with strangers.",
+    "Friends only",
+    "Only people you follow who follow you back can see or join your table. No strangers.",
   ],
   [
     "🍽️",

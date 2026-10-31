@@ -50,10 +50,13 @@ export const Route = createFileRoute("/_tabs/social")({
       {
         name: "description",
         content:
-          "See where your friends eat, find people with your taste, and join a table for 4 at a Winnipeg restaurant.",
+          "See where your friends eat, find people with your taste, and plan meals with friends at Winnipeg restaurants.",
       },
       { property: "og:title", content: "Social — Bity" },
-      { property: "og:description", content: "Eat with people who share your taste." },
+      {
+        property: "og:description",
+        content: "See where your friends eat and plan meals together.",
+      },
     ],
   }),
   component: Social,
@@ -76,7 +79,9 @@ function Social() {
     <div className="animate-screen pt-[max(env(safe-area-inset-top),1.25rem)]">
       <header className="px-5">
         <h1 className="text-[32px] font-extrabold leading-none tracking-tight">Social</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Eat with people who share your taste.</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          See where your friends eat and plan meals together.
+        </p>
       </header>
 
       <div className="mt-4 px-5">
@@ -138,7 +143,7 @@ function SignedOut() {
       <div className="text-6xl">🍽️</div>
       <h1 className="mt-4 text-3xl font-extrabold">Eat with your people</h1>
       <p className="mt-2 text-muted-foreground">
-        Find foodies with your taste, see where friends eat, and grab a seat at a table for 4.
+        Find foodies with your taste, see where friends eat, and plan meals with friends.
       </p>
       <Button asChild size="xl" className="mt-6 w-full">
         <Link to="/auth" search={{ redirect: "/social" }}>
@@ -324,9 +329,9 @@ function Tables({ me }: { me: string }) {
     <div className="space-y-3">
       <div className="flex items-center gap-3 rounded-3xl bg-foreground p-5 text-background">
         <div className="flex-1">
-          <p className="text-lg font-extrabold leading-tight">Table for 4</p>
+          <p className="text-lg font-extrabold leading-tight">Plan a meal with friends</p>
           <p className="mt-0.5 text-sm opacity-80">
-            Open a table at a spot you love. 3 to 8 seats, always in public.
+            Pick a spot and a time. Only your friends can see it and grab a seat.
           </p>
         </div>
         <Button
@@ -342,7 +347,8 @@ function Tables({ me }: { me: string }) {
         [0, 1].map((i) => <div key={i} className="h-44 animate-pulse rounded-3xl bg-secondary" />)}
       {!meetups.isLoading && list.length === 0 && (
         <p className="rounded-3xl bg-card p-5 text-center text-sm text-muted-foreground shadow-card">
-          No open tables yet. Be the first to open one!
+          No plans from your friends yet. Open one, or find friends in Match. Friends are people you
+          follow who follow you back.
         </p>
       )}
 
@@ -424,8 +430,8 @@ function Tables({ me }: { me: string }) {
           <ShieldCheck className="size-4 text-primary" /> Staying safe
         </p>
         <p className="mt-1">
-          18+ only, groups of 3 or more, and always at a Bity restaurant. Only people at a table see
-          who's going. Block or report anyone from their profile.
+          Friends only (you follow each other), 18+, and always at a restaurant. Only people at a
+          table see who's going. Block or report anyone from their profile.
         </p>
         <button
           className="mt-2 font-semibold text-primary"
@@ -560,7 +566,7 @@ function CreateTable({
       >
         <SheetHeader className="text-left">
           <SheetTitle className="text-2xl font-extrabold">Open a table</SheetTitle>
-          <SheetDescription>People with similar taste can grab a seat.</SheetDescription>
+          <SheetDescription>Only your friends will see this and can join.</SheetDescription>
         </SheetHeader>
         <form onSubmit={submit} className="mt-2 space-y-4 px-4">
           <label className="block">

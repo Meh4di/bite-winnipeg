@@ -28,7 +28,7 @@
 - Tab bar: Home, Drops, Social, Passport, Profile. Decide moved to Profile > Explore and the Social header.
 - `/social?tab=feed|tables|match`, `/people/$id`. Hooks in `src/lib/social.ts`, shared UI in `components/bite/Social.tsx`.
 - Friends = mutual follows. Feed (`activity`) is filled by triggers and RLS only shows friends' items older than 1 hour.
-- Tables (`meetups`): 18+ (`profile_private.birth_date`, owner-only), 3–8 seats, Bite restaurants only, always via RPCs.
+- Tables (`meetups`): FRIENDS ONLY since 0012 (see/join only if you and the host follow each other; `can_see_meetup`), 18+, 3–8 seats, always via RPCs. No meetups with strangers.
 - Blocking hides everything both ways; reports go to `user_reports` (insert-only for users).
 - DEMO DATA to delete before launch: auth users `00000000-0000-0000-0000-00000000de01..06` (sample.*@bite.example), their follows/activity, meetups `11111111-aaaa-*`. (The date-night crawl and DATE2 promo were removed on 2026-10-30; no dating or date-night features.)
 
