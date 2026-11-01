@@ -10,8 +10,10 @@ export const Route = createFileRoute("/owner")({
   ssr: false,
   beforeLoad: async () => {
     const { data } = await supabase.auth.getUser();
-    if (!data.user) throw redirect({ to: "/auth" });
-    if ((await fetchRole(data.user.id)) !== "restaurant_owner") throw redirect({ to: "/" });
+    // Opened from the Bity Business icon: send people to business sign-in / sign-up, not the customer app.
+    if (!data.user) throw redirect({ to: "/auth", search: { as: "owner" } });
+    if ((await fetchRole(data.user.id)) !== "restaurant_owner")
+      throw redirect({ to: "/for-restaurants" });
     return { userId: data.user.id };
   },
   head: () => ({
