@@ -21,6 +21,7 @@ import { FreeBanner, OwnerBusy, OwnerForward } from "@/components/bite/OwnerBusy
 import { OwnerReviews } from "@/components/bite/OwnerReviews";
 import { isVerified, VerifyStatusCard } from "@/components/bite/Verification";
 import { OwnerTraffic } from "@/components/bite/OwnerTraffic";
+import { InstallBusiness } from "@/components/bite/InstallBusiness";
 
 export const Route = createFileRoute("/owner/")({
   component: Dashboard,
@@ -114,6 +115,7 @@ function Dashboard() {
     <div className="space-y-4 px-5 pt-5 animate-screen">
       <h1 className="text-2xl font-extrabold">{r.name}</h1>
       <VerifyStatusCard restaurant={r} />
+      <InstallBusiness />
       {isVerified(r) && (
         <>
           <FreeBanner freeUntil={r.free_until} />
@@ -149,7 +151,7 @@ function Dashboard() {
         </Link>
       </Button>
       <Row to="/owner/drops" icon={Zap} label="Post a drop or deal" />
-      <Row to="/owner/unlock" icon={LockOpen} label="Unlock deals (fill slow nights)" />
+      <Row to="/owner/unlock" icon={LockOpen} label="Crew deals (fill slow nights)" />
       <Row to="/owner/stamps" icon={QrCode} label="Counter stamp code" />
       <Row to="/owner/menu" icon={UtensilsCrossed} label="Manage menu" />
       <Row to="/owner/setup" icon={Store} label="Edit details, hours & photos" />

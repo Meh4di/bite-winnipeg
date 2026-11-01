@@ -14,6 +14,8 @@ export type UnlockDeal = {
   ends_at: string;
   pickup_until: string;
   cancelled: boolean;
+  /** Set for "Bring your crew" deals: the deal switches on for each crew of this size. */
+  crew_size: number | null;
   restaurants: {
     name: string;
     slug: string;
@@ -25,12 +27,23 @@ export type UnlockDeal = {
   mine: boolean;
   my_code: string | null;
   redeemed: boolean;
+  my_crew: string | null;
+  crew_joined: number | null;
+  i_lead: boolean;
+  crews_unlocked: number | null;
 };
 
 export type UnlockState = "open" | "unlocked" | "closed-unlocked" | "failed" | "full" | "cancelled";
 
 export function unlockState(d: UnlockDeal, now = Date.now()): UnlockState {
   if (d.cancelled) return "cancelled";
+  if (d.crew_size) {
+    const mineReached = d.mine && (d.crew_joined ?? 0) >= d.crew_size;
+    if (now >= new Date(d.ends_at).getTime())
+      return mineReached || (!d.mine && (d.crews_unlocked ?? 0) > 0) ? "closed-unlocked" : "failed";
+    if (mineReached) return "unlocked";
+    return d.joined >= d.max_spots ? "full" : "open";
+  }
   const reached = d.joined >= d.goal;
   if (now >= new Date(d.ends_at).getTime()) return reached ? "closed-unlocked" : "failed";
   if (d.joined >= d.max_spots) return "full";
@@ -86,8 +99,16 @@ export function useUnlockDeals(opts: { restaurantId?: string; dealId?: string } 
           mine: p?.mine ?? false,
           my_code: p?.my_code ?? null,
           redeemed: p?.redeemed ?? false,
+          my_crew: p?.my_crew ?? null,
+          crew_joined: p?.crew_joined ?? null,
+          i_lead: p?.i_lead ?? false,
+          crews_unlocked: p?.crews_unlocked ?? null,
         } as UnlockDeal;
       });
     },
   });
 }
+
+/** Invite link for a crew. The crew id is random and never reveals anyone's pickup code. */
+export const crewLink = (dealId: string, crew: string) =>
+  `${typeof window === "undefined" ? "" : window.location.origin}/unlock/${dealId}?crew=${crew}`;

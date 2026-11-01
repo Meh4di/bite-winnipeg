@@ -13,6 +13,7 @@ export type RestaurantSummary = {
   hours: unknown;
   verification_status?: string;
   is_sample?: boolean;
+  same_price_pledge?: boolean;
 };
 
 export type CardExtras = {
@@ -102,6 +103,11 @@ export function RestaurantCard({
             {emojiFor(r.category)} {r.category} · {r.neighbourhood}
           </p>
           {x?.special && <p className="mt-0.5 truncate text-sm">⭐ {x.special}</p>}
+          {r.same_price_pledge && (
+            <p className="mt-0.5 truncate text-xs font-bold text-success">
+              🤝 Same price as in-store
+            </p>
+          )}
         </div>
         {x?.rating && x.rating.count > 0 && (
           <span className="grid size-9 shrink-0 place-items-center rounded-full bg-secondary text-xs font-bold">

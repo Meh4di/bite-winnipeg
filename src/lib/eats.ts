@@ -45,4 +45,5 @@ export const HONEST_PROMISES = [
   { emoji: "✅", text: "The price you see is the price you pay" },
   { emoji: "🙅", text: "No tip screens" },
   { emoji: "🍁", text: "Local, verified spots" },
+  { emoji: "🚗", text: "Delivery coming soon" },
 ] as const;

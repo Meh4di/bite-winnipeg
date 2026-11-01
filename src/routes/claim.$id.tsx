@@ -28,8 +28,8 @@ export const Route = createFileRoute("/claim/$id")({
 
 const PERKS = [
   "Free for your first 3 months after you're verified",
-  "Keep 100% of your sales: no commission",
-  "Post drops, Save food deals and Unlock deals",
+  "Then a small monthly fee + 3–5% on Bity orders, not 30%",
+  "Post instant deals, drops, Save food and crew deals",
   "Pickup orders, stamps for regulars, reviews you can reply to",
 ];
 

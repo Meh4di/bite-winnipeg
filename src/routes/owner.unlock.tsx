@@ -47,11 +47,11 @@ function OwnerUnlock({ restaurantId }: { restaurantId: string }) {
   return (
     <div className="space-y-4 px-5 pt-5 animate-screen">
       <div>
-        <h1 className="text-2xl font-extrabold">Unlock deals</h1>
+        <h1 className="text-2xl font-extrabold">Crew & unlock deals</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Offer a big discount that only switches on if enough people commit. You get guaranteed
-          volume on a slow night and know exactly how much to prep. If the goal isn't reached,
-          nothing happens.
+          Bigger discounts for groups. <b>Crew deals</b> switch on as soon as one customer brings a
+          few friends, so people don't wait. <b>Unlock deals</b> switch on when enough people in
+          total commit. Either way you get guaranteed groups and know how much to prep.
         </p>
       </div>
 
@@ -59,14 +59,14 @@ function OwnerUnlock({ restaurantId }: { restaurantId: string }) {
         <CreateUnlock restaurantId={restaurantId} onDone={() => setCreating(false)} />
       ) : (
         <Button size="xl" className="w-full" onClick={() => setCreating(true)}>
-          <Plus className="size-5" /> New unlock deal
+          <Plus className="size-5" /> New crew or unlock deal
         </Button>
       )}
 
       {deals.isLoading && <div className="h-40 animate-pulse rounded-3xl bg-muted" />}
       {!deals.isLoading && live.length === 0 && !creating && (
         <p className="rounded-3xl bg-card p-5 text-center text-sm text-muted-foreground shadow-card">
-          No unlock deals yet. Try one for your slowest night of the week.
+          No deals yet. Try a crew deal for your slowest night of the week.
         </p>
       )}
       {live.map((d) => (
@@ -131,16 +131,20 @@ function OwnerDealCard({ d, now }: { d: UnlockDeal; now: number }) {
                 : "bg-amber-500/15 text-amber-600"
           }`}
         >
-          {isReached(s)
-            ? "Unlocked"
-            : s === "failed"
-              ? "Didn't unlock"
-              : `Closes in ${countdown(d.ends_at, now)}`}
+          {d.crew_size
+            ? `👯 Crew of ${d.crew_size} · ${d.crews_unlocked ?? 0} unlocked`
+            : isReached(s)
+              ? "Unlocked"
+              : s === "failed"
+                ? "Didn't unlock"
+                : `Closes in ${countdown(d.ends_at, now)}`}
         </span>
       </div>
-      <div className="mt-3">
-        <UnlockProgress deal={d} />
-      </div>
+      {!d.crew_size && (
+        <div className="mt-3">
+          <UnlockProgress deal={d} />
+        </div>
+      )}
       <p className="mt-2 text-xs text-muted-foreground">
         Join by {fmtWhen(d.ends_at)} · pickup until {fmtWhen(d.pickup_until)} · max {d.max_spots}
       </p>
@@ -163,7 +167,16 @@ function OwnerDealCard({ d, now }: { d: UnlockDeal; now: number }) {
               <span className="w-20 font-mono text-base font-extrabold tracking-widest">
                 {p.code}
               </span>
-              <span className="flex-1 text-sm font-semibold">{p.first_name}</span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-semibold">{p.first_name}</span>
+                {p.crew && (
+                  <span
+                    className={`block truncate text-xs ${p.unlocked ? "text-success" : "text-muted-foreground"}`}
+                  >
+                    {p.crew} {p.unlocked ? "· unlocked" : "· not full yet"}
+                  </span>
+                )}
+              </span>
               {p.redeemed_at ? (
                 <span className="flex items-center gap-1 text-xs font-bold text-success">
                   <Check className="size-4" /> Picked up
@@ -173,7 +186,7 @@ function OwnerDealCard({ d, now }: { d: UnlockDeal; now: number }) {
                   size="sm"
                   variant="secondary"
                   className="rounded-full"
-                  disabled={!isReached(s)}
+                  disabled={!p.unlocked}
                   onClick={() => redeem(p.pledge_id)}
                 >
                   Picked up
@@ -203,7 +216,9 @@ function CreateUnlock({ restaurantId, onDone }: { restaurantId: string; onDone: 
     d.setHours(h, 0, 0, 0);
     return toLocal(d);
   };
+  const [crewMode, setCrewMode] = useState(true);
   const [f, setF] = useState({
+    crew: "4",
     title: "",
     description: "",
     regular: "",
@@ -224,7 +239,10 @@ function CreateUnlock({ restaurantId, onDone }: { restaurantId: string; onDone: 
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const goal = parseInt(f.goal, 10);
+    const crewSize = parseInt(f.crew, 10);
+    const goal = crewMode ? crewSize : parseInt(f.goal, 10);
+    if (crewMode && !(crewSize >= 2 && crewSize <= 8))
+      return void toast.error("A crew is 2 to 8 people");
     const max = parseInt(f.max, 10);
     if (!(reg > 0) || !(deal >= 0) || deal >= reg)
       return void toast.error("The deal price has to be lower than the regular price");
@@ -247,19 +265,38 @@ function CreateUnlock({ restaurantId, onDone }: { restaurantId: string; onDone: 
       regular_price_cents: reg,
       deal_price_cents: deal,
       goal,
+      crew_size: crewMode ? crewSize : null,
       max_spots: max,
       ends_at: ends.toISOString(),
       pickup_until: pickup.toISOString(),
     });
     setBusy(false);
     if (error) return void toast.error(error.message);
-    toast.success("Your unlock deal is live 🔓");
+    toast.success(crewMode ? "Your crew deal is live 👯" : "Your unlock deal is live 🔓");
     qc.invalidateQueries({ queryKey: ["unlock-deals"] });
     onDone();
   };
 
   return (
     <form onSubmit={submit} className="space-y-3 rounded-3xl bg-card p-4 shadow-card">
+      <div className="grid grid-cols-2 gap-1 rounded-2xl bg-muted p-1">
+        {(
+          [
+            [true, "👯 Crew deal", "Unlocks per group"],
+            [false, "🔓 Unlock deal", "Unlocks for everyone"],
+          ] as const
+        ).map(([v, t, sub]) => (
+          <button
+            key={t}
+            type="button"
+            onClick={() => setCrewMode(v)}
+            className={`rounded-xl px-2 py-2 text-left ${crewMode === v ? "bg-card shadow-card" : "text-muted-foreground"}`}
+          >
+            <span className="block text-sm font-extrabold">{t}</span>
+            <span className="block text-[11px]">{sub}</span>
+          </button>
+        ))}
+      </div>
       <ImagePick
         bucket="menu-photos"
         userId={userId}
@@ -297,7 +334,7 @@ function CreateUnlock({ restaurantId, onDone }: { restaurantId: string; onDone: 
           />
         </label>
         <label className="text-sm font-semibold">
-          Unlock price
+          Deal price
           <input
             className={`${field} mt-1`}
             inputMode="decimal"
@@ -312,18 +349,33 @@ function CreateUnlock({ restaurantId, onDone }: { restaurantId: string; onDone: 
         <p className="text-sm font-bold text-primary">That's {off}% off. Prices include tax.</p>
       )}
       <div className="grid grid-cols-2 gap-2">
-        <label className="text-sm font-semibold">
-          People needed
-          <input
-            className={`${field} mt-1`}
-            type="number"
-            min={2}
-            max={500}
-            required
-            value={f.goal}
-            onChange={set("goal")}
-          />
-        </label>
+        {crewMode ? (
+          <label className="text-sm font-semibold">
+            Crew size
+            <input
+              className={`${field} mt-1`}
+              type="number"
+              min={2}
+              max={8}
+              required
+              value={f.crew}
+              onChange={set("crew")}
+            />
+          </label>
+        ) : (
+          <label className="text-sm font-semibold">
+            People needed
+            <input
+              className={`${field} mt-1`}
+              type="number"
+              min={2}
+              max={500}
+              required
+              value={f.goal}
+              onChange={set("goal")}
+            />
+          </label>
+        )}
         <label className="text-sm font-semibold">
           Max spots
           <input
@@ -358,6 +410,9 @@ function CreateUnlock({ restaurantId, onDone }: { restaurantId: string; onDone: 
         />
       </label>
       <p className="rounded-2xl bg-secondary p-3 text-xs text-muted-foreground">
+        {crewMode
+          ? "Each customer brings their own friends with a private link. A crew gets the deal as soon as it's full. "
+          : ""}
         Customers pay at your counter when they pick up, using the code on their phone. After you
         post, the price, goal and times can't be changed, so it stays fair for everyone who joins.
       </p>

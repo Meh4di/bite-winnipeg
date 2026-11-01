@@ -1,0 +1,17 @@
+{
+  "id": "/owner",
+  "name": "Bity Business",
+  "short_name": "Bity Business",
+  "description": "Run your restaurant on Bity: orders, deals, stamps and who Bity sent you.",
+  "start_url": "/owner",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1C1917",
+  "theme_color": "#1C1917",
+  "icons": [
+    { "src": "/icons/biz-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/biz-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/biz-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

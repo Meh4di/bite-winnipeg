@@ -12,8 +12,11 @@ const PinPicker = lazy(() => import("@/components/bite/PinPicker"));
 
 export const Route = createFileRoute("/owner/setup")({ component: Setup });
 
-const field = "h-12 w-full rounded-2xl border bg-card px-4 text-base outline-none focus:border-primary";
-const defaultHours: Hours = Object.fromEntries(DAYS.map((d) => [d.key, { open: "09:00", close: "17:00" }]));
+const field =
+  "h-12 w-full rounded-2xl border bg-card px-4 text-base outline-none focus:border-primary";
+const defaultHours: Hours = Object.fromEntries(
+  DAYS.map((d) => [d.key, { open: "09:00", close: "17:00" }]),
+);
 
 function Setup() {
   const { userId } = OwnerRoute.useRouteContext();
@@ -21,18 +24,37 @@ function Setup() {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [f, setF] = useState({
-    name: "", category: "Coffee", description: "", address: "", neighbourhood: NEIGHBOURHOODS[0], phone: "",
-    logo_url: null as string | null, cover_url: null as string | null, hours: defaultHours,
-    lat: null as number | null, lng: null as number | null, pay_it_forward: false,
+    name: "",
+    category: "Coffee",
+    description: "",
+    address: "",
+    neighbourhood: NEIGHBOURHOODS[0],
+    phone: "",
+    logo_url: null as string | null,
+    cover_url: null as string | null,
+    hours: defaultHours,
+    lat: null as number | null,
+    lng: null as number | null,
+    pay_it_forward: false,
+    same_price_pledge: false,
   });
   const [busy, setBusy] = useState(false);
   useEffect(() => {
     if (r)
       setF({
-        name: r.name, category: r.category, description: r.description ?? "", address: r.address ?? "",
-        neighbourhood: r.neighbourhood ?? NEIGHBOURHOODS[0], phone: r.phone ?? "",
-        logo_url: r.logo_url, cover_url: r.cover_url, hours: { ...defaultHours, ...(r.hours as Hours) },
-        lat: r.lat, lng: r.lng, pay_it_forward: r.pay_it_forward,
+        name: r.name,
+        category: r.category,
+        description: r.description ?? "",
+        address: r.address ?? "",
+        neighbourhood: r.neighbourhood ?? NEIGHBOURHOODS[0],
+        phone: r.phone ?? "",
+        logo_url: r.logo_url,
+        cover_url: r.cover_url,
+        hours: { ...defaultHours, ...(r.hours as Hours) },
+        lat: r.lat,
+        lng: r.lng,
+        pay_it_forward: r.pay_it_forward,
+        same_price_pledge: r.same_price_pledge,
       });
   }, [r]);
   const set = (k: keyof typeof f, v: unknown) => setF((p) => ({ ...p, [k]: v }));
@@ -46,10 +68,15 @@ function Setup() {
     const { error } = r
       ? await supabase.from("restaurants").update(payload).eq("id", r.id)
       : await supabase.from("restaurants").insert({
-          ...payload, owner_id: userId, slug: `${slugify(f.name)}-${Math.random().toString(36).slice(2, 6)}`,
+          ...payload,
+          owner_id: userId,
+          slug: `${slugify(f.name)}-${Math.random().toString(36).slice(2, 6)}`,
         });
     setBusy(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Saved!");
     await qc.invalidateQueries({ queryKey: ["my-restaurant"] });
     qc.invalidateQueries({ queryKey: ["restaurants"] });
@@ -58,27 +85,83 @@ function Setup() {
 
   return (
     <form onSubmit={save} className="space-y-4 px-5 pt-5 animate-screen">
-      <h1 className="text-2xl font-extrabold">{r ? "Restaurant details" : "Set up your restaurant"}</h1>
+      <h1 className="text-2xl font-extrabold">
+        {r ? "Restaurant details" : "Set up your restaurant"}
+      </h1>
       {!r && (
         <p className="rounded-2xl bg-primary-soft p-4 text-sm font-semibold text-primary">
-          🍁 Founding partner offer: Bity is free for your first 3 months. No fees on orders, drops, deals or promotions.
+          🍁 Founding partner offer: Bity is free for your first 3 months. No fees on orders, drops,
+          deals or promotions.
         </p>
       )}
-      <ImagePick bucket="restaurant-covers" userId={userId} value={f.cover_url} onChange={(u) => set("cover_url", u)} label="Cover photo" className="h-40 w-full" />
-      <ImagePick bucket="restaurant-logos" userId={userId} value={f.logo_url} onChange={(u) => set("logo_url", u)} label="Logo" className="size-24" />
-      <input className={field} placeholder="Restaurant name" required value={f.name} onChange={(e) => set("name", e.target.value)} />
-      <select className={field} value={f.category} onChange={(e) => set("category", e.target.value)}>
-        {CATEGORIES.map((c) => <option key={c.name}>{c.name}</option>)}
+      <ImagePick
+        bucket="restaurant-covers"
+        userId={userId}
+        value={f.cover_url}
+        onChange={(u) => set("cover_url", u)}
+        label="Cover photo"
+        className="h-40 w-full"
+      />
+      <ImagePick
+        bucket="restaurant-logos"
+        userId={userId}
+        value={f.logo_url}
+        onChange={(u) => set("logo_url", u)}
+        label="Logo"
+        className="size-24"
+      />
+      <input
+        className={field}
+        placeholder="Restaurant name"
+        required
+        value={f.name}
+        onChange={(e) => set("name", e.target.value)}
+      />
+      <select
+        className={field}
+        value={f.category}
+        onChange={(e) => set("category", e.target.value)}
+      >
+        {CATEGORIES.map((c) => (
+          <option key={c.name}>{c.name}</option>
+        ))}
       </select>
-      <textarea className={`${field} h-24 py-3`} placeholder="Description" value={f.description} onChange={(e) => set("description", e.target.value)} />
-      <input className={field} placeholder="Street address" value={f.address} onChange={(e) => set("address", e.target.value)} />
+      <textarea
+        className={`${field} h-24 py-3`}
+        placeholder="Description"
+        value={f.description}
+        onChange={(e) => set("description", e.target.value)}
+      />
+      <input
+        className={field}
+        placeholder="Street address"
+        value={f.address}
+        onChange={(e) => set("address", e.target.value)}
+      />
       <Suspense fallback={<div className="h-60 animate-pulse rounded-2xl bg-muted" />}>
-        <PinPicker address={f.address} lat={f.lat} lng={f.lng} onChange={(lat, lng) => setF((p) => ({ ...p, lat, lng }))} />
+        <PinPicker
+          address={f.address}
+          lat={f.lat}
+          lng={f.lng}
+          onChange={(lat, lng) => setF((p) => ({ ...p, lat, lng }))}
+        />
       </Suspense>
-      <select className={field} value={f.neighbourhood} onChange={(e) => set("neighbourhood", e.target.value)}>
-        {NEIGHBOURHOODS.map((n) => <option key={n}>{n}</option>)}
+      <select
+        className={field}
+        value={f.neighbourhood}
+        onChange={(e) => set("neighbourhood", e.target.value)}
+      >
+        {NEIGHBOURHOODS.map((n) => (
+          <option key={n}>{n}</option>
+        ))}
       </select>
-      <input className={field} type="tel" placeholder="Phone" value={f.phone} onChange={(e) => set("phone", e.target.value)} />
+      <input
+        className={field}
+        type="tel"
+        placeholder="Phone"
+        value={f.phone}
+        onChange={(e) => set("phone", e.target.value)}
+      />
       <h2 className="pt-2 text-lg font-bold">Hours</h2>
       <div className="space-y-2 rounded-3xl bg-card p-4 shadow-card">
         {DAYS.map((d) => {
@@ -86,15 +169,47 @@ function Setup() {
           return (
             <div key={d.key} className="flex items-center gap-2 text-sm">
               <span className="w-10 font-semibold">{d.label.slice(0, 3)}</span>
-              <input type="time" disabled={h.closed} value={h.open ?? ""} onChange={(e) => setDay(d.key, { open: e.target.value })} className="h-10 flex-1 rounded-xl border bg-background px-2 disabled:opacity-40" />
-              <input type="time" disabled={h.closed} value={h.close ?? ""} onChange={(e) => setDay(d.key, { close: e.target.value })} className="h-10 flex-1 rounded-xl border bg-background px-2 disabled:opacity-40" />
+              <input
+                type="time"
+                disabled={h.closed}
+                value={h.open ?? ""}
+                onChange={(e) => setDay(d.key, { open: e.target.value })}
+                className="h-10 flex-1 rounded-xl border bg-background px-2 disabled:opacity-40"
+              />
+              <input
+                type="time"
+                disabled={h.closed}
+                value={h.close ?? ""}
+                onChange={(e) => setDay(d.key, { close: e.target.value })}
+                className="h-10 flex-1 rounded-xl border bg-background px-2 disabled:opacity-40"
+              />
               <label className="flex items-center gap-1 text-xs">
-                <input type="checkbox" checked={!!h.closed} onChange={(e) => setDay(d.key, { closed: e.target.checked })} /> Closed
+                <input
+                  type="checkbox"
+                  checked={!!h.closed}
+                  onChange={(e) => setDay(d.key, { closed: e.target.checked })}
+                />{" "}
+                Closed
               </label>
             </div>
           );
         })}
       </div>
+      <label className="flex items-start gap-3 rounded-2xl bg-success/10 p-4">
+        <input
+          type="checkbox"
+          className="mt-1 size-5 accent-[var(--primary)]"
+          checked={f.same_price_pledge}
+          onChange={(e) => set("same_price_pledge", e.target.checked)}
+        />
+        <span>
+          <span className="block font-semibold">🤝 Same price as in-store</span>
+          <span className="block text-sm text-muted-foreground">
+            Promise customers your Bity prices match your menu board. Delivery apps often mark
+            prices up 15–30%. Your page gets a badge customers trust.
+          </span>
+        </span>
+      </label>
       <label className="flex items-start gap-3 rounded-2xl bg-amber-50 p-4 dark:bg-amber-950/30">
         <input
           type="checkbox"
@@ -105,11 +220,14 @@ function Setup() {
         <span>
           <span className="block font-semibold">💛 Accept pay-it-forward meals</span>
           <span className="block text-sm text-muted-foreground">
-            Customers can buy a coffee or meal for someone in need. You hand them out at the counter, no questions asked.
+            Customers can buy a coffee or meal for someone in need. You hand them out at the
+            counter, no questions asked.
           </span>
         </span>
       </label>
-      <Button type="submit" size="xl" className="w-full" disabled={busy}>{busy ? "Saving…" : "Save"}</Button>
+      <Button type="submit" size="xl" className="w-full" disabled={busy}>
+        {busy ? "Saving…" : "Save"}
+      </Button>
     </form>
   );
 }

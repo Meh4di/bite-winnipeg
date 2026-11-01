@@ -6,16 +6,16 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/for-restaurants")({
   head: () => ({
     meta: [
-      { title: "Bity for restaurants — free for 3 months" },
+      { title: "Bity Business — free for 3 months" },
       {
         name: "description",
         content:
-          "List your Winnipeg restaurant or cafe on Bity. Pickup orders, drops, Save food deals and promos with no fees for your first 3 months.",
+          "List your Winnipeg restaurant or cafe on Bity. Pickup orders, drops, Save food deals and promos, free for your first 3 months, then a fraction of what delivery apps charge.",
       },
-      { property: "og:title", content: "Bity for restaurants" },
+      { property: "og:title", content: "Bity Business: for Winnipeg restaurants" },
       {
         property: "og:description",
-        content: "Free for your first 3 months. No fees on orders or deals.",
+        content: "Free for your first 3 months, then a small monthly fee and 3–5% on Bity orders.",
       },
     ],
   }),
@@ -58,8 +58,8 @@ const FEATURES = [
   },
   {
     e: "🔓",
-    t: "Unlock deals",
-    d: "A discount that only switches on if enough people commit. Guaranteed volume on slow nights.",
+    t: "Crew deals",
+    d: "A bigger discount when a customer brings friends. Guaranteed groups on slow nights.",
   },
   { e: "🔥", t: "Drops", d: "Limited items at a set time. Builds hype and fills slow hours." },
   { e: "♻️", t: "Save food", d: "Sell end-of-day food at 60–70% off instead of throwing it out." },
@@ -105,7 +105,7 @@ const FAQ = [
   },
   {
     q: "Do you take a cut of my sales?",
-    a: "No. Delivery apps can take 20 to 30% of every order. Bity will charge a flat monthly fee instead, so you keep 100% of every sale. And your first 3 months are free.",
+    a: "A small one, and only on orders paid through Bity. Delivery apps can take 20 to 30% of every order. After your 3 free months, Bity is a simple monthly fee plus 3 to 5% on pickup orders and drops paid in the app. Walk-ins, dine-in and crew deals paid at your counter: no cut, ever.",
   },
   {
     q: "Why do customers like Bity?",
@@ -113,11 +113,11 @@ const FAQ = [
   },
   {
     q: "What does it cost?",
-    a: "Nothing for your first 3 months after you're verified: no fees on orders, drops, Save food deals or promotions. We'll tell you the pricing well before your free period ends, and you can leave any time.",
+    a: "Nothing for your first 3 months after you're verified. After that: a simple monthly fee plus 3 to 5% on orders paid through Bity. We'll tell you the exact monthly price well before your free months end, and you can leave any time with no contract.",
   },
   {
     q: "Do you do delivery?",
-    a: "Pickup only for now. Delivery is on the roadmap.",
+    a: "Pickup only for now. Delivery is coming soon, starting slowly with local couriers. You'll choose whether to turn it on.",
   },
 ];
 
@@ -147,10 +147,10 @@ function ForRestaurants() {
           <ArrowLeft className="size-4" /> Bity
         </Link>
         <p className="mt-6 text-xs font-extrabold uppercase tracking-widest text-primary">
-          For restaurants & cafes
+          Bity Business · for restaurants & cafes
         </p>
         <h1 className="mt-2 text-[2.25rem] font-extrabold leading-[1.05]">
-          More customers. Less waste. <span className="text-primary">Keep 100%</span> of your sales.
+          More customers. Less waste. <span className="text-primary">Fair fees</span>, not 30%.
         </h1>
         <p className="mt-3 text-[15px] opacity-80">
           Bity is Winnipeg's food app for pickup orders, hype drops and rescuing end-of-day food.
@@ -196,7 +196,8 @@ function ForRestaurants() {
           <p className="text-lg font-extrabold text-primary">🍁 Founding partner offer</p>
           <ul className="mt-3 space-y-2 text-sm">
             {[
-              "No fees on anything for 3 months",
+              "Free for your first 3 months",
+              "Then a monthly fee + 3–5% on Bity orders only",
               "No contract, leave any time",
               "Set up in about 10 minutes",
               "We'll help you post your first drop",

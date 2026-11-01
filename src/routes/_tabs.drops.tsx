@@ -33,10 +33,10 @@ export const Route = createFileRoute("/_tabs/drops")({
 });
 
 const SEGMENTS: { key: Seg; label: string }[] = [
+  { key: "deals", label: "⚡ Now" },
   { key: "drops", label: "🔥 Drops" },
-  { key: "unlock", label: "🔓 Unlock" },
   { key: "leftover", label: "♻️ Save" },
-  { key: "deals", label: "📣 Deals" },
+  { key: "unlock", label: "👯 Crew" },
   { key: "vortex", label: "🥶 Vortex" },
 ];
 
@@ -45,7 +45,7 @@ function Drops() {
   const now = useNow(1000);
   const drops = useDrops();
   const promos = usePromotions();
-  const [seg, setSeg] = useState<Seg>(tab ?? "drops");
+  const [seg, setSeg] = useState<Seg>(tab ?? "deals");
   const vortexDeals = useVortexDeals();
   const impact = useQuery({
     queryKey: ["city-impact"],
@@ -86,7 +86,7 @@ function Drops() {
     <div className="animate-screen px-5 pt-[max(env(safe-area-inset-top),1.25rem)]">
       <h1 className="text-[2rem] font-extrabold leading-tight">Drops</h1>
       <p className="text-sm text-muted-foreground">
-        Limited runs, food rescue deals, promos and cold-weather specials.
+        Instant deals, limited runs, food rescue and crew deals.
       </p>
 
       <div className="mt-4 grid grid-cols-5 gap-1 rounded-2xl bg-muted p-1" role="tablist">
@@ -132,10 +132,10 @@ function Drops() {
       {seg === "unlock" ? (
         <div className="mt-5 space-y-6">
           <div className="rounded-3xl bg-foreground p-4 text-background">
-            <p className="font-extrabold">🔓 Unlock deals</p>
+            <p className="font-extrabold">👯 Bring your crew</p>
             <p className="mt-1 text-sm opacity-80">
-              Big discounts that switch on when enough people join. Joining is free, and if the goal
-              isn't reached, nobody pays.
+              Bigger discounts for groups. Crew deals unlock the moment your friends join, no
+              waiting on strangers. Joining is free, and if it doesn't unlock, nobody pays.
             </p>
           </div>
           {unlocks.isLoading && <div className="h-72 animate-pulse rounded-3xl bg-muted" />}
@@ -173,9 +173,9 @@ function Drops() {
           ))}
           {!promos.isLoading && !deals.length && (
             <Empty
-              emoji="📣"
-              title="No deals running"
-              line="When spots post promos, they'll show up here."
+              emoji="⚡"
+              title="No instant deals right now"
+              line="Instant deals work the moment you see them: no goal, no waiting. Check Save food for tonight's deals."
             />
           )}
         </div>

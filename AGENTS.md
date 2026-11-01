@@ -56,3 +56,12 @@
 - Interest counts: `log_spot_event(view|directions)` for signed-in users, once per person per spot per hour; never location tracking. Owner sees totals via `owner_report()` ("Bity sent you" card); verified visits = counter stamps + pickups + unlock redemptions.
 - Admin > Map pins fills missing lat/lng from OpenStreetMap Nominatim (1 lookup/sec, Winnipeg bounds enforced by `admin_set_location`).
 - Rule: rankings are never for sale. Anything paid on the map must be labelled Sponsored and kept out of rankings.
+
+## Instant deals, crews, same price, Bity Business (migration 0014)
+- Pricing promise to restaurants: 3 free months after verification, then a monthly fee + 3–5% on orders paid through Bity only (no cut on walk-ins, dine-in or crew deals paid at the counter). Don't say "keep 100%" / "no commission" anywhere.
+- Instant deals = `promotions` (non-vortex). They work immediately: "⚡ Now" is the first Drops tab and Home has a "Deals right now" rail. Owners post them as "Instant deal".
+- Crew deals = `unlock_deals.crew_size` (2–8, `goal = crew_size`). Each crew unlocks on its own as soon as it's full; no waiting on strangers. `unlock_pledges.crew_id` is a random id (never a pledge id, so invite links can't leak pickup codes) and `crew_leader` marks the starter. Join with `join_unlock(p_deal_id, p_crew?)` (no p_crew = start a crew), invite link `/unlock/$id?crew=<crew_id>`, `crew_invite` (leader first name + count), `my_crew`. `pledge_unlocked()` decides redeem/leave for both kinds. Leaders can't leave while others are in their crew.
+- `restaurants.same_price_pledge`: owner toggle in Details; "🤝 Same price as in-store" on cards and the restaurant page.
+- Delivery isn't built: UI says "Delivery coming soon" (checkout, Home chips, FAQ).
+- Bity Business = the /owner area installed as its own app: `public/business.webmanifest` (id /owner, start_url /owner, dark maple icons `icons/biz-*`). `useBusinessAppShell()` swaps the manifest/icon/title while in /owner; `InstallBusiness` card on the dashboard. `/business` redirects owners to /owner, everyone else to /for-restaurants.
+- DEMO DATA: sample unlock deal 3 is now a crew deal with 2 crews of demo users.

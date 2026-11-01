@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchRole } from "@/lib/auth";
 import { VerifiedChip } from "@/components/bite/Verification";
+import { useBusinessAppShell } from "@/lib/business-app";
 
 export const Route = createFileRoute("/owner")({
   ssr: false,
@@ -15,7 +16,7 @@ export const Route = createFileRoute("/owner")({
   },
   head: () => ({
     meta: [
-      { title: "Restaurant dashboard — Bity" },
+      { title: "Bity Business" },
       { name: "description", content: "Manage your restaurant page and menu on Bity." },
       { property: "og:title", content: "Restaurant dashboard — Bity" },
       { property: "og:description", content: "Manage your restaurant on Bity." },
@@ -43,6 +44,7 @@ export function useMyRestaurant() {
 }
 
 function OwnerLayout() {
+  useBusinessAppShell();
   const { data: r } = useMyRestaurant();
   const tabs = [
     { to: "/owner", label: "Orders", icon: ShoppingBag },

@@ -8,7 +8,8 @@ import { RestaurantCard, type CardExtras } from "@/components/bite/RestaurantCar
 import { VortexBanner, useVortexDeals } from "@/components/bite/Vortex";
 import { HomeHero, type HeroSlide } from "@/components/bite/HomeHero";
 import { useAuth } from "@/lib/auth";
-import { clockTime, countdown, dropState, useDrops, useNow } from "@/lib/live";
+import { clockTime, countdown, dropState, useDrops, useNow, usePromotions } from "@/lib/live";
+import { PromoCard } from "@/components/bite/PromoCard";
 import { liveBusy, useHouseSpecials, useRatings } from "@/lib/community";
 import { dishEmoji, useDishLeaderboard } from "@/lib/dishes";
 import { useCrawls } from "@/lib/crawls";
@@ -51,6 +52,8 @@ function Home() {
   const crawls = useCrawls();
   const vortexDeals = useVortexDeals();
   const unlocks = useUnlockDeals();
+  const promos = usePromotions();
+  const instant = (promos.data ?? []).filter((p) => !p.vortex_only);
   const value = useValueItems(1500);
   const liveUnlocks = (unlocks.data ?? []).filter((d) =>
     ["open", "unlocked"].includes(unlockState(d, now)),
@@ -71,7 +74,7 @@ function Home() {
       const { data, error } = await supabase
         .from("restaurants")
         .select(
-          "id, slug, name, category, neighbourhood, cover_url, logo_url, hours, busy_level, wait_minutes, busy_updated_at, verification_status, is_sample",
+          "id, slug, name, category, neighbourhood, cover_url, logo_url, hours, busy_level, wait_minutes, busy_updated_at, verification_status, is_sample, same_price_pledge",
         )
         .eq("is_active", true)
         .order("created_at");
@@ -288,10 +291,18 @@ function Home() {
             ))}
           </div>
 
+          {instant.length > 0 && (
+            <Rail title="⚡ Deals right now" sub="No goal, no waiting. Just show up." to="/drops">
+              {instant.map((p) => (
+                <PromoCard key={p.id} p={p} className="w-[280px] shrink-0" />
+              ))}
+            </Rail>
+          )}
+
           {liveUnlocks.length > 0 && (
             <Rail
-              title="🔓 Unlock together"
-              sub="Big deals that switch on when enough people join"
+              title="👯 Bring your crew"
+              sub="Bigger deals for groups and friends"
               to="/drops"
               search={{ tab: "unlock" }}
             >
@@ -578,13 +589,13 @@ function Home() {
             >
               <span className="absolute -right-3 -top-4 text-8xl opacity-20">👩‍🍳</span>
               <p className="text-xs font-extrabold uppercase tracking-wider opacity-70">
-                For restaurants
+                Bity Business
               </p>
               <p className="mt-1 text-xl font-extrabold leading-tight">
                 Own a spot? Join Bity free for 3 months.
               </p>
               <p className="mt-1 text-sm opacity-80">
-                Pickup orders, drops and Save food deals with no fees.
+                Pickup orders, instant deals and crew deals. Fair fees after that, never 30%.
               </p>
               <span className="mt-3 inline-flex h-10 items-center rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground">
                 See how it works
@@ -645,7 +656,7 @@ function Rail({
   title: string;
   sub?: string;
   to?: "/drops" | "/best" | "/crawls" | "/eats";
-  search?: { tab?: "leftover" | "unlock" };
+  search?: { tab?: "leftover" | "unlock" | "deals" };
   children: React.ReactNode;
 }) {
   return (

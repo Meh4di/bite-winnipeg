@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { emojiFor } from "@/lib/bite";
 import { clockTime, type PromoRow } from "@/lib/live";
 
-export function PromoCard({ p }: { p: PromoRow }) {
+export function PromoCard({ p, className = "" }: { p: PromoRow; className?: string }) {
   const copy = async () => {
     if (!p.promo_code) return;
     try {
@@ -15,7 +15,7 @@ export function PromoCard({ p }: { p: PromoRow }) {
     }
   };
   return (
-    <article className="overflow-hidden rounded-3xl bg-card shadow-card">
+    <article className={`overflow-hidden rounded-3xl bg-card shadow-card ${className}`}>
       {p.photo_url && (
         <img
           src={p.photo_url}
@@ -39,7 +39,10 @@ export function PromoCard({ p }: { p: PromoRow }) {
             {p.restaurants.name}
           </Link>
         )}
-        <h3 className="mt-2 flex items-start gap-2 text-lg font-extrabold leading-tight">
+        <p className="mt-2 inline-flex rounded-full bg-success/10 px-2 py-0.5 text-[11px] font-extrabold text-success">
+          ⚡ Works now · no goal, no waiting
+        </p>
+        <h3 className="mt-1.5 flex items-start gap-2 text-lg font-extrabold leading-tight">
           {!p.photo_url && <Megaphone className="mt-0.5 size-5 shrink-0 text-primary" />}
           {p.title}
         </h3>

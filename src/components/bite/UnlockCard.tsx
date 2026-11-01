@@ -4,6 +4,7 @@ import { formatPrice } from "@/lib/bite";
 import { countdown, isReached, percentOff, unlockState, type UnlockDeal } from "@/lib/unlock";
 
 export function UnlockProgress({ deal, big }: { deal: UnlockDeal; big?: boolean }) {
+  if (deal.crew_size) return <CrewProgress deal={deal} big={big} />;
   const pct = Math.min(100, Math.round((deal.joined / deal.goal) * 100));
   const reached = deal.joined >= deal.goal;
   return (
@@ -29,6 +30,48 @@ export function UnlockProgress({ deal, big }: { deal: UnlockDeal; big?: boolean 
   );
 }
 
+function CrewProgress({ deal, big }: { deal: UnlockDeal; big?: boolean | undefined }) {
+  const size = deal.crew_size ?? 2;
+  const n = deal.mine ? (deal.crew_joined ?? 1) : 0;
+  const reached = deal.mine && n >= size;
+  const text = big ? "text-sm" : "text-xs";
+  return (
+    <div>
+      <div className="flex gap-1.5" aria-label={`${n} of ${size} in your crew`}>
+        {Array.from({ length: size }, (_, i) => (
+          <span
+            key={i}
+            className={`grid flex-1 place-items-center rounded-full font-extrabold transition-all ${big ? "h-9 text-base" : "h-7 text-sm"} ${
+              i < n
+                ? reached
+                  ? "bg-success text-success-foreground"
+                  : "bg-primary text-primary-foreground"
+                : "border-2 border-dashed border-muted-foreground/30 text-muted-foreground/50"
+            }`}
+          >
+            {i < n ? "🙋" : "+"}
+          </span>
+        ))}
+      </div>
+      <div className={`mt-1.5 flex items-center justify-between font-semibold ${text}`}>
+        <span className="flex items-center gap-1">
+          <Users className="size-3.5" />
+          {deal.mine ? `${n} of ${size} in your crew` : `Crew of ${size}, you included`}
+        </span>
+        <span className={reached ? "text-success" : "text-primary"}>
+          {reached
+            ? "Unlocked 🎉"
+            : deal.mine
+              ? `${size - n} more friend${size - n === 1 ? "" : "s"}`
+              : (deal.crews_unlocked ?? 0) > 0
+                ? `${deal.crews_unlocked} crew${deal.crews_unlocked === 1 ? "" : "s"} unlocked`
+                : "No waiting on strangers"}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export function UnlockCard({ deal, now, wide }: { deal: UnlockDeal; now: number; wide?: boolean }) {
   const s = unlockState(deal, now);
   const img = deal.photo_url ?? deal.restaurants?.cover_url;
@@ -46,8 +89,20 @@ export function UnlockCard({ deal, now, wide }: { deal: UnlockDeal; now: number;
             isReached(s) ? "bg-success" : "bg-black/60 backdrop-blur"
           }`}
         >
-          {isReached(s) ? <LockOpen className="size-3.5" /> : <Lock className="size-3.5" />}
-          {isReached(s) ? "UNLOCKED" : "UNLOCK DEAL"}
+          {deal.crew_size ? (
+            "👯"
+          ) : isReached(s) ? (
+            <LockOpen className="size-3.5" />
+          ) : (
+            <Lock className="size-3.5" />
+          )}
+          {deal.crew_size
+            ? isReached(s) && deal.mine
+              ? "CREW UNLOCKED"
+              : `CREW DEAL · ${deal.crew_size}`
+            : isReached(s)
+              ? "UNLOCKED"
+              : "UNLOCK DEAL"}
         </span>
         <span className="absolute right-3 top-3 rounded-full bg-primary px-2.5 py-1 text-[11px] font-extrabold text-primary-foreground">
           −{percentOff(deal)}%
@@ -71,7 +126,9 @@ export function UnlockCard({ deal, now, wide }: { deal: UnlockDeal; now: number;
               : s === "full"
                 ? "All spots taken"
                 : s === "failed"
-                  ? "Didn't unlock"
+                  ? deal.crew_size
+                    ? "Closed"
+                    : "Didn't unlock"
                   : s === "cancelled"
                     ? "Cancelled"
                     : "Closed"}

@@ -82,7 +82,11 @@ const KIND_INFO: Record<Kind, { title: string; line: string; icon: typeof Flame 
     line: "Food that would be thrown out, 60–70% off. Customers pick it up before you close.",
     icon: Package,
   },
-  promo: { title: "Promotion", line: "A deal or code shown in the Deals feed.", icon: Megaphone },
+  promo: {
+    title: "Instant deal",
+    line: "Works the moment you post it. No goal, no waiting. Shows in the ⚡ Now feed.",
+    icon: Megaphone,
+  },
   vortex: {
     title: "Vortex deal",
     line: "Unlocks only when Winnipeg feels like -25°C or colder. Post bigger ones for -30 and -35.",
@@ -187,7 +191,8 @@ function OwnerDrops() {
         if (!(qty >= 1 && qty <= 1000)) throw new Error("Quantity must be between 1 and 1000");
         if (draft.kind === "leftover") {
           if (!original || original <= 0) throw new Error("Enter the regular price");
-          if (price * 2 > original) throw new Error("Save-food deals need to be at least 50% off (60–70% works best)");
+          if (price * 2 > original)
+            throw new Error("Save-food deals need to be at least 50% off (60–70% works best)");
         }
         const { error } = await supabase.from("drops").insert({
           restaurant_id: r.id,
@@ -204,7 +209,9 @@ function OwnerDrops() {
         if (error) throw error;
       }
       toast.success(
-        draft.kind === "promo" || draft.kind === "vortex" ? "Posted" : "Posted! It's in the Drops feed.",
+        draft.kind === "promo" || draft.kind === "vortex"
+          ? "Posted"
+          : "Posted! It's in the Drops feed.",
       );
       setDraft(null);
       refresh();
@@ -224,7 +231,10 @@ function OwnerDrops() {
   const donate = async (id: string, left: number) => {
     const to = prompt(`Donate the ${left} left to which food bank or shelter?`, "Local food bank");
     if (to === null) return;
-    const { data: n, error } = await supabase.rpc("donate_leftover", { p_drop_id: id, p_recipient: to });
+    const { data: n, error } = await supabase.rpc("donate_leftover", {
+      p_drop_id: id,
+      p_recipient: to,
+    });
     if (error) {
       toast.error(error.message);
       return;
@@ -264,11 +274,11 @@ function OwnerDrops() {
         to="/owner/unlock"
         className="flex items-center gap-3 rounded-2xl bg-foreground p-4 text-background active:scale-[0.98]"
       >
-        <span className="text-2xl">🔓</span>
+        <span className="text-2xl">👯</span>
         <span className="flex-1">
-          <span className="block font-bold">Unlock deals</span>
+          <span className="block font-bold">Crew & unlock deals</span>
           <span className="block text-xs opacity-80">
-            A discount that only switches on if enough people commit
+            A bigger discount for customers who bring friends
           </span>
         </span>
         <span aria-hidden>→</span>
@@ -364,10 +374,10 @@ function OwnerDrops() {
       </section>
 
       <section>
-        <h2 className="mb-2 text-lg font-bold">Promotions</h2>
+        <h2 className="mb-2 text-lg font-bold">Instant deals</h2>
         {promoActive.length === 0 && (
           <p className="rounded-2xl bg-card p-4 text-sm text-muted-foreground shadow-card">
-            No promotions running.
+            No instant deals running.
           </p>
         )}
         <div className="space-y-2">
@@ -438,10 +448,10 @@ function OwnerDrops() {
                 draft.kind === "vortex"
                   ? "e.g. Free hot chocolate with any soup"
                   : draft.kind === "promo"
-                  ? "e.g. 2-for-1 lattes until 3pm"
-                  : draft.kind === "leftover"
-                    ? "e.g. Surprise pastry box"
-                    : "e.g. Birria tacos (only 50!)"
+                    ? "e.g. 2-for-1 lattes until 3pm"
+                    : draft.kind === "leftover"
+                      ? "e.g. Surprise pastry box"
+                      : "e.g. Birria tacos (only 50!)"
               }
               value={draft.title}
               onChange={(e) => setDraft({ ...draft, title: e.target.value })}
@@ -491,7 +501,11 @@ function OwnerDrops() {
                       onChange={(e) => {
                         const original = e.target.value;
                         const o = parseFloat(original);
-                        setDraft({ ...draft, original, price: o > 0 ? (Math.round(o * 35) / 100).toFixed(2) : draft.price });
+                        setDraft({
+                          ...draft,
+                          original,
+                          price: o > 0 ? (Math.round(o * 35) / 100).toFixed(2) : draft.price,
+                        });
                       }}
                     />
                   </label>
@@ -506,16 +520,23 @@ function OwnerDrops() {
                     onChange={(e) => setDraft({ ...draft, price: e.target.value })}
                   />
                 </label>
-                {draft.kind === "leftover" && parseFloat(draft.original) > 0 && parseFloat(draft.price) >= 0 && (
-                  <p
-                    className={`col-span-2 -mt-1 text-sm font-bold ${
-                      parseFloat(draft.price) * 2 <= parseFloat(draft.original) ? "text-success" : "text-destructive"
-                    }`}
-                  >
-                    {Math.round((1 - parseFloat(draft.price) / parseFloat(draft.original)) * 100)}% off
-                    {parseFloat(draft.price) * 2 <= parseFloat(draft.original) ? " ✓" : " · needs to be at least 50% off"}
-                  </p>
-                )}
+                {draft.kind === "leftover" &&
+                  parseFloat(draft.original) > 0 &&
+                  parseFloat(draft.price) >= 0 && (
+                    <p
+                      className={`col-span-2 -mt-1 text-sm font-bold ${
+                        parseFloat(draft.price) * 2 <= parseFloat(draft.original)
+                          ? "text-success"
+                          : "text-destructive"
+                      }`}
+                    >
+                      {Math.round((1 - parseFloat(draft.price) / parseFloat(draft.original)) * 100)}
+                      % off
+                      {parseFloat(draft.price) * 2 <= parseFloat(draft.original)
+                        ? " ✓"
+                        : " · needs to be at least 50% off"}
+                    </p>
+                  )}
                 {draft.kind === "leftover" ? null : (
                   <label className="text-sm font-semibold">
                     How many
@@ -573,6 +594,7 @@ function OwnerDrops() {
 function Gated() {
   const { data: r, isLoading } = useMyRestaurant();
   if (isLoading) return <div className="m-5 h-40 animate-pulse rounded-3xl bg-muted" />;
-  if (r && !isVerified(r)) return <LockedTool title="Drops and deals" status={r.verification_status} />;
+  if (r && !isVerified(r))
+    return <LockedTool title="Drops and deals" status={r.verification_status} />;
   return <OwnerDrops />;
 }

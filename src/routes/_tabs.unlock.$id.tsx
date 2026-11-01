@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { ArrowLeft, Clock, LockOpen, MapPin, Share2, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Clock, LockOpen, MapPin, Share2, ShieldCheck, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -9,6 +9,7 @@ import { formatPrice } from "@/lib/bite";
 import { useNow } from "@/lib/live";
 import {
   countdown,
+  crewLink,
   fmtWhen,
   isReached,
   percentOff,
@@ -18,7 +19,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { UnlockProgress } from "@/components/bite/UnlockCard";
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export const Route = createFileRoute("/_tabs/unlock/$id")({
+  validateSearch: (s: Record<string, unknown>): { crew?: string } => {
+    const c = s["crew"];
+    return typeof c === "string" && UUID.test(c) ? { crew: c } : {};
+  },
   head: () => ({
     meta: [
       { title: "Unlock deal — Bity" },
@@ -40,8 +47,16 @@ const HOW = [
   ["🤷", "Not reached?", "Nothing happens and nobody pays. No risk."],
 ] as const;
 
+const CREW_HOW = [
+  ["👯", "Start a crew", "Free. You're saying you'll come with friends."],
+  ["💬", "Send the link", "Drop your crew link in the group chat."],
+  ["🔓", "Crew full? Deal's on", "It unlocks for your crew right away. No waiting on strangers."],
+  ["🤷", "Not enough friends?", "Nothing happens and nobody pays. No risk."],
+] as const;
+
 function UnlockPage() {
   const { id } = Route.useParams();
+  const { crew: invite } = Route.useSearch();
   const { user } = useAuth();
   const router = useRouter();
   const navigate = useNavigate();
@@ -50,6 +65,25 @@ function UnlockPage() {
   const q = useUnlockDeals({ dealId: id });
   const d = q.data?.[0];
   const [busy, setBusy] = useState(false);
+  const isCrew = !!d?.crew_size;
+  const inviteInfo = useQuery({
+    queryKey: ["crew-invite", id, invite],
+    enabled: !!invite && isCrew && !d?.mine,
+    queryFn: async () => {
+      const { data } = await supabase.rpc("crew_invite", { p_deal_id: id, p_crew: invite! });
+      return data?.[0] ?? null;
+    },
+  });
+  const crew = useQuery({
+    queryKey: ["my-crew", id, d?.crew_joined],
+    enabled: isCrew && !!d?.mine,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("my_crew", { p_deal_id: id });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const joiningCrew = isCrew && !!inviteInfo.data;
 
   const back = (
     <button
@@ -86,29 +120,49 @@ function UnlockPage() {
 
   const act = async (join: boolean) => {
     if (!user) {
-      navigate({ to: "/auth", search: { redirect: `/unlock/${d.id}` } });
+      navigate({
+        to: "/auth",
+        search: { redirect: `/unlock/${d.id}${invite ? `?crew=${invite}` : ""}` },
+      });
       return;
     }
     setBusy(true);
     const { data, error } = join
-      ? await supabase.rpc("join_unlock", { p_deal_id: d.id })
+      ? await supabase.rpc("join_unlock", {
+          p_deal_id: d.id,
+          ...(joiningCrew ? { p_crew: invite! } : {}),
+        })
       : await supabase.rpc("leave_unlock", { p_deal_id: d.id });
     setBusy(false);
     if (error) return void toast.error(error.message);
     if (join) {
       const n = (data as number) ?? 0;
-      toast.success(
-        n >= d.goal
-          ? "You're in, and the deal is unlocked! 🎉"
-          : `You're in! ${d.goal - n} more to unlock. Share it with friends.`,
-      );
+      if (isCrew) {
+        const left = (d.crew_size ?? 0) - n;
+        toast.success(
+          left <= 0
+            ? "Your crew is full. Deal unlocked! 🎉"
+            : joiningCrew
+              ? `You're in the crew! ${left} more to go.`
+              : `Crew started! Invite ${left} friend${left === 1 ? "" : "s"} to unlock it.`,
+        );
+      } else
+        toast.success(
+          n >= d.goal
+            ? "You're in, and the deal is unlocked! 🎉"
+            : `You're in! ${d.goal - n} more to unlock. Share it with friends.`,
+        );
     } else toast.success("You've left this deal");
     qc.invalidateQueries({ queryKey: ["unlock-deals"] });
   };
 
   const share = async () => {
-    const url = `${window.location.origin}/unlock/${d.id}`;
-    const text = `Help me unlock ${d.title} at ${d.restaurants?.name} on Bity: ${formatPrice(d.deal_price_cents)} instead of ${formatPrice(d.regular_price_cents)}. ${Math.max(0, d.goal - d.joined)} more people needed!`;
+    const mineCrew = isCrew && d.my_crew;
+    const url = mineCrew ? crewLink(d.id, d.my_crew!) : `${window.location.origin}/unlock/${d.id}`;
+    const left = Math.max(0, (d.crew_size ?? 0) - (d.crew_joined ?? 0));
+    const text = mineCrew
+      ? `Join my crew for ${d.title} at ${d.restaurants?.name}: ${formatPrice(d.deal_price_cents)} instead of ${formatPrice(d.regular_price_cents)}. ${left > 0 ? `We need ${left} more!` : "We're in!"}`
+      : `Help me unlock ${d.title} at ${d.restaurants?.name} on Bity: ${formatPrice(d.deal_price_cents)} instead of ${formatPrice(d.regular_price_cents)}. ${Math.max(0, d.goal - d.joined)} more people needed!`;
     try {
       if (navigator.share) await navigator.share({ title: d.title, text, url });
       else {
@@ -130,7 +184,14 @@ function UnlockPage() {
           <span
             className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-extrabold ${isReached(s) ? "bg-success" : "bg-white/20 backdrop-blur"}`}
           >
-            {isReached(s) ? "🔓 UNLOCKED" : "🔒 UNLOCK DEAL"} · −{percentOff(d)}%
+            {isCrew
+              ? isReached(s) && d.mine
+                ? "👯 CREW UNLOCKED"
+                : `👯 CREW DEAL · ${d.crew_size}`
+              : isReached(s)
+                ? "🔓 UNLOCKED"
+                : "🔒 UNLOCK DEAL"}{" "}
+            · −{percentOff(d)}%
           </span>
           <h1 className="mt-2 text-[28px] font-extrabold leading-[1.05]">{d.title}</h1>
           {d.restaurants && (
@@ -161,8 +222,40 @@ function UnlockPage() {
           </p>
         </div>
 
+        {joiningCrew && !d.mine && (
+          <div className="rounded-3xl bg-primary-soft p-4">
+            <p className="text-lg font-extrabold text-primary">
+              👋 {inviteInfo.data!.leader_name} invited you to their crew
+            </p>
+            <p className="mt-1 text-sm">
+              {inviteInfo.data!.members} of {d.crew_size} in so far. Join and the deal unlocks for
+              all of you once the crew is full.
+            </p>
+          </div>
+        )}
+
         <div className="rounded-3xl bg-card p-4 shadow-card">
           <UnlockProgress deal={d} big />
+          {isCrew && d.mine && (crew.data?.length ?? 0) > 0 && (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {crew.data!.map((m, i) => (
+                <span
+                  key={i}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-secondary py-1 pl-1 pr-2.5 text-xs font-bold"
+                >
+                  {m.avatar_url ? (
+                    <img src={m.avatar_url} alt="" className="size-6 rounded-full object-cover" />
+                  ) : (
+                    <span className="grid size-6 place-items-center rounded-full bg-primary text-[11px] text-primary-foreground">
+                      {m.first_name[0]}
+                    </span>
+                  )}
+                  {m.is_me ? "You" : m.first_name}
+                  {m.is_leader && " 👑"}
+                </span>
+              ))}
+            </div>
+          )}
           <p className="mt-2 text-xs text-muted-foreground">
             {d.max_spots - d.joined > 0
               ? `${d.max_spots - d.joined} spots left in total.`
@@ -185,7 +278,19 @@ function UnlockPage() {
             </p>
           </div>
         )}
-        {d.mine && !isReached(s) && s !== "failed" && (
+        {isCrew && d.mine && !isReached(s) && s !== "failed" && (
+          <div className="rounded-3xl bg-primary-soft p-4 text-sm">
+            <p className="font-bold text-primary">You're in the crew ✓</p>
+            <p className="mt-1">
+              Invite {(d.crew_size ?? 0) - (d.crew_joined ?? 0)} more. Only people with your link
+              can join your crew. You won't pay anything unless it unlocks.
+            </p>
+            <Button className="mt-3 w-full rounded-full" onClick={share}>
+              <UserPlus className="size-4" /> Invite friends
+            </Button>
+          </div>
+        )}
+        {!isCrew && d.mine && !isReached(s) && s !== "failed" && (
           <div className="rounded-3xl bg-primary-soft p-4 text-sm">
             <p className="font-bold text-primary">You're in ✓</p>
             <p className="mt-1">
@@ -196,14 +301,22 @@ function UnlockPage() {
         )}
         {s === "failed" && (
           <p className="rounded-3xl bg-secondary p-4 text-sm">
-            This one didn't reach its goal, so nobody pays anything. Watch for the next one!
+            {isCrew
+              ? "This crew deal has closed. If your crew wasn't full, nobody pays anything."
+              : "This one didn't reach its goal, so nobody pays anything. Watch for the next one!"}
           </p>
         )}
 
         <div className="grid grid-cols-[1fr_auto] gap-2">
           {canJoin ? (
             <Button size="xl" className="w-full" disabled={busy} onClick={() => act(true)}>
-              {user ? "Join, it's free" : "Sign in to join"}
+              {!user
+                ? "Sign in to join"
+                : joiningCrew
+                  ? `Join ${inviteInfo.data!.leader_name}'s crew`
+                  : isCrew
+                    ? "Start a crew, it's free"
+                    : "Join, it's free"}
             </Button>
           ) : canLeave ? (
             <Button
@@ -238,9 +351,11 @@ function UnlockPage() {
         </div>
 
         <section className="rounded-3xl bg-card p-4 shadow-card">
-          <h2 className="font-extrabold">How unlock deals work</h2>
+          <h2 className="font-extrabold">
+            {isCrew ? "How crew deals work" : "How unlock deals work"}
+          </h2>
           <ul className="mt-3 space-y-3">
-            {HOW.map(([e, t, sub]) => (
+            {(isCrew ? CREW_HOW : HOW).map(([e, t, sub]) => (
               <li key={t} className="flex gap-3">
                 <span className="text-2xl">{e}</span>
                 <span>

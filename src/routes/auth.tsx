@@ -10,7 +10,7 @@ export const Route = createFileRoute("/auth")({
     const r = search["redirect"];
     const ok =
       typeof r === "string" &&
-      /^\/(checkout|drops|passport|social|people\/[0-9a-f-]{36}|unlock\/[0-9a-f-]{36}|claim\/[0-9a-f-]{36}|decide(\/[A-Za-z0-9]{5})?|stamp\/[a-z0-9-]+\/[A-Za-z0-9]{6}|orders\/[a-f0-9-]+)$/.test(
+      /^\/(checkout|drops|passport|social|people\/[0-9a-f-]{36}|unlock\/[0-9a-f-]{36}(\?crew=[0-9a-f-]{36})?|claim\/[0-9a-f-]{36}|decide(\/[A-Za-z0-9]{5})?|stamp\/[a-z0-9-]+\/[A-Za-z0-9]{6}|orders\/[a-f0-9-]+)$/.test(
         r,
       );
     const as = search["as"] === "owner" ? ("owner" as const) : undefined;
@@ -46,13 +46,20 @@ function AuthPage() {
   const { user, role: currentRole, loading, refreshRole } = useAuth();
   // A signed-in customer who came here to list a restaurant gets the choice instead of a bounce.
   const addingBusiness = as === "owner" && !!user && currentRole === "customer";
+  // Redirects can carry a query (e.g. a crew invite link), so split it into path + search.
+  const go = (path: string) => {
+    const [to, qs] = path.split("?");
+    navigate({
+      to,
+      search: qs ? Object.fromEntries(new URLSearchParams(qs)) : undefined,
+      replace: true,
+    } as never);
+  };
 
   useEffect(() => {
     if (!loading && user && currentRole && !addingBusiness)
-      navigate({
-        to: redirect ?? (currentRole === "restaurant_owner" ? "/owner" : "/"),
-        replace: true,
-      });
+      go(redirect ?? (currentRole === "restaurant_owner" ? "/owner" : "/"));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, user, currentRole, navigate, redirect, addingBusiness]);
 
   const addBusiness = async () => {
@@ -65,7 +72,7 @@ function AuthPage() {
     }
     await refreshRole();
     setBusy(false);
-    navigate({ to: redirect ?? "/owner", replace: true });
+    go(redirect ?? "/owner");
   };
 
   const submit = async (e: React.FormEvent) => {
@@ -84,7 +91,7 @@ function AuthPage() {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         const r = await fetchRole(data.user.id);
-        navigate({ to: redirect ?? (r === "restaurant_owner" ? "/owner" : "/"), replace: true });
+        go(redirect ?? (r === "restaurant_owner" ? "/owner" : "/"));
       }
     } catch (err) {
       toast.error((err as Error).message);
