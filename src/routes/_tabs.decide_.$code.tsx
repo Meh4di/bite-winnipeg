@@ -78,6 +78,7 @@ function Group() {
         supabase.from("decide_votes").select("user_id, restaurant_id, liked").eq("session_id", sid),
       ]);
       if (session.error) throw session.error;
+      if (!session.data) throw new Error("This group isn't available anymore");
       return { session: session.data, members: members.data ?? [], votes: votes.data ?? [] };
     },
   });
@@ -170,9 +171,13 @@ function Group() {
         </Button>
       </Center>
     );
-  if (joinError)
+  if (joinError || group.isError)
     return (
-      <Center emoji="🤷" title="Couldn't join" line={joinError}>
+      <Center
+        emoji="🤷"
+        title="Couldn't join"
+        line={joinError ?? (group.error as Error | null)?.message ?? "Try again"}
+      >
         <Button asChild size="xl" className="w-full">
           <Link to="/decide">Back to Decide</Link>
         </Button>
