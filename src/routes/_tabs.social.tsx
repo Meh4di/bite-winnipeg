@@ -55,7 +55,7 @@ export const Route = createFileRoute("/_tabs/social")({
       { property: "og:title", content: "Social — Bity" },
       {
         property: "og:description",
-        content: "See where your friends eat and plan meals together.",
+        content: "See where your friends eat, what they're going to, and plan together.",
       },
     ],
   }),
@@ -80,11 +80,24 @@ function Social() {
       <header className="px-5">
         <h1 className="text-[32px] font-extrabold leading-none tracking-tight">Social</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          See where your friends eat and plan meals together.
+          See where your friends eat, what they're going to, and plan together.
         </p>
       </header>
 
       <div className="mt-4 px-5">
+        <Link
+          to="/events"
+          search={{ when: "friends" }}
+          className="mb-3 flex items-center gap-3 rounded-2xl bg-primary p-4 text-primary-foreground shadow-card"
+        >
+          <span className="text-4xl">📅</span>
+          <span>
+            <span className="block font-extrabold leading-tight">What's on in Winnipeg</span>
+            <span className="block text-xs opacity-85">
+              Games, festivals, markets and pop-ups. See which friends are going.
+            </span>
+          </span>
+        </Link>
         <Link
           to="/decide"
           className="flex items-center gap-3 rounded-2xl bg-secondary p-4 shadow-card"

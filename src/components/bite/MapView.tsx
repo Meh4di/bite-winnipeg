@@ -20,6 +20,8 @@ import {
   type Heat,
 } from "@/lib/map";
 import { BusyLine, RatingPill } from "@/components/bite/Busy";
+import { categoryOf, isOnNow, useEvents, whenLabel, type BityEvent } from "@/lib/events";
+import { FriendsGoing } from "@/components/bite/EventCard";
 import { OpenBadge } from "@/components/bite/RestaurantCard";
 import { Button } from "@/components/ui/button";
 import {
@@ -96,6 +98,17 @@ function pinIcon(spot: MapSpot, x: Extras, selected: boolean, now: number, rank:
   return L.divIcon({ html, className: "", iconSize: [48, 48], iconAnchor: [24, 44] });
 }
 
+function eventIcon(e: BityEvent, selected: boolean) {
+  const live = isOnNow(e);
+  const friends = e.stats.friends_going;
+  const html = `
+    <div class="bity-event-pin${selected ? " is-selected" : ""}${live ? " is-live" : ""}">
+      <span>${categoryOf(e.category).emoji}</span>
+      ${friends > 0 ? `<b>👯 ${friends}</b>` : ""}
+    </div>`;
+  return L.divIcon({ html, className: "", iconSize: [44, 44], iconAnchor: [22, 40] });
+}
+
 function FlyTo({ to }: { to: [number, number] | null }) {
   const map = useMap();
   useEffect(() => {
@@ -120,6 +133,20 @@ export default function MapView({
   const [voting, setVoting] = useState(false);
   const [me, setMe] = useState<[number, number] | null>(null);
   const [flyTo, setFlyTo] = useState<[number, number] | null>(null);
+  const [showEvents, setShowEvents] = useState(true);
+  const [eventId, setEventId] = useState<string | null>(null);
+  const eventsQ = useEvents();
+  const mapEvents = useMemo(
+    () =>
+      (eventsQ.data ?? []).filter(
+        (e) =>
+          e.lat !== null &&
+          e.lng !== null &&
+          new Date(e.starts_at).getTime() < now + 7 * 86_400_000,
+      ),
+    [eventsQ.data, now],
+  );
+  const selectedEvent = showEvents ? (mapEvents.find((e) => e.id === eventId) ?? null) : null;
 
   const best = useBestSpots(layer);
   const myVotes = useMyVotes(user?.id);
@@ -175,6 +202,7 @@ export default function MapView({
     });
 
   const select = (s: MapSpot) => {
+    setEventId(null);
     setSelectedId(s.id);
     if (s.lat !== null && s.lng !== null) setFlyTo([s.lat, s.lng]);
   };
@@ -217,10 +245,42 @@ export default function MapView({
             title={s.name}
           />
         ))}
+        {showEvents &&
+          !layer &&
+          mapEvents.map((e) => (
+            <Marker
+              key={`ev-${e.id}`}
+              position={[e.lat as number, e.lng as number]}
+              icon={eventIcon(e, e.id === eventId)}
+              zIndexOffset={500}
+              eventHandlers={{
+                click: () => {
+                  setSelectedId(null);
+                  setEventId(e.id);
+                  setFlyTo([e.lat as number, e.lng as number]);
+                },
+              }}
+              keyboard
+              title={e.title}
+            />
+          ))}
       </MapContainer>
 
       <div className="pointer-events-none absolute inset-x-0 top-0 z-[1000] space-y-2 p-3 pt-[max(env(safe-area-inset-top),0.75rem)]">
         <div className="no-scrollbar pointer-events-auto flex gap-2 overflow-x-auto">
+          <button
+            onClick={() => {
+              setLayer(null);
+              setEventId(null);
+              setShowEvents(!showEvents);
+            }}
+            aria-pressed={showEvents}
+            className={`h-10 shrink-0 rounded-full px-3.5 text-sm font-bold shadow-card ${
+              showEvents && !layer ? "bg-violet-600 text-white" : "bg-card"
+            }`}
+          >
+            📅 What's on{mapEvents.length ? ` · ${mapEvents.length}` : ""}
+          </button>
           <span className="flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-foreground px-3.5 text-sm font-extrabold text-background shadow-card">
             <Trophy className="size-4" /> Best in the Peg
           </span>
@@ -268,10 +328,38 @@ export default function MapView({
         onClick={locate}
         aria-label="Show spots near me"
         className="absolute right-3 z-[1000] grid size-12 place-items-center rounded-full bg-card shadow-pop active:scale-90"
-        style={{ bottom: selected ? "15.5rem" : layer ? "17rem" : "1rem" }}
+        style={{
+          bottom: selected ? "15.5rem" : layer ? "17rem" : selectedEvent ? "12.5rem" : "1rem",
+        }}
       >
         <LocateFixed className="size-5 text-primary" />
       </button>
+
+      {selectedEvent && !selected && !layer && (
+        <div className="absolute inset-x-3 bottom-3 z-[1100] rounded-3xl bg-card p-4 shadow-pop animate-screen">
+          <button
+            onClick={() => setEventId(null)}
+            className="absolute right-3 top-3 grid size-8 place-items-center rounded-full bg-secondary"
+            aria-label="Close"
+          >
+            <X className="size-4" />
+          </button>
+          <p className="text-[11px] font-bold uppercase tracking-wide text-violet-600">
+            {categoryOf(selectedEvent.category).emoji} {whenLabel(selectedEvent)}
+          </p>
+          <p className="mt-0.5 pr-8 text-lg font-extrabold leading-tight">{selectedEvent.title}</p>
+          <p className="truncate text-sm text-muted-foreground">{selectedEvent.venue_name}</p>
+          <FriendsGoing e={selectedEvent} className="mt-1 text-sm" />
+          <Button asChild className="mt-3 w-full rounded-full">
+            <Link to="/events/$id" params={{ id: selectedEvent.id }}>
+              See event
+              {selectedEvent.stats.deals
+                ? ` & ${selectedEvent.stats.deals} food deals`
+                : " & food nearby"}
+            </Link>
+          </Button>
+        </div>
+      )}
 
       {layer && !selected && layerInfo && (
         <div className="absolute inset-x-3 bottom-3 z-[1100] rounded-3xl bg-card p-4 shadow-pop animate-screen">

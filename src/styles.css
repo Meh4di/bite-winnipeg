@@ -152,7 +152,7 @@
   --sidebar-foreground: oklch(0.97 0.004 20);
   --sidebar-border: oklch(0.3 0.01 20);
   --shadow-card-v: 0 1px 2px oklch(0 0 0 / 0.3), 0 8px 24px -12px oklch(0 0 0 / 0.5);
-  }
+}
 
 @utility bg-warm {
   background-image: var(--gradient-warm);
@@ -222,15 +222,25 @@
 }
 
 @keyframes stamp-in {
-  0% { transform: scale(2.2) rotate(-18deg); opacity: 0; }
-  60% { transform: scale(0.92) rotate(4deg); opacity: 1; }
-  100% { transform: scale(1) rotate(0); }
+  0% {
+    transform: scale(2.2) rotate(-18deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(0.92) rotate(4deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0);
+  }
 }
 @utility animate-stamp {
   animation: stamp-in 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
 }
 @media (prefers-reduced-motion: reduce) {
-  .animate-stamp { animation: none; }
+  .animate-stamp {
+    animation: none;
+  }
 }
 
 /* Map pins */
@@ -247,8 +257,12 @@
   box-shadow: 0 6px 16px -4px rgb(0 0 0 / 0.35);
   transition: transform 0.15s ease;
 }
-.bite-pin > * { transform: rotate(45deg); }
-.bite-pin.is-closed { background: #6b7280; }
+.bite-pin > * {
+  transform: rotate(45deg);
+}
+.bite-pin.is-closed {
+  background: #6b7280;
+}
 /* Heat glow: brighter the more Winnipeg visited this week */
 .bite-pin.is-hot {
   box-shadow:
@@ -258,11 +272,23 @@
   animation: bite-heat 2.2s ease-in-out infinite;
 }
 @keyframes bite-heat {
-  50% { filter: brightness(1.12) saturate(1.15); }
+  50% {
+    filter: brightness(1.12) saturate(1.15);
+  }
 }
-@media (prefers-reduced-motion: reduce) { .bite-pin.is-hot { animation: none; } }
-.bite-pin.is-selected { transform: rotate(-45deg) scale(1.2); z-index: 1000; }
-.bite-pin-emoji { font-size: 20px; line-height: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .bite-pin.is-hot {
+    animation: none;
+  }
+}
+.bite-pin.is-selected {
+  transform: rotate(-45deg) scale(1.2);
+  z-index: 1000;
+}
+.bite-pin-emoji {
+  font-size: 20px;
+  line-height: 1;
+}
 .bite-pin-rating {
   position: absolute;
   bottom: -14px;
@@ -282,7 +308,10 @@
   right: -10px;
   font-size: 16px;
 }
-.leaflet-container { font-family: var(--font-sans); background: var(--muted); }
+.leaflet-container {
+  font-family: var(--font-sans);
+  background: var(--muted);
+}
 
 /* Polar Vortex mode: the app goes frosty blue when Winnipeg drops to -25°C */
 :root.vortex {
@@ -297,11 +326,17 @@
   --primary-soft: oklch(0.3 0.07 245);
 }
 @media (prefers-color-scheme: light) {
-  :root.vortex:not(.dark) { --primary-soft: oklch(0.94 0.04 240); }
+  :root.vortex:not(.dark) {
+    --primary-soft: oklch(0.94 0.04 240);
+  }
 }
 @keyframes snow-fall {
-  from { transform: translateY(-10%); }
-  to { transform: translateY(110%); }
+  from {
+    transform: translateY(-10%);
+  }
+  to {
+    transform: translateY(110%);
+  }
 }
 .snow {
   pointer-events: none;
@@ -327,5 +362,45 @@
   animation-delay: -3s;
 }
 @media (prefers-reduced-motion: reduce) {
-  .snow::before, .snow::after { animation: none; }
+  .snow::before,
+  .snow::after {
+    animation: none;
+  }
+}
+
+/* Event pins on the Bity Map: violet squircle with the category emoji */
+.bity-event-pin {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  background: #7c3aed;
+  border: 3px solid #fff;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.25);
+  font-size: 20px;
+  transform: rotate(-6deg);
+  transition: transform 0.15s;
+}
+.bity-event-pin.is-selected {
+  transform: rotate(0) scale(1.18);
+}
+.bity-event-pin.is-live {
+  box-shadow:
+    0 0 0 4px rgb(124 58 237 / 0.35),
+    0 4px 14px rgb(0 0 0 / 0.25);
+}
+.bity-event-pin b {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%) rotate(6deg);
+  white-space: nowrap;
+  border-radius: 999px;
+  background: #fff;
+  color: #7c3aed;
+  padding: 0 6px;
+  font-size: 10px;
+  font-weight: 800;
 }

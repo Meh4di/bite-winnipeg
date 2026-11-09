@@ -8,6 +8,149 @@ export type Database = {
   };
   public: {
     Tables: {
+      event_deals: {
+        Row: {
+          created_at: string
+          details: string | null
+          event_id: string
+          id: string
+          restaurant_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          event_id: string
+          id?: string
+          restaurant_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          event_id?: string
+          id?: string
+          restaurant_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_deals_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_deals_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_rsvps: {
+        Row: {
+          created_at: string
+          event_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          status: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      events: {
+        Row: {
+          address: string | null
+          category: string
+          created_at: string
+          created_by: string
+          description: string | null
+          ends_at: string
+          id: string
+          is_free: boolean
+          is_sample: boolean
+          lat: number | null
+          link_url: string | null
+          lng: number | null
+          photo_url: string | null
+          price_text: string | null
+          restaurant_id: string | null
+          review_note: string | null
+          starts_at: string
+          status: string
+          tags: string[]
+          title: string
+          venue_name: string
+        }
+        Insert: {
+          address?: string | null
+          category: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          ends_at: string
+          id?: string
+          is_free?: boolean
+          is_sample?: boolean
+          lat?: number | null
+          link_url?: string | null
+          lng?: number | null
+          photo_url?: string | null
+          price_text?: string | null
+          restaurant_id?: string | null
+          review_note?: string | null
+          starts_at: string
+          status?: string
+          tags?: string[]
+          title: string
+          venue_name: string
+        }
+        Update: {
+          address?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          ends_at?: string
+          id?: string
+          is_free?: boolean
+          is_sample?: boolean
+          lat?: number | null
+          link_url?: string | null
+          lng?: number | null
+          photo_url?: string | null
+          price_text?: string | null
+          restaurant_id?: string | null
+          review_note?: string | null
+          starts_at?: string
+          status?: string
+          tags?: string[]
+          title?: string
+          venue_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activity: {
         Row: {
           badge_id: string | null;
@@ -1492,6 +1635,50 @@ export type Database = {
       };
     };
     Functions: {
+      add_event_deal: {
+        Args: { p_details: string | null; p_event_id: string; p_restaurant_id: string; p_title: string }
+        Returns: undefined
+      }
+      admin_event_queue: { Args: never; Returns: Database["public"]["Tables"]["events"]["Row"][] }
+      cancel_event: { Args: { p_event_id: string }; Returns: undefined }
+      event_stats: {
+        Args: never
+        Returns: {
+          deals: number
+          event_id: string
+          friend_names: string[]
+          friends_going: number
+          going: number
+          interested: number
+          my_status: string | null
+        }[]
+      }
+      remove_event_deal: { Args: { p_event_id: string; p_restaurant_id: string }; Returns: undefined }
+      review_event: {
+        Args: { p_approve: boolean; p_event_id: string; p_note?: string }
+        Returns: undefined
+      }
+      rsvp_event: { Args: { p_event_id: string; p_status: string | null }; Returns: undefined }
+      submit_event: {
+        Args: {
+          p_address: string | null
+          p_category: string
+          p_description: string | null
+          p_ends_at: string
+          p_is_free: boolean
+          p_lat: number | null
+          p_link_url: string | null
+          p_lng: number | null
+          p_photo_url: string | null
+          p_price_text: string | null
+          p_restaurant_id?: string
+          p_starts_at: string
+          p_tags: string[]
+          p_title: string
+          p_venue_name: string
+        }
+        Returns: { id: string; status: string }[]
+      }
       admin_listing_reports: {
         Args: never;
         Returns: {

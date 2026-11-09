@@ -65,3 +65,10 @@
 - Delivery isn't built: UI says "Delivery coming soon" (checkout, Home chips, FAQ).
 - Bity Business = the /owner area installed as its own app: `public/business.webmanifest` (id /owner, start_url /owner, dark maple icons `icons/biz-*`). `useBusinessAppShell()` swaps the manifest/icon/title while in /owner; `InstallBusiness` card on the dashboard. `/business` redirects owners to /owner, everyone else to /for-restaurants.
 - DEMO DATA: sample unlock deal 3 is now a crew deal with 2 crews of demo users.
+
+## What's on: events (migration 0015)
+- Bity = food + going out. `events` (games, concerts, festivals, markets, pop-ups, food trucks, restaurant nights, cultural, community). Only `status = 'approved'` is public. Post only through `submit_event`: verified businesses (with `p_restaurant_id`) go live instantly; everyone else is `pending` until an admin approves in /admin (`admin_event_queue`, `review_event`). 10 posts/day per user. `cancel_event` for the poster or admins.
+- Going/Interested via `rsvp_event` (null removes). `event_stats()` gives counts, my status and FRIENDS going (mutual follows only, first names, max 3). Strangers are never listed.
+- Restaurants attach deals for event-goers with `add_event_deal` / `remove_event_deal` (verified only), shown as "Eat near this event" with spots within 2.5 km.
+- Pages: `/events` (filters, New to Winnipeg = `newcomer-friendly` tag), `/events/$id`, `/events/new`. Home "What's on this week" rail, Map "📅 What's on" layer (next 7 days, violet pins), Social card, owner dashboard rows. Photos in the `event-photos` bucket.
+- DEMO DATA: sample events `33333333-cccc-*` (`is_sample`, Sample badge), their event deals and RSVPs.

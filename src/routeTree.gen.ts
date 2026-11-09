@@ -22,6 +22,7 @@ import { Route as TabsCrawlsRouteImport } from './routes/_tabs.crawls'
 import { Route as TabsDecideRouteImport } from './routes/_tabs.decide'
 import { Route as TabsDropsRouteImport } from './routes/_tabs.drops'
 import { Route as TabsEatsRouteImport } from './routes/_tabs.eats'
+import { Route as TabsEventsRouteImport } from './routes/_tabs.events'
 import { Route as TabsMapRouteImport } from './routes/_tabs.map'
 import { Route as TabsPassportRouteImport } from './routes/_tabs.passport'
 import { Route as TabsProfileRouteImport } from './routes/_tabs.profile'
@@ -39,6 +40,8 @@ import { Route as OwnerVerifyRouteImport } from './routes/owner.verify'
 import { Route as RSlugRouteImport } from './routes/r.$slug'
 import { Route as TabsCrawlsSlugRouteImport } from './routes/_tabs.crawls_.$slug'
 import { Route as TabsDecideCodeRouteImport } from './routes/_tabs.decide_.$code'
+import { Route as TabsEventsIdRouteImport } from './routes/_tabs.events_.$id'
+import { Route as TabsEventsNewRouteImport } from './routes/_tabs.events_.new'
 import { Route as TabsPeopleIdRouteImport } from './routes/_tabs.people.$id'
 import { Route as TabsUnlockIdRouteImport } from './routes/_tabs.unlock.$id'
 import { Route as StampSlugCodeRouteImport } from './routes/stamp.$slug.$code'
@@ -105,6 +108,11 @@ const TabsDropsRoute = TabsDropsRouteImport.update({
 const TabsEatsRoute = TabsEatsRouteImport.update({
   id: '/eats',
   path: '/eats',
+  getParentRoute: () => TabsRoute,
+} as any)
+const TabsEventsRoute = TabsEventsRouteImport.update({
+  id: '/events',
+  path: '/events',
   getParentRoute: () => TabsRoute,
 } as any)
 const TabsMapRoute = TabsMapRouteImport.update({
@@ -192,6 +200,16 @@ const TabsDecideCodeRoute = TabsDecideCodeRouteImport.update({
   path: '/decide/$code',
   getParentRoute: () => TabsRoute,
 } as any)
+const TabsEventsIdRoute = TabsEventsIdRouteImport.update({
+  id: '/events_/$id',
+  path: '/events/$id',
+  getParentRoute: () => TabsRoute,
+} as any)
+const TabsEventsNewRoute = TabsEventsNewRouteImport.update({
+  id: '/events_/new',
+  path: '/events/new',
+  getParentRoute: () => TabsRoute,
+} as any)
 const TabsPeopleIdRoute = TabsPeopleIdRouteImport.update({
   id: '/people/$id',
   path: '/people/$id',
@@ -221,6 +239,7 @@ export interface FileRoutesByFullPath {
   '/decide': typeof TabsDecideRoute
   '/drops': typeof TabsDropsRoute
   '/eats': typeof TabsEatsRoute
+  '/events': typeof TabsEventsRoute
   '/map': typeof TabsMapRoute
   '/passport': typeof TabsPassportRoute
   '/profile': typeof TabsProfileRoute
@@ -238,6 +257,8 @@ export interface FileRoutesByFullPath {
   '/owner/': typeof OwnerIndexRoute
   '/crawls/$slug': typeof TabsCrawlsSlugRoute
   '/decide/$code': typeof TabsDecideCodeRoute
+  '/events/$id': typeof TabsEventsIdRoute
+  '/events/new': typeof TabsEventsNewRoute
   '/people/$id': typeof TabsPeopleIdRoute
   '/unlock/$id': typeof TabsUnlockIdRoute
   '/stamp/$slug/$code': typeof StampSlugCodeRoute
@@ -253,6 +274,7 @@ export interface FileRoutesByTo {
   '/decide': typeof TabsDecideRoute
   '/drops': typeof TabsDropsRoute
   '/eats': typeof TabsEatsRoute
+  '/events': typeof TabsEventsRoute
   '/map': typeof TabsMapRoute
   '/passport': typeof TabsPassportRoute
   '/profile': typeof TabsProfileRoute
@@ -271,6 +293,8 @@ export interface FileRoutesByTo {
   '/owner': typeof OwnerIndexRoute
   '/crawls/$slug': typeof TabsCrawlsSlugRoute
   '/decide/$code': typeof TabsDecideCodeRoute
+  '/events/$id': typeof TabsEventsIdRoute
+  '/events/new': typeof TabsEventsNewRoute
   '/people/$id': typeof TabsPeopleIdRoute
   '/unlock/$id': typeof TabsUnlockIdRoute
   '/stamp/$slug/$code': typeof StampSlugCodeRoute
@@ -289,6 +313,7 @@ export interface FileRoutesById {
   '/_tabs/decide': typeof TabsDecideRoute
   '/_tabs/drops': typeof TabsDropsRoute
   '/_tabs/eats': typeof TabsEatsRoute
+  '/_tabs/events': typeof TabsEventsRoute
   '/_tabs/map': typeof TabsMapRoute
   '/_tabs/passport': typeof TabsPassportRoute
   '/_tabs/profile': typeof TabsProfileRoute
@@ -307,6 +332,8 @@ export interface FileRoutesById {
   '/owner/': typeof OwnerIndexRoute
   '/_tabs/crawls_/$slug': typeof TabsCrawlsSlugRoute
   '/_tabs/decide_/$code': typeof TabsDecideCodeRoute
+  '/_tabs/events_/$id': typeof TabsEventsIdRoute
+  '/_tabs/events_/new': typeof TabsEventsNewRoute
   '/_tabs/people/$id': typeof TabsPeopleIdRoute
   '/_tabs/unlock/$id': typeof TabsUnlockIdRoute
   '/stamp/$slug/$code': typeof StampSlugCodeRoute
@@ -326,6 +353,7 @@ export interface FileRouteTypes {
     | '/decide'
     | '/drops'
     | '/eats'
+    | '/events'
     | '/map'
     | '/passport'
     | '/profile'
@@ -343,6 +371,8 @@ export interface FileRouteTypes {
     | '/owner/'
     | '/crawls/$slug'
     | '/decide/$code'
+    | '/events/$id'
+    | '/events/new'
     | '/people/$id'
     | '/unlock/$id'
     | '/stamp/$slug/$code'
@@ -358,6 +388,7 @@ export interface FileRouteTypes {
     | '/decide'
     | '/drops'
     | '/eats'
+    | '/events'
     | '/map'
     | '/passport'
     | '/profile'
@@ -376,6 +407,8 @@ export interface FileRouteTypes {
     | '/owner'
     | '/crawls/$slug'
     | '/decide/$code'
+    | '/events/$id'
+    | '/events/new'
     | '/people/$id'
     | '/unlock/$id'
     | '/stamp/$slug/$code'
@@ -393,6 +426,7 @@ export interface FileRouteTypes {
     | '/_tabs/decide'
     | '/_tabs/drops'
     | '/_tabs/eats'
+    | '/_tabs/events'
     | '/_tabs/map'
     | '/_tabs/passport'
     | '/_tabs/profile'
@@ -411,6 +445,8 @@ export interface FileRouteTypes {
     | '/owner/'
     | '/_tabs/crawls_/$slug'
     | '/_tabs/decide_/$code'
+    | '/_tabs/events_/$id'
+    | '/_tabs/events_/new'
     | '/_tabs/people/$id'
     | '/_tabs/unlock/$id'
     | '/stamp/$slug/$code'
@@ -521,6 +557,13 @@ declare module '@tanstack/react-router' {
       path: '/eats'
       fullPath: '/eats'
       preLoaderRoute: typeof TabsEatsRouteImport
+      parentRoute: typeof TabsRoute
+    }
+    '/_tabs/events': {
+      id: '/_tabs/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof TabsEventsRouteImport
       parentRoute: typeof TabsRoute
     }
     '/_tabs/map': {
@@ -642,6 +685,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TabsDecideCodeRouteImport
       parentRoute: typeof TabsRoute
     }
+    '/_tabs/events_/$id': {
+      id: '/_tabs/events_/$id'
+      path: '/events/$id'
+      fullPath: '/events/$id'
+      preLoaderRoute: typeof TabsEventsIdRouteImport
+      parentRoute: typeof TabsRoute
+    }
+    '/_tabs/events_/new': {
+      id: '/_tabs/events_/new'
+      path: '/events/new'
+      fullPath: '/events/new'
+      preLoaderRoute: typeof TabsEventsNewRouteImport
+      parentRoute: typeof TabsRoute
+    }
     '/_tabs/people/$id': {
       id: '/_tabs/people/$id'
       path: '/people/$id'
@@ -672,6 +729,7 @@ interface TabsRouteChildren {
   TabsDecideRoute: typeof TabsDecideRoute
   TabsDropsRoute: typeof TabsDropsRoute
   TabsEatsRoute: typeof TabsEatsRoute
+  TabsEventsRoute: typeof TabsEventsRoute
   TabsMapRoute: typeof TabsMapRoute
   TabsPassportRoute: typeof TabsPassportRoute
   TabsProfileRoute: typeof TabsProfileRoute
@@ -679,6 +737,8 @@ interface TabsRouteChildren {
   TabsIndexRoute: typeof TabsIndexRoute
   TabsCrawlsSlugRoute: typeof TabsCrawlsSlugRoute
   TabsDecideCodeRoute: typeof TabsDecideCodeRoute
+  TabsEventsIdRoute: typeof TabsEventsIdRoute
+  TabsEventsNewRoute: typeof TabsEventsNewRoute
   TabsPeopleIdRoute: typeof TabsPeopleIdRoute
   TabsUnlockIdRoute: typeof TabsUnlockIdRoute
 }
@@ -689,6 +749,7 @@ const TabsRouteChildren: TabsRouteChildren = {
   TabsDecideRoute: TabsDecideRoute,
   TabsDropsRoute: TabsDropsRoute,
   TabsEatsRoute: TabsEatsRoute,
+  TabsEventsRoute: TabsEventsRoute,
   TabsMapRoute: TabsMapRoute,
   TabsPassportRoute: TabsPassportRoute,
   TabsProfileRoute: TabsProfileRoute,
@@ -696,6 +757,8 @@ const TabsRouteChildren: TabsRouteChildren = {
   TabsIndexRoute: TabsIndexRoute,
   TabsCrawlsSlugRoute: TabsCrawlsSlugRoute,
   TabsDecideCodeRoute: TabsDecideCodeRoute,
+  TabsEventsIdRoute: TabsEventsIdRoute,
+  TabsEventsNewRoute: TabsEventsNewRoute,
   TabsPeopleIdRoute: TabsPeopleIdRoute,
   TabsUnlockIdRoute: TabsUnlockIdRoute,
 }

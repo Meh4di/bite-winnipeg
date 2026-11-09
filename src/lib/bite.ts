@@ -103,7 +103,7 @@ export const slugify = (s: string) =>
     .replace(/(^-|-$)/g, "");
 
 export type ImageBucket =
-  "restaurant-logos" | "restaurant-covers" | "menu-photos" | "review-photos";
+  "restaurant-logos" | "restaurant-covers" | "menu-photos" | "review-photos" | "event-photos";
 
 /** Uploads into the owner's folder and returns a long-lived signed URL (buckets are private). */
 export async function uploadImage(bucket: ImageBucket, userId: string, file: File) {

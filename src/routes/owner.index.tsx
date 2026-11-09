@@ -9,6 +9,8 @@ import {
   Store,
   UtensilsCrossed,
   Zap,
+  CalendarDays,
+  CalendarPlus,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -152,6 +154,12 @@ function Dashboard() {
       </Button>
       <Row to="/owner/drops" icon={Zap} label="Post a drop or deal" />
       <Row to="/owner/unlock" icon={LockOpen} label="Crew deals (fill slow nights)" />
+      <Row
+        to="/events/new"
+        icon={CalendarPlus}
+        label="Post an event (trivia, live music, pop-up)"
+      />
+      <Row to="/events" icon={CalendarDays} label="Add a deal to a nearby event or game" />
       <Row to="/owner/stamps" icon={QrCode} label="Counter stamp code" />
       <Row to="/owner/menu" icon={UtensilsCrossed} label="Manage menu" />
       <Row to="/owner/setup" icon={Store} label="Edit details, hours & photos" />
@@ -179,7 +187,14 @@ function Row({
   icon: Icon,
   label,
 }: {
-  to: "/owner/menu" | "/owner/setup" | "/owner/drops" | "/owner/stamps" | "/owner/unlock";
+  to:
+    | "/owner/menu"
+    | "/owner/setup"
+    | "/owner/drops"
+    | "/owner/stamps"
+    | "/owner/unlock"
+    | "/events/new"
+    | "/events";
   icon: typeof Store;
   label: string;
 }) {

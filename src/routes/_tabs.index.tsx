@@ -10,6 +10,8 @@ import { HomeHero, type HeroSlide } from "@/components/bite/HomeHero";
 import { useAuth } from "@/lib/auth";
 import { clockTime, countdown, dropState, useDrops, useNow, usePromotions } from "@/lib/live";
 import { PromoCard } from "@/components/bite/PromoCard";
+import { EventCard } from "@/components/bite/EventCard";
+import { useEvents } from "@/lib/events";
 import { liveBusy, useHouseSpecials, useRatings } from "@/lib/community";
 import { dishEmoji, useDishLeaderboard } from "@/lib/dishes";
 import { useCrawls } from "@/lib/crawls";
@@ -54,6 +56,14 @@ function Home() {
   const unlocks = useUnlockDeals();
   const promos = usePromotions();
   const instant = (promos.data ?? []).filter((p) => !p.vortex_only);
+  const events = useEvents();
+  const soon = (events.data ?? [])
+    .filter((e) => new Date(e.starts_at).getTime() < Date.now() + 7 * 86_400_000)
+    .sort(
+      (a, b) =>
+        b.stats.friends_going - a.stats.friends_going || a.starts_at.localeCompare(b.starts_at),
+    )
+    .slice(0, 8);
   const value = useValueItems(1500);
   const liveUnlocks = (unlocks.data ?? []).filter((d) =>
     ["open", "unlocked"].includes(unlockState(d, now)),
@@ -290,6 +300,18 @@ function Home() {
               </span>
             ))}
           </div>
+
+          {soon.length > 0 && (
+            <Rail
+              title="📅 What's on this week"
+              sub="Go out, bring friends, eat nearby"
+              to="/events"
+            >
+              {soon.map((e) => (
+                <EventCard key={e.id} e={e} compact />
+              ))}
+            </Rail>
+          )}
 
           {instant.length > 0 && (
             <Rail title="⚡ Deals right now" sub="No goal, no waiting. Just show up." to="/drops">
@@ -655,7 +677,7 @@ function Rail({
 }: {
   title: string;
   sub?: string;
-  to?: "/drops" | "/best" | "/crawls" | "/eats";
+  to?: "/drops" | "/best" | "/crawls" | "/eats" | "/events";
   search?: { tab?: "leftover" | "unlock" | "deals" };
   children: React.ReactNode;
 }) {

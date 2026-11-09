@@ -86,6 +86,7 @@ function Admin() {
           />
         ))}
       </div>
+      <EventQueue />
       <MapPinFinder />
       <ListingReports />
     </div>
@@ -173,6 +174,92 @@ function MapPinFinder() {
       <p className="mt-2 text-[11px] text-muted-foreground">
         Locations from OpenStreetMap. Takes about a second per spot.
       </p>
+    </section>
+  );
+}
+
+function EventQueue() {
+  const qc = useQueryClient();
+  const q = useQuery({
+    queryKey: ["event-queue"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_event_queue");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const review = async (id: string, approve: boolean) => {
+    const note = approve
+      ? null
+      : window.prompt("Reason (shown to the person who posted it)?") || null;
+    const { error } = await supabase.rpc("review_event", {
+      p_event_id: id,
+      p_approve: approve,
+      ...(note ? { p_note: note } : {}),
+    });
+    if (error) return void toast.error(error.message);
+    toast.success(approve ? "Event is live" : "Event rejected");
+    qc.invalidateQueries({ queryKey: ["event-queue"] });
+    qc.invalidateQueries({ queryKey: ["events"] });
+  };
+  return (
+    <section className="mt-10">
+      <h2 className="text-2xl font-extrabold">Events to review</h2>
+      <p className="text-sm text-muted-foreground">
+        Community events wait here. Approve only real, public events; check the link or venue if
+        unsure.
+      </p>
+      <div className="mt-3 space-y-3">
+        {q.data?.length === 0 && (
+          <p className="rounded-3xl bg-card p-5 text-center text-sm text-muted-foreground shadow-card">
+            Nothing waiting. 👍
+          </p>
+        )}
+        {q.data?.map((e) => (
+          <article key={e.id} className="rounded-3xl bg-card p-4 shadow-card">
+            <Link to="/events/$id" params={{ id: e.id }} className="font-extrabold">
+              {e.title}
+            </Link>
+            <p className="text-sm text-muted-foreground">
+              {e.category} · {e.venue_name} ·{" "}
+              {new Date(e.starts_at).toLocaleString("en-CA", {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+              })}
+            </p>
+            {e.description && (
+              <p className="mt-2 line-clamp-3 rounded-xl bg-secondary p-2 text-sm">
+                {e.description}
+              </p>
+            )}
+            {e.link_url && (
+              <a
+                href={e.link_url}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-1 block truncate text-xs font-semibold text-primary"
+              >
+                {e.link_url}
+              </a>
+            )}
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <Button
+                variant="outline"
+                className="rounded-2xl shadow-none"
+                onClick={() => review(e.id, false)}
+              >
+                Reject
+              </Button>
+              <Button className="rounded-2xl" onClick={() => review(e.id, true)}>
+                Approve
+              </Button>
+            </div>
+          </article>
+        ))}
+      </div>
     </section>
   );
 }
