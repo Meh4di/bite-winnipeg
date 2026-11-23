@@ -119,3 +119,13 @@ export async function uploadImage(bucket: ImageBucket, userId: string, file: Fil
   if (e2) throw e2;
   return data.signedUrl;
 }
+
+/** Diet tags restaurants set themselves (Bity doesn't certify them). */
+export const DIETS = [
+  { key: "halal", label: "Halal", emoji: "🥙" },
+  { key: "vegan", label: "Vegan", emoji: "🌱" },
+  { key: "vegetarian", label: "Vegetarian", emoji: "🥕" },
+  { key: "gluten-free", label: "Gluten-free", emoji: "🌾" },
+] as const;
+export type DietKey = (typeof DIETS)[number]["key"];
+export const dietLabel = (k: string) => DIETS.find((d) => d.key === k);

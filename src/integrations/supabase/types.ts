@@ -8,6 +8,12 @@ export type Database = {
   };
   public: {
     Tables: {
+      spot_requests: {
+        Row: { created_at: string; restaurant_id: string; user_id: string };
+        Insert: { created_at?: string; restaurant_id: string; user_id: string };
+        Update: { created_at?: string; restaurant_id?: string; user_id?: string };
+        Relationships: [];
+      };
       event_deals: {
         Row: {
           created_at: string
@@ -1123,6 +1129,7 @@ export type Database = {
           category: string;
           cover_url: string | null;
           created_at: string;
+          diet_tags: string[];
           description: string | null;
           free_until: string | null;
           hours: Json;
@@ -1151,6 +1158,7 @@ export type Database = {
           category?: string;
           cover_url?: string | null;
           created_at?: string;
+          diet_tags?: string[];
           description?: string | null;
           free_until?: string | null;
           hours?: Json;
@@ -1179,6 +1187,7 @@ export type Database = {
           category?: string;
           cover_url?: string | null;
           created_at?: string;
+          diet_tags?: string[];
           description?: string | null;
           free_until?: string | null;
           hours?: Json;
@@ -1635,6 +1644,23 @@ export type Database = {
       };
     };
     Functions: {
+      admin_top_requests: {
+        Args: never;
+        Returns: {
+          address: string | null;
+          last_request: string;
+          name: string;
+          neighbourhood: string | null;
+          requests: number;
+          restaurant_id: string;
+          slug: string;
+        }[];
+      };
+      request_spot: { Args: { p_restaurant_id: string }; Returns: number };
+      spot_request_info: {
+        Args: { p_restaurant_id: string };
+        Returns: { mine: boolean; requests: number }[];
+      };
       add_event_deal: {
         Args: { p_details: string | null; p_event_id: string; p_restaurant_id: string; p_title: string }
         Returns: undefined

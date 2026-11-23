@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { fetchRole } from "@/lib/auth";
 import { VerifiedChip } from "@/components/bite/Verification";
 import { useBusinessAppShell } from "@/lib/business-app";
+import { OrderAlerts } from "@/components/bite/OrderAlerts";
 
 export const Route = createFileRoute("/owner")({
   ssr: false,
@@ -56,8 +57,8 @@ function OwnerLayout() {
     { to: "/owner/setup", label: "Details", icon: Store },
   ] as const;
   return (
-    <div className="pb-24">
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b bg-background/90 px-5 pb-3 pt-[max(env(safe-area-inset-top),1rem)] backdrop-blur-xl">
+    <div className="pb-24 print:pb-0">
+      <header className="sticky top-0 z-30 print:hidden flex items-center justify-between border-b bg-background/90 px-5 pb-3 pt-[max(env(safe-area-inset-top),1rem)] backdrop-blur-xl">
         <div className="flex items-center gap-2">
           <img src="/icons/icon-192.png" alt="" className="size-8 rounded-lg" />
           <span className="font-display text-lg font-extrabold">bity</span>
@@ -76,8 +77,13 @@ function OwnerLayout() {
           </Link>
         )}
       </header>
+      {r && r.verification_status === "verified" && (
+        <div className="print:hidden">
+          <OrderAlerts restaurantId={r.id} />
+        </div>
+      )}
       <Outlet />
-      <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-[430px] border-t bg-sidebar/95 backdrop-blur-xl pb-safe">
+      <nav className="fixed inset-x-0 bottom-0 z-40 print:hidden mx-auto max-w-[430px] border-t bg-sidebar/95 backdrop-blur-xl pb-safe">
         <ul className="grid grid-cols-5">
           {tabs.map(({ to, label, icon: Icon }) => (
             <li key={to}>

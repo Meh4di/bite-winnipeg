@@ -67,6 +67,14 @@ function Claim() {
     },
   });
 
+  const asked = useQuery({
+    queryKey: ["spot-requests", id, "claim"],
+    queryFn: async () => {
+      const { data } = await supabase.rpc("spot_request_info", { p_restaurant_id: id });
+      return data?.[0]?.requests ?? 0;
+    },
+  });
+
   const r = spot.data;
   const header = (
     <Link
@@ -107,6 +115,14 @@ function Claim() {
             </p>
           </div>
         </div>
+        {(asked.data ?? 0) > 0 && r.verification_status === "unclaimed" && (
+          <p className="mt-3 rounded-3xl bg-primary p-4 text-center text-primary-foreground">
+            <span className="block text-3xl font-extrabold">🙋 {asked.data}</span>
+            <span className="block text-sm font-semibold">
+              {asked.data === 1 ? "customer has" : "customers have"} asked for {r.name} on Bity
+            </span>
+          </p>
+        )}
       </div>
 
       {pending ? (

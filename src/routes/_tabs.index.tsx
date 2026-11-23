@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { ChevronRight, MapPin, Search, Star, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { CATEGORIES, emojiFor, formatPrice } from "@/lib/bite";
+import { CATEGORIES, DIETS, emojiFor, formatPrice } from "@/lib/bite";
 import { RestaurantCard, type CardExtras } from "@/components/bite/RestaurantCard";
 import { VortexBanner, useVortexDeals } from "@/components/bite/Vortex";
 import { HomeHero, type HeroSlide } from "@/components/bite/HomeHero";
@@ -43,6 +43,7 @@ export const Route = createFileRoute("/_tabs/")({
 function Home() {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string | null>(null);
+  const [diet, setDiet] = useState<string | null>(null);
   const { user } = useAuth();
   const name = (user?.user_metadata?.["full_name"] as string | undefined)?.split(" ")[0];
   const now = useNow(10_000);
@@ -84,7 +85,7 @@ function Home() {
       const { data, error } = await supabase
         .from("restaurants")
         .select(
-          "id, slug, name, category, neighbourhood, cover_url, logo_url, hours, busy_level, wait_minutes, busy_updated_at, verification_status, is_sample, same_price_pledge",
+          "id, slug, name, category, neighbourhood, cover_url, logo_url, hours, busy_level, wait_minutes, busy_updated_at, verification_status, is_sample, same_price_pledge, diet_tags",
         )
         .eq("is_active", true)
         .order("created_at");
@@ -120,7 +121,7 @@ function Home() {
     deal: dealBy(r.id),
   });
 
-  const searching = !!q.trim() || !!cat;
+  const searching = !!q.trim() || !!cat || !!diet;
   const list = useMemo(() => {
     const s = q.trim().toLowerCase();
     // Spots that are on Bity (deals, ordering) first, then the rest of the city.
@@ -128,6 +129,7 @@ function Home() {
       .filter(
         (r) =>
           (!cat || r.category === cat) &&
+          (!diet || (r.diet_tags ?? []).includes(diet)) &&
           (!s || [r.name, r.category, r.neighbourhood].some((v) => v?.toLowerCase().includes(s))),
       )
       .sort(
@@ -135,7 +137,7 @@ function Home() {
           Number(a.verification_status === "unclaimed") -
           Number(b.verification_status === "unclaimed"),
       );
-  }, [data, q, cat]);
+  }, [data, q, cat, diet]);
 
   const topDishes = useMemo(() => {
     const seen = new Set<string>();
@@ -646,6 +648,18 @@ function Home() {
           <span className="text-sm text-muted-foreground">
             {list.length} {list.length === 1 ? "spot" : "spots"}
           </span>
+        </div>
+        <div className="-mx-5 mb-4 flex gap-2 overflow-x-auto px-5 no-scrollbar">
+          {DIETS.map((d) => (
+            <button
+              key={d.key}
+              onClick={() => setDiet(diet === d.key ? null : d.key)}
+              aria-pressed={diet === d.key}
+              className={`shrink-0 rounded-full border px-3 py-1.5 text-sm font-bold ${diet === d.key ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card"}`}
+            >
+              {d.emoji} {d.label}
+            </button>
+          ))}
         </div>
         <div className="space-y-6">
           {isLoading &&

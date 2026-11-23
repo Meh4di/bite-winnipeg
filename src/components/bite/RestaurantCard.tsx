@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { emojiFor, openState } from "@/lib/bite";
+import { dietLabel, emojiFor, openState } from "@/lib/bite";
 import { BUSY, type BusyInfo } from "@/lib/community";
 
 export type RestaurantSummary = {
@@ -14,6 +14,7 @@ export type RestaurantSummary = {
   verification_status?: string;
   is_sample?: boolean;
   same_price_pledge?: boolean;
+  diet_tags?: string[];
 };
 
 export type CardExtras = {
@@ -103,6 +104,18 @@ export function RestaurantCard({
             {emojiFor(r.category)} {r.category} · {r.neighbourhood}
           </p>
           {x?.special && <p className="mt-0.5 truncate text-sm">⭐ {x.special}</p>}
+          {(r.diet_tags?.length ?? 0) > 0 && (
+            <p className="mt-1 flex flex-wrap gap-1">
+              {r.diet_tags!.map((t) => (
+                <span
+                  key={t}
+                  className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-bold"
+                >
+                  {dietLabel(t)?.emoji} {dietLabel(t)?.label ?? t}
+                </span>
+              ))}
+            </p>
+          )}
           {r.same_price_pledge && (
             <p className="mt-0.5 truncate text-xs font-bold text-success">
               🤝 Same price as in-store

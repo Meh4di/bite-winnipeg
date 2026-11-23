@@ -4,7 +4,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { CATEGORIES, DAYS, NEIGHBOURHOODS, slugify, type Hours } from "@/lib/bite";
+import { CATEGORIES, DAYS, DIETS, NEIGHBOURHOODS, slugify, type Hours } from "@/lib/bite";
 import { ImagePick } from "@/components/bite/ImagePick";
 import { Route as OwnerRoute, useMyRestaurant } from "./owner";
 
@@ -37,6 +37,7 @@ function Setup() {
     lng: null as number | null,
     pay_it_forward: false,
     same_price_pledge: false,
+    diet_tags: [] as string[],
   });
   const [busy, setBusy] = useState(false);
   useEffect(() => {
@@ -55,6 +56,7 @@ function Setup() {
         lng: r.lng,
         pay_it_forward: r.pay_it_forward,
         same_price_pledge: r.same_price_pledge,
+        diet_tags: r.diet_tags ?? [],
       });
   }, [r]);
   const set = (k: keyof typeof f, v: unknown) => setF((p) => ({ ...p, [k]: v }));
@@ -194,6 +196,32 @@ function Setup() {
             </div>
           );
         })}
+      </div>
+      <div className="rounded-2xl bg-card p-4 shadow-card">
+        <p className="font-semibold">Diet options</p>
+        <p className="text-sm text-muted-foreground">
+          Customers filter by these. Only tick what you can honestly serve every day.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {DIETS.map((d) => {
+            const on = f.diet_tags.includes(d.key);
+            return (
+              <button
+                type="button"
+                key={d.key}
+                onClick={() =>
+                  set(
+                    "diet_tags",
+                    on ? f.diet_tags.filter((x) => x !== d.key) : [...f.diet_tags, d.key],
+                  )
+                }
+                className={`rounded-full border px-3 py-1.5 text-sm font-bold ${on ? "border-primary bg-primary text-primary-foreground" : "border-border"}`}
+              >
+                {d.emoji} {d.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
       <label className="flex items-start gap-3 rounded-2xl bg-success/10 p-4">
         <input

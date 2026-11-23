@@ -11,6 +11,7 @@ import {
   Zap,
   CalendarDays,
   CalendarPlus,
+  Printer,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -161,6 +162,7 @@ function Dashboard() {
       />
       <Row to="/events" icon={CalendarDays} label="Add a deal to a nearby event or game" />
       <Row to="/owner/stamps" icon={QrCode} label="Counter stamp code" />
+      <Row to="/owner/kit" icon={Printer} label="Print your Find us on Bity sign" />
       <Row to="/owner/menu" icon={UtensilsCrossed} label="Manage menu" />
       <Row to="/owner/setup" icon={Store} label="Edit details, hours & photos" />
       <button
@@ -194,7 +196,8 @@ function Row({
     | "/owner/stamps"
     | "/owner/unlock"
     | "/events/new"
-    | "/events";
+    | "/events"
+    | "/owner/kit";
   icon: typeof Store;
   label: string;
 }) {

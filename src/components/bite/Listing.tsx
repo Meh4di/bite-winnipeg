@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Flag, Store } from "lucide-react";
 import { toast } from "sonner";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -13,18 +14,86 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-/** Shown on a real spot that hasn't joined Bity yet: facts only, plus a way for the owner to claim it. */
-export function UnclaimedCard({ id, name }: { id: string; name: string }) {
+/** Shown on a real spot that hasn't joined Bity yet: facts only, a way for customers to ask it to
+ * join (the count becomes the pitch), and a way for the owner to claim it. */
+export function UnclaimedCard({ id, name, slug }: { id: string; name: string; slug: string }) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const [busy, setBusy] = useState(false);
+  const info = useQuery({
+    queryKey: ["spot-requests", id, user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.rpc("spot_request_info", { p_restaurant_id: id });
+      return data?.[0] ?? { requests: 0, mine: false };
+    },
+  });
+  const n = info.data?.requests ?? 0;
+  const mine = info.data?.mine ?? false;
+
+  const ask = async () => {
+    if (!user) {
+      navigate({ to: "/auth", search: { redirect: `/r/${slug}` } });
+      return;
+    }
+    setBusy(true);
+    const { error } = await supabase.rpc("request_spot", { p_restaurant_id: id });
+    setBusy(false);
+    if (error) return void toast.error(error.message);
+    toast.success(`Asked! We'll let ${name} know people want them on Bity.`);
+    qc.invalidateQueries({ queryKey: ["spot-requests", id] });
+  };
+
+  const share = async () => {
+    const url = window.location.href;
+    const text = `I want ${name} on Bity! Tap "Get them on Bity" so they join: ${url}`;
+    try {
+      if (navigator.share) await navigator.share({ title: name, text, url });
+      else {
+        await navigator.clipboard.writeText(text);
+        toast.success("Link copied");
+      }
+    } catch {
+      /* closed */
+    }
+  };
+
   return (
-    <div className="mt-5 rounded-3xl border-2 border-dashed border-border p-5">
-      <p className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground">
-        Not on Bity yet
-      </p>
-      <p className="mt-1 text-[15px]">
-        {name} is a local Winnipeg spot that hasn't joined Bity yet, so there's no menu, deals or
-        ordering here. Follow it and you'll see its first deal as soon as it joins.
-      </p>
-      <Button asChild variant="outline" className="mt-4 w-full rounded-2xl shadow-none" size="lg">
+    <div className="mt-5 space-y-3">
+      <div className="rounded-3xl bg-primary-soft p-5">
+        <p className="text-xs font-extrabold uppercase tracking-widest text-primary">
+          Not on Bity yet
+        </p>
+        <p className="mt-1 text-lg font-extrabold leading-tight">Want {name} on Bity?</p>
+        <p className="mt-1 text-sm">
+          Ask them to join. The more people ask, the sooner you'll see their deals, menu and
+          ordering here.
+        </p>
+        {n > 0 && (
+          <p className="mt-3 text-sm font-extrabold text-primary">
+            🙋 {n} {n === 1 ? "person has" : "people have"} asked
+          </p>
+        )}
+        {mine ? (
+          <div className="mt-3 space-y-2">
+            <p className="rounded-2xl bg-card px-3 py-2 text-sm font-semibold">
+              ✓ You asked. You're following them, so you'll see their first deal.
+            </p>
+            <Button
+              onClick={share}
+              variant="outline"
+              className="w-full rounded-2xl bg-card shadow-none"
+            >
+              Get friends to ask too
+            </Button>
+          </div>
+        ) : (
+          <Button disabled={busy} onClick={ask} className="mt-3 w-full rounded-2xl" size="lg">
+            🙋 Get them on Bity
+          </Button>
+        )}
+      </div>
+      <Button asChild variant="outline" className="w-full rounded-2xl shadow-none" size="lg">
         <Link to="/claim/$id" params={{ id }}>
           <Store className="size-4" /> Own this place? Claim it, free
         </Link>

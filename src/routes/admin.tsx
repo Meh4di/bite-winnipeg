@@ -86,6 +86,7 @@ function Admin() {
           />
         ))}
       </div>
+      <TopRequests />
       <EventQueue />
       <MapPinFinder />
       <ListingReports />
@@ -174,6 +175,54 @@ function MapPinFinder() {
       <p className="mt-2 text-[11px] text-muted-foreground">
         Locations from OpenStreetMap. Takes about a second per spot.
       </p>
+    </section>
+  );
+}
+
+function TopRequests() {
+  const q = useQuery({
+    queryKey: ["top-requests"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_top_requests");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  return (
+    <section className="mt-10">
+      <h2 className="text-2xl font-extrabold">Who to pitch next</h2>
+      <p className="text-sm text-muted-foreground">
+        Spots customers asked to join Bity. Walk in and tell them how many people asked.
+      </p>
+      <div className="mt-3 space-y-2">
+        {q.data?.length === 0 && (
+          <p className="rounded-3xl bg-card p-5 text-center text-sm text-muted-foreground shadow-card">
+            No requests yet. They show up when customers tap "Get them on Bity".
+          </p>
+        )}
+        {q.data?.map((r) => (
+          <Link
+            key={r.restaurant_id}
+            to="/r/$slug"
+            params={{ slug: r.slug }}
+            className="flex items-center gap-3 rounded-3xl bg-card p-3.5 shadow-card"
+          >
+            <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-primary text-lg font-extrabold text-primary-foreground">
+              {r.requests}
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate font-bold">{r.name}</span>
+              <span className="block truncate text-xs text-muted-foreground">
+                {r.address ?? r.neighbourhood} · last ask{" "}
+                {new Date(r.last_request).toLocaleDateString("en-CA", {
+                  month: "short",
+                  day: "numeric",
+                })}
+              </span>
+            </span>
+          </Link>
+        ))}
+      </div>
     </section>
   );
 }

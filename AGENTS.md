@@ -72,3 +72,9 @@
 - Restaurants attach deals for event-goers with `add_event_deal` / `remove_event_deal` (verified only), shown as "Eat near this event" with spots within 2.5 km.
 - Pages: `/events` (filters, New to Winnipeg = `newcomer-friendly` tag), `/events/$id`, `/events/new`. Home "What's on this week" rail, Map "📅 What's on" layer (next 7 days, violet pins), Social card, owner dashboard rows. Photos in the `event-photos` bucket.
 - DEMO DATA: sample events `33333333-cccc-*` (`is_sample`, Sample badge), their event deals and RSVPs.
+
+## Requests, order alerts, diets, counter sign (migration 0016)
+- "Get them on Bity": customers ask unclaimed spots to join via `request_spot` (also follows the spot). `spot_request_info` gives the public count + mine (never who asked). Count shows on the listing and on `/claim/$id`; admins see `admin_top_requests()` as "Who to pitch next" in /admin.
+- `OrderAlerts` (in the owner layout, verified spots only): realtime INSERT of paid orders → loud 3-tone chime every 3 s (max 2 min) until tapped, vibration, flashing title, top banner; screen wake lock while on. Sound needs a tap each session (browser rule); the preference is remembered in localStorage. OwnerOrders no longer has its own chime.
+- `restaurants.diet_tags` ('halal','vegan','vegetarian','gluten-free'), set by owners in Details (self-declared, not certified). `DIETS` in `src/lib/bite.ts`; badges on cards and pages; Home diet filter chips.
+- `/owner/kit`: printable "Find us on Bity" sign with a QR to the restaurant page (owner chrome is `print:hidden`). It is NOT the stamp code (that rotates every 2 minutes).

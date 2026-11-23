@@ -31,6 +31,7 @@ import { Route as ClaimIdRouteImport } from './routes/claim.$id'
 import { Route as OrdersIdRouteImport } from './routes/orders.$id'
 import { Route as OwnerIndexRouteImport } from './routes/owner.index'
 import { Route as OwnerDropsRouteImport } from './routes/owner.drops'
+import { Route as OwnerKitRouteImport } from './routes/owner.kit'
 import { Route as OwnerMenuRouteImport } from './routes/owner.menu'
 import { Route as OwnerOrdersRouteImport } from './routes/owner.orders'
 import { Route as OwnerSetupRouteImport } from './routes/owner.setup'
@@ -155,6 +156,11 @@ const OwnerDropsRoute = OwnerDropsRouteImport.update({
   path: '/drops',
   getParentRoute: () => OwnerRoute,
 } as any)
+const OwnerKitRoute = OwnerKitRouteImport.update({
+  id: '/kit',
+  path: '/kit',
+  getParentRoute: () => OwnerRoute,
+} as any)
 const OwnerMenuRoute = OwnerMenuRouteImport.update({
   id: '/menu',
   path: '/menu',
@@ -247,6 +253,7 @@ export interface FileRoutesByFullPath {
   '/claim/$id': typeof ClaimIdRoute
   '/orders/$id': typeof OrdersIdRoute
   '/owner/drops': typeof OwnerDropsRoute
+  '/owner/kit': typeof OwnerKitRoute
   '/owner/menu': typeof OwnerMenuRoute
   '/owner/orders': typeof OwnerOrdersRoute
   '/owner/setup': typeof OwnerSetupRoute
@@ -282,6 +289,7 @@ export interface FileRoutesByTo {
   '/claim/$id': typeof ClaimIdRoute
   '/orders/$id': typeof OrdersIdRoute
   '/owner/drops': typeof OwnerDropsRoute
+  '/owner/kit': typeof OwnerKitRoute
   '/owner/menu': typeof OwnerMenuRoute
   '/owner/orders': typeof OwnerOrdersRoute
   '/owner/setup': typeof OwnerSetupRoute
@@ -321,6 +329,7 @@ export interface FileRoutesById {
   '/claim/$id': typeof ClaimIdRoute
   '/orders/$id': typeof OrdersIdRoute
   '/owner/drops': typeof OwnerDropsRoute
+  '/owner/kit': typeof OwnerKitRoute
   '/owner/menu': typeof OwnerMenuRoute
   '/owner/orders': typeof OwnerOrdersRoute
   '/owner/setup': typeof OwnerSetupRoute
@@ -361,6 +370,7 @@ export interface FileRouteTypes {
     | '/claim/$id'
     | '/orders/$id'
     | '/owner/drops'
+    | '/owner/kit'
     | '/owner/menu'
     | '/owner/orders'
     | '/owner/setup'
@@ -396,6 +406,7 @@ export interface FileRouteTypes {
     | '/claim/$id'
     | '/orders/$id'
     | '/owner/drops'
+    | '/owner/kit'
     | '/owner/menu'
     | '/owner/orders'
     | '/owner/setup'
@@ -434,6 +445,7 @@ export interface FileRouteTypes {
     | '/claim/$id'
     | '/orders/$id'
     | '/owner/drops'
+    | '/owner/kit'
     | '/owner/menu'
     | '/owner/orders'
     | '/owner/setup'
@@ -622,6 +634,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OwnerDropsRouteImport
       parentRoute: typeof OwnerRoute
     }
+    '/owner/kit': {
+      id: '/owner/kit'
+      path: '/kit'
+      fullPath: '/owner/kit'
+      preLoaderRoute: typeof OwnerKitRouteImport
+      parentRoute: typeof OwnerRoute
+    }
     '/owner/menu': {
       id: '/owner/menu'
       path: '/menu'
@@ -767,6 +786,7 @@ const TabsRouteWithChildren = TabsRoute._addFileChildren(TabsRouteChildren)
 
 interface OwnerRouteChildren {
   OwnerDropsRoute: typeof OwnerDropsRoute
+  OwnerKitRoute: typeof OwnerKitRoute
   OwnerMenuRoute: typeof OwnerMenuRoute
   OwnerOrdersRoute: typeof OwnerOrdersRoute
   OwnerSetupRoute: typeof OwnerSetupRoute
@@ -778,6 +798,7 @@ interface OwnerRouteChildren {
 
 const OwnerRouteChildren: OwnerRouteChildren = {
   OwnerDropsRoute: OwnerDropsRoute,
+  OwnerKitRoute: OwnerKitRoute,
   OwnerMenuRoute: OwnerMenuRoute,
   OwnerOrdersRoute: OwnerOrdersRoute,
   OwnerSetupRoute: OwnerSetupRoute,

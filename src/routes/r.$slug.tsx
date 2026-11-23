@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import {
+  dietLabel,
   DAYS,
   displayAddress,
   emojiFor,
@@ -254,8 +255,20 @@ function RestaurantPage() {
           <Heart className={`size-5 ${following.data ? "fill-current" : ""}`} />
           {following.data ? "Following" : "Follow"}
         </button>
-        {unclaimed && <UnclaimedCard id={r.id} name={r.name} />}
+        {unclaimed && <UnclaimedCard id={r.id} name={r.name} slug={r.slug} />}
         {r.is_sample && <SampleBanner />}
+        {(r.diet_tags?.length ?? 0) > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {r.diet_tags.map((t) => (
+              <span key={t} className="rounded-full bg-secondary px-3 py-1 text-xs font-bold">
+                {dietLabel(t)?.emoji} {dietLabel(t)?.label ?? t}
+              </span>
+            ))}
+            <span className="self-center text-[11px] text-muted-foreground">
+              Set by the restaurant
+            </span>
+          </div>
+        )}
         {r.same_price_pledge && (
           <div className="mt-4 flex items-start gap-3 rounded-3xl bg-success/10 p-4">
             <span className="text-2xl">🤝</span>
