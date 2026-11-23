@@ -40,7 +40,7 @@ function MapPage() {
       const { data, error } = await supabase
         .from("restaurants")
         .select(
-          "id, slug, name, category, neighbourhood, address, cover_url, lat, lng, hours, busy_level, wait_minutes, busy_updated_at, verification_status, is_sample",
+          "id, slug, name, category, neighbourhood, address, cover_url, logo_url, lat, lng, hours, busy_level, wait_minutes, busy_updated_at, verification_status, is_sample",
         )
         .eq("is_active", true);
       if (error) throw error;

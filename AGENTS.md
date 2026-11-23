@@ -78,3 +78,8 @@
 - `OrderAlerts` (in the owner layout, verified spots only): realtime INSERT of paid orders → loud 3-tone chime every 3 s (max 2 min) until tapped, vibration, flashing title, top banner; screen wake lock while on. Sound needs a tap each session (browser rule); the preference is remembered in localStorage. OwnerOrders no longer has its own chime.
 - `restaurants.diet_tags` ('halal','vegan','vegetarian','gluten-free'), set by owners in Details (self-declared, not certified). `DIETS` in `src/lib/bite.ts`; badges on cards and pages; Home diet filter chips.
 - `/owner/kit`: printable "Find us on Bity" sign with a QR to the restaurant page (owner chrome is `print:hidden`). It is NOT the stamp code (that rotates every 2 minutes).
+
+## Map v2 (no migration)
+- Top: search (name/category/neighbourhood; spots without pins link to their page), one chip row (📅 What's on, 🏆 Best in the Peg picker sheet, quick filters incl. 👯 Friends went), one food-type row (`CATEGORIES`). Bottom "List" sheet sorts visible spots by distance from your location or the map centre.
+- Pins: logo/cover photo when the spot has one; unclaimed spots are small grey pins; friends' faces on spots they went to in the last 7 days (from the friends-only, 1-hour-delayed `activity` feed; never live location).
+- Basemap: OSM tiles restyled with a CSS filter (`.bity-map`), inverted for dark mode.

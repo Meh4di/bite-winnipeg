@@ -3,12 +3,23 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import L from "leaflet";
-import { CircleMarker, MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
-import { Check, Flame, LocateFixed, Navigation, Search, Trophy, X } from "lucide-react";
+import { CircleMarker, MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
+import {
+  Check,
+  ChevronDown,
+  Flame,
+  List,
+  LocateFixed,
+  Navigation,
+  Search,
+  Trophy,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { emojiFor, formatPrice, isOpenNow, openState } from "@/lib/bite";
+import { CATEGORIES, emojiFor, formatPrice, isOpenNow, openState } from "@/lib/bite";
+import { useFeed, usePeople } from "@/lib/social";
 import { BUSY, liveBusy, type BusyLevel } from "@/lib/community";
 import {
   BEST_CATEGORIES,
@@ -20,7 +31,7 @@ import {
   type Heat,
 } from "@/lib/map";
 import { BusyLine, RatingPill } from "@/components/bite/Busy";
-import { categoryOf, isOnNow, useEvents, whenLabel, type BityEvent } from "@/lib/events";
+import { categoryOf, isOnNow, km, useEvents, whenLabel, type BityEvent } from "@/lib/events";
 import { FriendsGoing } from "@/components/bite/EventCard";
 import { OpenBadge } from "@/components/bite/RestaurantCard";
 import { Button } from "@/components/ui/button";
@@ -40,6 +51,7 @@ export type MapSpot = {
   neighbourhood: string | null;
   address: string | null;
   cover_url: string | null;
+  logo_url?: string | null;
   lat: number | null;
   lng: number | null;
   hours: unknown;
@@ -65,10 +77,25 @@ const FILTERS = [
   { key: "deals", label: "🏷️ Deals" },
   { key: "calm", label: "🟢 Not busy" },
   { key: "top", label: "⭐ 4+" },
+  { key: "friends", label: "👯 Friends went" },
 ] as const;
+
+type FriendsHere = { names: string[]; avatars: (string | null)[]; latest: string };
+const esc = (u: string) => u.replace(/["'<>]/g, (c) => encodeURIComponent(c));
+const ago = (iso: string) => {
+  const d = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
+  return d <= 0 ? "today" : d === 1 ? "yesterday" : `${d} days ago`;
+};
 type FilterKey = (typeof FILTERS)[number]["key"];
 
-function pinIcon(spot: MapSpot, x: Extras, selected: boolean, now: number, rank: number | null) {
+function pinIcon(
+  spot: MapSpot,
+  x: Extras,
+  selected: boolean,
+  now: number,
+  rank: number | null,
+  friends?: FriendsHere,
+) {
   const busy = liveBusy(spot, now);
   const open = openState(spot.hours);
   const ring = busy?.level
@@ -89,11 +116,28 @@ function pinIcon(spot: MapSpot, x: Extras, selected: boolean, now: number, rank:
       : rating?.count
         ? `<span class="bite-pin-rating">★ ${rating.avg.toFixed(1)}</span>`
         : "";
+  const photo = spot.logo_url ?? spot.cover_url;
+  const unclaimed = spot.verification_status === "unclaimed";
+  const face =
+    photo && !unclaimed
+      ? `<img class="bite-pin-photo" src="${esc(photo)}" alt="" />`
+      : `<span class="bite-pin-emoji">${emojiFor(spot.category)}</span>`;
+  const pals = friends
+    ? `<span class="bite-pin-friends">${friends.avatars
+        .slice(0, 2)
+        .map((a, i) =>
+          a ? `<img src="${esc(a)}" alt="" />` : `<i>${(friends.names[i] ?? "?")[0]}</i>`,
+        )
+        .join("")}${friends.names.length > 2 ? `<b>+${friends.names.length - 2}</b>` : ""}</span>`
+    : "";
   const html = `
-    <div class="bite-pin${selected ? " is-selected" : ""}${open === false ? " is-closed" : ""}${glow}">
-      <span class="bite-pin-emoji">${emojiFor(spot.category)}</span>
+    <div class="bite-pin-wrap">
+    <div class="bite-pin${selected ? " is-selected" : ""}${open === false ? " is-closed" : ""}${unclaimed ? " is-unclaimed" : ""}${glow}">
+      ${face}
       ${label}
       ${deal && (deal.drops || deal.rescue) ? `<span class="bite-pin-deal">${deal.rescue ? "♻️" : "🔥"}</span>` : ""}
+    </div>
+    ${pals}
     </div>`;
   return L.divIcon({ html, className: "", iconSize: [48, 48], iconAnchor: [24, 44] });
 }
@@ -107,6 +151,16 @@ function eventIcon(e: BityEvent, selected: boolean) {
       ${friends > 0 ? `<b>👯 ${friends}</b>` : ""}
     </div>`;
   return L.divIcon({ html, className: "", iconSize: [44, 44], iconAnchor: [22, 40] });
+}
+
+function CenterTracker({ onMove }: { onMove: (c: [number, number]) => void }) {
+  useMapEvents({
+    moveend: (e) => {
+      const c = e.target.getCenter();
+      onMove([c.lat, c.lng]);
+    },
+  });
+  return null;
 }
 
 function FlyTo({ to }: { to: [number, number] | null }) {
@@ -134,6 +188,58 @@ export default function MapView({
   const [me, setMe] = useState<[number, number] | null>(null);
   const [flyTo, setFlyTo] = useState<[number, number] | null>(null);
   const [showEvents, setShowEvents] = useState(true);
+  const [query, setQuery] = useState("");
+  const [cat, setCat] = useState<string | null>(null);
+  const [listOpen, setListOpen] = useState(false);
+  const [bestOpen, setBestOpen] = useState(false);
+  const [center, setCenter] = useState<[number, number]>(WINNIPEG);
+
+  // Friends' recent spots (last 7 days). The feed only ever contains friends' activity older than
+  // an hour (database rule), so this never shows live location or strangers.
+  const feed = useFeed(user?.id);
+  const recent = useMemo(
+    () =>
+      (feed.data ?? []).filter(
+        (a) =>
+          a.restaurant_id &&
+          a.user_id !== user?.id &&
+          Date.now() - new Date(a.created_at).getTime() < 7 * 86_400_000,
+      ),
+    [feed.data, user?.id],
+  );
+  const people = usePeople([...new Set(recent.map((a) => a.user_id))]);
+  const friendsAt = useMemo(() => {
+    const byId = people.data ?? new Map();
+    const m = new Map<string, FriendsHere & { ids: Set<string> }>();
+    for (const a of recent) {
+      const cur = m.get(a.restaurant_id!) ?? {
+        names: [],
+        avatars: [],
+        latest: a.created_at,
+        ids: new Set(),
+      };
+      if (!cur.ids.has(a.user_id)) {
+        cur.ids.add(a.user_id);
+        const p = byId.get(a.user_id);
+        cur.names.push(p?.full_name?.split(" ")[0] || p?.username || "A friend");
+        cur.avatars.push(p?.avatar_url ?? null);
+      }
+      if (a.created_at > cur.latest) cur.latest = a.created_at;
+      m.set(a.restaurant_id!, cur);
+    }
+    return m;
+  }, [recent, people.data]);
+
+  const matches = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (q.length < 2) return [];
+    return spots
+      .filter((s) =>
+        [s.name, s.category, s.neighbourhood].some((v) => v?.toLowerCase().includes(q)),
+      )
+      .sort((a, b) => Number(a.lat === null) - Number(b.lat === null))
+      .slice(0, 6);
+  }, [query, spots]);
   const [eventId, setEventId] = useState<string | null>(null);
   const eventsQ = useEvents();
   const mapEvents = useMemo(
@@ -162,6 +268,8 @@ export default function MapView({
       spots.filter((s) => {
         if (s.lat === null || s.lng === null) return false;
         if (layer) return rankOf.has(s.id);
+        if (cat && s.category !== cat) return false;
+        if (filters.has("friends") && !friendsAt.has(s.id)) return false;
         const busy = liveBusy(s, now);
         const deal = extras.deals.get(s.id);
         if (filters.has("hot") && (extras.heat.get(s.id)?.level ?? 0) < 0.15) return false;
@@ -172,7 +280,7 @@ export default function MapView({
         if (filters.has("top") && (extras.ratings.get(s.id)?.avg ?? 0) < 4) return false;
         return true;
       }),
-    [spots, filters, extras, now, layer, rankOf],
+    [spots, filters, extras, now, layer, rankOf, cat, friendsAt],
   );
   const selected = visible.find((s) => s.id === selectedId) ?? null;
   const missing = spots.filter((s) => s.lat === null || s.lng === null).length;
@@ -213,7 +321,7 @@ export default function MapView({
         center={WINNIPEG}
         zoom={13}
         zoomControl={false}
-        className="size-full"
+        className="bity-map size-full"
         attributionControl
       >
         <TileLayer
@@ -222,6 +330,7 @@ export default function MapView({
           maxZoom={19}
         />
         <FlyTo to={flyTo} />
+        <CenterTracker onMove={setCenter} />
         {me && (
           <CircleMarker
             center={me}
@@ -239,6 +348,7 @@ export default function MapView({
               s.id === selectedId,
               now,
               layer ? (rankOf.get(s.id) ?? null) : null,
+              friendsAt.get(s.id),
             )}
             eventHandlers={{ click: () => select(s) }}
             keyboard
@@ -267,7 +377,62 @@ export default function MapView({
       </MapContainer>
 
       <div className="pointer-events-none absolute inset-x-0 top-0 z-[1000] space-y-2 p-3 pt-[max(env(safe-area-inset-top),0.75rem)]">
-        <div className="no-scrollbar pointer-events-auto flex gap-2 overflow-x-auto">
+        <div className="pointer-events-auto relative">
+          <label className="flex h-12 items-center gap-2 rounded-full bg-card/95 px-4 shadow-pop backdrop-blur">
+            <Search className="size-5 shrink-0 text-muted-foreground" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search spots, food, neighbourhoods"
+              className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-muted-foreground"
+              aria-label="Search the map"
+            />
+            {query && (
+              <button onClick={() => setQuery("")} aria-label="Clear search">
+                <X className="size-4 text-muted-foreground" />
+              </button>
+            )}
+          </label>
+          {matches.length > 0 && (
+            <ul className="absolute inset-x-0 top-14 overflow-hidden rounded-3xl bg-card shadow-pop">
+              {matches.map((m) => (
+                <li key={m.id}>
+                  <button
+                    onClick={() => {
+                      setQuery("");
+                      setLayer(null);
+                      setCat(null);
+                      setFilters(new Set());
+                      if (m.lat !== null) select(m);
+                    }}
+                    className="flex w-full items-center gap-3 px-4 py-2.5 text-left active:bg-secondary"
+                  >
+                    <span className="text-xl">{emojiFor(m.category)}</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-bold">{m.name}</span>
+                      <span className="block truncate text-xs text-muted-foreground">
+                        {m.category} · {m.neighbourhood}
+                        {m.lat === null ? " · not on the map yet" : ""}
+                      </span>
+                    </span>
+                    {m.lat === null && (
+                      <Link
+                        to="/r/$slug"
+                        params={{ slug: m.slug }}
+                        className="text-xs font-bold text-primary"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        View
+                      </Link>
+                    )}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="no-scrollbar pointer-events-auto flex gap-2 overflow-x-auto pb-1">
           <button
             onClick={() => {
               setLayer(null);
@@ -275,54 +440,61 @@ export default function MapView({
               setShowEvents(!showEvents);
             }}
             aria-pressed={showEvents}
-            className={`h-10 shrink-0 rounded-full px-3.5 text-sm font-bold shadow-card ${
-              showEvents && !layer ? "bg-violet-600 text-white" : "bg-card"
-            }`}
+            className={`h-9 shrink-0 rounded-full px-3.5 text-[13px] font-bold shadow-card ${showEvents && !layer ? "bg-violet-600 text-white" : "bg-card"}`}
           >
             📅 What's on{mapEvents.length ? ` · ${mapEvents.length}` : ""}
           </button>
-          <span className="flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-foreground px-3.5 text-sm font-extrabold text-background shadow-card">
-            <Trophy className="size-4" /> Best in the Peg
-          </span>
-          {BEST_CATEGORIES.map((c) => (
-            <button
-              key={c.key}
-              onClick={() => {
-                setSelectedId(null);
-                setLayer(layer === c.key ? null : c.key);
-              }}
-              aria-pressed={layer === c.key}
-              className={`h-10 shrink-0 rounded-full px-3.5 text-sm font-semibold shadow-card ${
-                layer === c.key ? "bg-primary text-primary-foreground" : "bg-card"
-              }`}
-            >
-              {c.emoji} {c.label}
-            </button>
-          ))}
-        </div>
-        {!layer && (
-          <div className="no-scrollbar pointer-events-auto flex gap-2 overflow-x-auto">
-            {FILTERS.map((f) => (
+          <button
+            onClick={() => (layer ? setLayer(null) : setBestOpen(true))}
+            aria-pressed={!!layer}
+            className={`h-9 shrink-0 rounded-full px-3.5 text-[13px] font-bold shadow-card flex items-center gap-1 ${layer ? "bg-primary text-primary-foreground" : "bg-foreground text-background"}`}
+          >
+            <Trophy className="size-4" />
+            {layerInfo ? `Best ${layerInfo.label.toLowerCase()}` : "Best in the Peg"}
+            {layer ? <X className="size-3.5" /> : <ChevronDown className="size-3.5" />}
+          </button>
+          {!layer &&
+            FILTERS.map((f) => (
               <button
                 key={f.key}
                 onClick={() => toggle(f.key)}
                 aria-pressed={filters.has(f.key)}
-                className={`h-9 shrink-0 rounded-full px-3.5 text-[13px] font-semibold shadow-card ${
-                  filters.has(f.key) ? "bg-foreground text-background" : "bg-card/95"
-                }`}
+                className={`h-9 shrink-0 rounded-full px-3.5 text-[13px] font-bold shadow-card ${filters.has(f.key) ? "bg-foreground text-background" : "bg-card/95"}`}
               >
                 {f.label}
               </button>
             ))}
+        </div>
+
+        {!layer && (
+          <div className="no-scrollbar pointer-events-auto flex gap-1.5 overflow-x-auto pb-1">
+            {CATEGORIES.map((c) => (
+              <button
+                key={c.name}
+                onClick={() => setCat(cat === c.name ? null : c.name)}
+                aria-pressed={cat === c.name}
+                className={`h-8 shrink-0 rounded-full border px-3 text-xs font-bold shadow-card ${
+                  cat === c.name
+                    ? "border-primary bg-primary-soft text-primary"
+                    : "border-transparent bg-card/95"
+                }`}
+              >
+                {c.emoji} {c.name}
+              </button>
+            ))}
           </div>
         )}
-        {!layer && (
-          <p className="pointer-events-auto inline-block rounded-full bg-card/90 px-3 py-1 text-xs font-semibold shadow-card backdrop-blur">
-            {visible.length} {visible.length === 1 ? "spot" : "spots"}
-            {missing > 0 && !filters.size ? ` · ${missing} not on the map yet` : ""}
-          </p>
-        )}
       </div>
+
+      {!selected && !selectedEvent && !layer && (
+        <button
+          onClick={() => setListOpen(true)}
+          className="absolute bottom-4 left-1/2 z-[1000] flex h-12 -translate-x-1/2 items-center gap-2 rounded-full bg-foreground px-5 text-sm font-extrabold text-background shadow-pop active:scale-95"
+        >
+          <List className="size-4" /> List · {visible.length}{" "}
+          {visible.length === 1 ? "spot" : "spots"}
+        </button>
+      )}
 
       <button
         onClick={locate}
@@ -442,6 +614,15 @@ export default function MapView({
                   count={extras.ratings.get(selected.id)?.count ?? 0}
                 />
               </div>
+              {friendsAt.get(selected.id) && (
+                <p className="mt-1 truncate text-xs font-bold text-primary">
+                  👯 {friendsAt.get(selected.id)!.names.slice(0, 2).join(" & ")}
+                  {friendsAt.get(selected.id)!.names.length > 2
+                    ? ` +${friendsAt.get(selected.id)!.names.length - 2}`
+                    : ""}{" "}
+                  went {ago(friendsAt.get(selected.id)!.latest)}
+                </p>
+              )}
               {isOpenNow(selected.hours) && (
                 <div className="mt-1.5">
                   <BusyLine
@@ -479,6 +660,101 @@ export default function MapView({
           </div>
         </div>
       )}
+
+      <Sheet open={bestOpen} onOpenChange={setBestOpen}>
+        <SheetContent side="bottom" className="z-[1200] mx-auto max-w-[430px] rounded-t-3xl p-5">
+          <SheetHeader className="p-0 text-left">
+            <SheetTitle className="text-2xl font-extrabold">🏆 Best in the Peg</SheetTitle>
+            <SheetDescription>
+              Winnipeg's favourites, voted by locals. Pick a category.
+            </SheetDescription>
+          </SheetHeader>
+          <div className="mt-4 grid grid-cols-3 gap-2 pb-[env(safe-area-inset-bottom)]">
+            {BEST_CATEGORIES.map((c) => (
+              <button
+                key={c.key}
+                onClick={() => {
+                  setSelectedId(null);
+                  setEventId(null);
+                  setLayer(c.key);
+                  setBestOpen(false);
+                }}
+                className="flex flex-col items-center gap-1 rounded-2xl bg-secondary p-3 text-sm font-bold active:scale-95"
+              >
+                <span className="text-3xl">{c.emoji}</span>
+                {c.label}
+              </button>
+            ))}
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      <Sheet open={listOpen} onOpenChange={setListOpen}>
+        <SheetContent
+          side="bottom"
+          className="z-[1200] mx-auto max-h-[80dvh] max-w-[430px] overflow-hidden rounded-t-3xl p-0"
+        >
+          <SheetHeader className="px-5 pt-5 text-left">
+            <SheetTitle className="text-2xl font-extrabold">
+              {cat ? `${CATEGORIES.find((c) => c.name === cat)?.emoji} ${cat}` : "Spots"}{" "}
+              {me ? "near you" : "on the map"}
+            </SheetTitle>
+            <SheetDescription>
+              {me
+                ? "Closest first."
+                : "Closest to the middle of the map first. Tap 📍 to use your location."}
+            </SheetDescription>
+          </SheetHeader>
+          <ul className="max-h-[62dvh] space-y-1 overflow-y-auto px-3 pb-[max(env(safe-area-inset-bottom),1rem)] pt-2">
+            {[...visible]
+              .map((s) => ({ s, d: km((me ?? center)[0], (me ?? center)[1], s.lat!, s.lng!) }))
+              .sort((a, b) => a.d - b.d)
+              .map(({ s, d }) => (
+                <li key={s.id}>
+                  <button
+                    onClick={() => {
+                      setListOpen(false);
+                      select(s);
+                    }}
+                    className="flex w-full items-center gap-3 rounded-2xl p-2 text-left active:bg-secondary"
+                  >
+                    {s.logo_url || s.cover_url ? (
+                      <img
+                        src={(s.logo_url ?? s.cover_url)!}
+                        alt=""
+                        className="size-12 shrink-0 rounded-2xl object-cover"
+                      />
+                    ) : (
+                      <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-primary-soft text-2xl">
+                        {emojiFor(s.category)}
+                      </span>
+                    )}
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate font-bold">{s.name}</span>
+                      <span className="block truncate text-xs text-muted-foreground">
+                        {s.category} · {s.neighbourhood}
+                        {s.verification_status === "unclaimed" ? " · not on Bity yet" : ""}
+                      </span>
+                      {friendsAt.get(s.id) && (
+                        <span className="block truncate text-xs font-bold text-primary">
+                          👯 {friendsAt.get(s.id)!.names[0]} went {ago(friendsAt.get(s.id)!.latest)}
+                        </span>
+                      )}
+                    </span>
+                    <span className="shrink-0 text-xs font-bold text-muted-foreground">
+                      {d < 1 ? `${Math.round(d * 1000)} m` : `${d.toFixed(1)} km`}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            {visible.length === 0 && (
+              <li className="py-8 text-center text-sm text-muted-foreground">
+                Nothing matches. Try removing a filter.
+              </li>
+            )}
+          </ul>
+        </SheetContent>
+      </Sheet>
 
       {layer && layerInfo && (
         <VoteSheet
