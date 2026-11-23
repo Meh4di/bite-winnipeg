@@ -98,7 +98,7 @@ function NewEvent() {
       p_link_url: f.link.trim() || null,
       p_tags: f.tags,
       ...(postingAsBusiness ? { p_restaurant_id: r.id } : {}),
-    });
+    } as never);
     setBusy(false);
     if (error) return void toast.error(error.message);
     const row = data?.[0];
