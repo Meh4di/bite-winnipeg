@@ -45,7 +45,7 @@
 - DEMO DATA: unlock deals `22222222-bbbb-*` and their pledges/activity.
 
 ## Real listings + claiming (migration 0010)
-- 78 real Winnipeg spots are `verification_status = 'unclaimed'`: public facts only (name, category, neighbourhood, address), no owner, no menu/deals/orders, no coordinates (they don't show on the map until claimed). Checked against current public listings in Oct 2026; customers can report closures (`listing_reports`), admins hide them from /admin.
+- 78 real Winnipeg spots are `verification_status = 'unclaimed'`: public facts only (name, category, neighbourhood, address), no owner, no menu/deals/orders. Map pins were filled on 2026-11-23 by a one-off OpenStreetMap Nominatim lookup of their addresses (the temporary pg_net/pg_cron job was removed afterwards); they show as small grey "not on Bity yet" pins. Checked against current public listings in Oct 2026; customers can report closures (`listing_reports`), admins hide them from /admin.
 - Owners claim at `/claim/$id` (same `submit_verification` RPC, `kind = 'claim'`; grants the restaurant_owner role). Approval sets `owner_id` to the claimer and verifies; a rejected claim leaves the listing unclaimed.
 - `restaurants.is_sample` marks the 6 made-up demo spots (shown with a "Sample" badge). Delete them before launch.
 - Unknown hours: use `openState()` (null = don't show Open/Closed) and `displayAddress()` from `src/lib/bite.ts`.
