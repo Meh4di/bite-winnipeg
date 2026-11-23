@@ -162,6 +162,6 @@ export function km(aLat: number, aLng: number, bLat: number, bLng: number) {
 }
 
 export async function rsvp(eventId: string, status: "going" | "interested" | null) {
-  const { error } = await supabase.rpc("rsvp_event", { p_event_id: eventId, p_status: status });
+  const { error } = await supabase.rpc("rsvp_event", { p_event_id: eventId, p_status: status } as never);
   if (error) throw error;
 }

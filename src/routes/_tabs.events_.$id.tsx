@@ -378,7 +378,7 @@ function OwnerDeal({
       p_restaurant_id: restaurantId,
       p_title: title,
       p_details: details || null,
-    });
+    } as never);
     setBusy(false);
     if (error) return void toast.error(error.message);
     toast.success("Your deal is on this event 🎉");
