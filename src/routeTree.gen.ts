@@ -16,6 +16,7 @@ import { Route as BusinessRouteImport } from './routes/business'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ForRestaurantsRouteImport } from './routes/for-restaurants'
 import { Route as OwnerRouteImport } from './routes/owner'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as TabsIndexRouteImport } from './routes/_tabs.index'
 import { Route as TabsBestRouteImport } from './routes/_tabs.best'
 import { Route as TabsCrawlsRouteImport } from './routes/_tabs.crawls'
@@ -79,6 +80,11 @@ const ForRestaurantsRoute = ForRestaurantsRouteImport.update({
 const OwnerRoute = OwnerRouteImport.update({
   id: '/owner',
   path: '/owner',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TabsIndexRoute = TabsIndexRouteImport.update({
@@ -240,6 +246,7 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/for-restaurants': typeof ForRestaurantsRoute
   '/owner': typeof OwnerRouteWithChildren
+  '/reset-password': typeof ResetPasswordRoute
   '/best': typeof TabsBestRoute
   '/crawls': typeof TabsCrawlsRoute
   '/decide': typeof TabsDecideRoute
@@ -276,6 +283,7 @@ export interface FileRoutesByTo {
   '/business': typeof BusinessRoute
   '/checkout': typeof CheckoutRoute
   '/for-restaurants': typeof ForRestaurantsRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/best': typeof TabsBestRoute
   '/crawls': typeof TabsCrawlsRoute
   '/decide': typeof TabsDecideRoute
@@ -316,6 +324,7 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/for-restaurants': typeof ForRestaurantsRoute
   '/owner': typeof OwnerRouteWithChildren
+  '/reset-password': typeof ResetPasswordRoute
   '/_tabs/best': typeof TabsBestRoute
   '/_tabs/crawls': typeof TabsCrawlsRoute
   '/_tabs/decide': typeof TabsDecideRoute
@@ -357,6 +366,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/for-restaurants'
     | '/owner'
+    | '/reset-password'
     | '/best'
     | '/crawls'
     | '/decide'
@@ -393,6 +403,7 @@ export interface FileRouteTypes {
     | '/business'
     | '/checkout'
     | '/for-restaurants'
+    | '/reset-password'
     | '/best'
     | '/crawls'
     | '/decide'
@@ -432,6 +443,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/for-restaurants'
     | '/owner'
+    | '/reset-password'
     | '/_tabs/best'
     | '/_tabs/crawls'
     | '/_tabs/decide'
@@ -472,6 +484,7 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   ForRestaurantsRoute: typeof ForRestaurantsRoute
   OwnerRoute: typeof OwnerRouteWithChildren
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ClaimIdRoute: typeof ClaimIdRoute
   OrdersIdRoute: typeof OrdersIdRoute
   RSlugRoute: typeof RSlugRoute
@@ -527,6 +540,13 @@ declare module '@tanstack/react-router' {
       path: '/owner'
       fullPath: '/owner'
       preLoaderRoute: typeof OwnerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_tabs/': {
@@ -818,6 +838,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   ForRestaurantsRoute: ForRestaurantsRoute,
   OwnerRoute: OwnerRouteWithChildren,
+  ResetPasswordRoute: ResetPasswordRoute,
   ClaimIdRoute: ClaimIdRoute,
   OrdersIdRoute: OrdersIdRoute,
   RSlugRoute: RSlugRoute,

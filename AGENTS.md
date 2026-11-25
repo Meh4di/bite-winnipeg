@@ -84,3 +84,11 @@
 - Pins: logo/cover photo when the spot has one; unclaimed spots are small grey pins; friends' faces on spots they went to in the last 7 days (from the friends-only, 1-hour-delayed `activity` feed; never live location).
 - Basemap (v3): OpenFreeMap vector tiles (free, no API key) via `@maplibre/maplibre-gl-leaflet`, Positron/Dark styles recoloured by `bityStyle()` in `src/lib/mapStyle.ts` (POI icons removed). `MapBasemap` falls back to OSM raster tiles (CSS-filtered, `.is-raster`) when WebGL or the style fails.
 - Pins (v3): `.bp` bubble pins (photo/emoji face, busy-coloured ring, spinning gradient ring when hot, name label at zoom ≥ 15 via `.z-near`); unclaimed spots are small dots that cluster (`clusterSpots`) below zoom 15; pulsing blue "you are here" dot; weather chip in the search bar.
+
+## Fix pass 2026-11-25 (no migration)
+- Password reset: "Forgot password?" on /auth sends `resetPasswordForEmail` with redirect `/reset-password`, which sets the new password via `updateUser`. The redirect URL must be allowed in the auth settings (Lovable Cloud) if reset links bounce.
+- Vortex-only promos are hidden on restaurant pages unless Vortex mode is active.
+- Signed-out Social shows a sign-in card plus What's on events. Profile > Explore links What's on.
+- Broken images are hidden app-wide (`img.img-broken`, capture listener in `__root`).
+- Unclaimed restaurant pages: colourful category header, no separate Follow button ("Get them on Bity" follows).
+- Data fixes: Falafel Place category → World; A l'Épi de Blé pin moved to 1757 Main St (geocoder had put it downtown).

@@ -212,6 +212,12 @@ function Settings() {
           <Footprints className="size-5 text-primary" /> Food crawls
         </Link>
         <Link
+          to="/events"
+          className="col-span-2 flex items-center gap-2 rounded-2xl bg-secondary p-4 font-semibold"
+        >
+          <span className="text-lg">📅</span> What's on in Winnipeg
+        </Link>
+        <Link
           to="/decide"
           className="col-span-2 flex items-center gap-2 rounded-2xl bg-secondary p-4 font-semibold"
         >

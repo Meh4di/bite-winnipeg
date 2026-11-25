@@ -27,6 +27,7 @@ import { TabBar } from "@/components/bite/TabBar";
 import { clockTime, countdown, dropState, useDrops, useNow, usePromotions } from "@/lib/live";
 import { levelName } from "@/lib/passport";
 import { liveBusy, useLiveQueue, useRatings } from "@/lib/community";
+import { useVortex } from "@/lib/weather";
 import { BusyLine, RatingPill } from "@/components/bite/Busy";
 import { ReviewsSection } from "@/components/bite/Reviews";
 import { DishRate } from "@/components/bite/DishRate";
@@ -93,6 +94,7 @@ function RestaurantPage() {
   const drops = useDrops(rid);
   const promos = usePromotions(rid);
   const ratings = useRatings();
+  const vortexOn = useVortex().active;
   const dishRatings = useDishRatings(rid, user?.id);
   const board = useDishLeaderboard();
   const canRate = useQuery({
@@ -191,8 +193,19 @@ function RestaurantPage() {
 
   return (
     <div className="animate-screen pb-48">
-      <div className="relative aspect-[4/3] bg-muted">
-        {r.cover_url && <img src={r.cover_url} alt={r.name} className="size-full object-cover" />}
+      <div
+        className={`relative bg-muted ${r.cover_url ? "aspect-[4/3]" : "aspect-[16/9] bg-gradient-to-br from-primary/80 via-orange-400/70 to-amber-300/70"}`}
+      >
+        {r.cover_url ? (
+          <img src={r.cover_url} alt={r.name} className="size-full object-cover" />
+        ) : (
+          <span
+            className="absolute inset-0 grid place-items-center text-[7rem] opacity-30"
+            aria-hidden
+          >
+            {emojiFor(r.category)}
+          </span>
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
         <button
           onClick={() =>
@@ -243,18 +256,20 @@ function RestaurantPage() {
         </div>
         {r.description && <p className="mt-3 text-[15px] leading-relaxed">{r.description}</p>}
 
-        <button
-          onClick={() => toggle.mutate()}
-          disabled={toggle.isPending}
-          className={`mt-5 flex h-13 w-full items-center justify-center gap-2 rounded-2xl text-base font-semibold transition-all active:scale-[0.98] ${
-            following.data
-              ? "bg-primary-soft text-primary"
-              : "bg-primary text-primary-foreground shadow-pop"
-          }`}
-        >
-          <Heart className={`size-5 ${following.data ? "fill-current" : ""}`} />
-          {following.data ? "Following" : "Follow"}
-        </button>
+        {!unclaimed && (
+          <button
+            onClick={() => toggle.mutate()}
+            disabled={toggle.isPending}
+            className={`mt-5 flex h-13 w-full items-center justify-center gap-2 rounded-2xl text-base font-semibold transition-all active:scale-[0.98] ${
+              following.data
+                ? "bg-primary-soft text-primary"
+                : "bg-primary text-primary-foreground shadow-pop"
+            }`}
+          >
+            <Heart className={`size-5 ${following.data ? "fill-current" : ""}`} />
+            {following.data ? "Following" : "Follow"}
+          </button>
+        )}
         {unclaimed && <UnclaimedCard id={r.id} name={r.name} slug={r.slug} />}
         {r.is_sample && <SampleBanner />}
         {(r.diet_tags?.length ?? 0) > 0 && (
@@ -344,7 +359,8 @@ function RestaurantPage() {
           const happening = (drops.data ?? []).filter((d) =>
             ["live", "upcoming"].includes(dropState(d, now)),
           );
-          const deals = promos.data ?? [];
+          // Polar Vortex deals only count as "happening" when it's actually that cold.
+          const deals = (promos.data ?? []).filter((p) => !p.vortex_only || vortexOn);
           if (!happening.length && !deals.length) return null;
           return (
             <section className="mt-8">

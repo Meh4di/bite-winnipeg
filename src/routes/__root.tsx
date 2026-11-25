@@ -87,7 +87,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
       { name: "apple-mobile-web-app-title", content: "Bity" },
       { title: "Bity — Winnipeg eats" },
-      { name: "description", content: "Discover Winnipeg restaurants and cafes, order ahead and collect stamps." },
+      {
+        name: "description",
+        content: "Discover Winnipeg restaurants and cafes, order ahead and collect stamps.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -137,15 +140,26 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  // App-wide: if any photo fails to load, hide it so the card's colour/emoji background shows
+  // instead of a broken-image icon.
+  useEffect(() => {
+    const onError = (e: Event) => {
+      const t = e.target;
+      if (t instanceof HTMLImageElement) t.classList.add("img-broken");
+    };
+    document.addEventListener("error", onError, true);
+    return () => document.removeEventListener("error", onError, true);
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <CartProvider>
-        <div className="relative mx-auto min-h-dvh max-w-[430px] bg-background sm:shadow-card">
-          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <Outlet />
-        </div>
-        <Toaster position="top-center" />
+          <div className="relative mx-auto min-h-dvh max-w-[430px] bg-background sm:shadow-card">
+            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+            <Outlet />
+          </div>
+          <Toaster position="top-center" />
         </CartProvider>
       </AuthProvider>
     </QueryClientProvider>

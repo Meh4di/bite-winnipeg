@@ -36,6 +36,18 @@ const field =
 function AuthPage() {
   const { redirect, as } = Route.useSearch();
   const [mode, setMode] = useState<"signin" | "signup">(as === "owner" ? "signup" : "signin");
+  const [forgot, setForgot] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+  const sendReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setBusy(false);
+    if (error) return void toast.error(error.message);
+    setResetSent(true);
+  };
   const [role, setRole] = useState<BiteRole>(as === "owner" ? "restaurant_owner" : "customer");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -162,79 +174,142 @@ function AuthPage() {
         <span className="font-display text-3xl font-extrabold">bity</span>
       </div>
       <h1 className="mt-8 text-4xl font-extrabold leading-[1.05]">
-        {mode === "signin" ? "Welcome back." : "Winnipeg's tastiest app."}
+        {forgot
+          ? "Reset your password."
+          : mode === "signin"
+            ? "Welcome back."
+            : "Winnipeg's tastiest app."}
       </h1>
       <p className="mt-2 text-muted-foreground">
-        {mode === "signin" ? "Sign in to keep biting." : "Create an account in seconds."}
+        {forgot
+          ? "It happens. We'll email you a link."
+          : mode === "signin"
+            ? "Sign in to keep biting."
+            : "Create an account in seconds."}
       </p>
 
-      <form onSubmit={submit} className="mt-8 space-y-3">
-        {mode === "signup" && (
-          <>
-            <p className="text-sm font-semibold">I am a…</p>
-            <div className="grid grid-cols-2 gap-3">
-              {(
-                [
-                  ["customer", "😋", "Foodie", "Find & order food"],
-                  ["restaurant_owner", "👩‍🍳", "Restaurant", "List my spot (we verify you)"],
-                ] as const
-              ).map(([value, emoji, title, sub]) => (
-                <button
-                  type="button"
-                  key={value}
-                  onClick={() => setRole(value)}
-                  className={`rounded-2xl border-2 p-4 text-left transition-all active:scale-95 ${
-                    role === value ? "border-primary bg-primary-soft" : "border-border bg-card"
-                  }`}
-                >
-                  <span className="text-3xl">{emoji}</span>
-                  <p className="mt-2 font-bold">{title}</p>
-                  <p className="text-xs text-muted-foreground">{sub}</p>
-                </button>
-              ))}
-            </div>
-            <input
-              className={field}
-              placeholder="Your name"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </>
-        )}
-        <input
-          className={field}
-          type="email"
-          placeholder="Email"
-          autoComplete="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          className={field}
-          type="password"
-          placeholder="Password"
-          minLength={6}
-          autoComplete={mode === "signin" ? "current-password" : "new-password"}
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <Button type="submit" size="xl" className="w-full" disabled={busy}>
-          {busy ? "One sec…" : mode === "signin" ? "Sign in" : "Create account"}
-        </Button>
-      </form>
+      {forgot ? (
+        <form onSubmit={sendReset} className="mt-8 space-y-3">
+          {resetSent ? (
+            <p className="rounded-2xl bg-success/10 p-4 text-sm font-semibold text-success">
+              📬 Check your email. We sent a link to reset your password. It can take a minute, and
+              check your spam folder too.
+            </p>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground">
+                Enter the email you signed up with and we'll send you a link to set a new password.
+              </p>
+              <input
+                className={field}
+                type="email"
+                placeholder="Email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <Button type="submit" size="xl" className="w-full" disabled={busy}>
+                {busy ? "Sending…" : "Send reset link"}
+              </Button>
+            </>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              setForgot(false);
+              setResetSent(false);
+            }}
+            className="h-12 w-full text-sm font-semibold text-primary"
+          >
+            ← Back to sign in
+          </button>
+        </form>
+      ) : (
+        <form onSubmit={submit} className="mt-8 space-y-3">
+          {mode === "signup" && (
+            <>
+              <p className="text-sm font-semibold">I am a…</p>
+              <div className="grid grid-cols-2 gap-3">
+                {(
+                  [
+                    ["customer", "😋", "Foodie", "Find & order food"],
+                    ["restaurant_owner", "👩‍🍳", "Restaurant", "List my spot (we verify you)"],
+                  ] as const
+                ).map(([value, emoji, title, sub]) => (
+                  <button
+                    type="button"
+                    key={value}
+                    onClick={() => setRole(value)}
+                    className={`rounded-2xl border-2 p-4 text-left transition-all active:scale-95 ${
+                      role === value ? "border-primary bg-primary-soft" : "border-border bg-card"
+                    }`}
+                  >
+                    <span className="text-3xl">{emoji}</span>
+                    <p className="mt-2 font-bold">{title}</p>
+                    <p className="text-xs text-muted-foreground">{sub}</p>
+                  </button>
+                ))}
+              </div>
+              <input
+                className={field}
+                placeholder="Your name"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </>
+          )}
+          <input
+            className={field}
+            type="email"
+            placeholder="Email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            className={field}
+            type="password"
+            placeholder="Password"
+            minLength={6}
+            autoComplete={mode === "signin" ? "current-password" : "new-password"}
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          {mode === "signin" && (
+            <button
+              type="button"
+              onClick={() => setForgot(true)}
+              className="-mt-1 block text-sm font-semibold text-muted-foreground"
+            >
+              Forgot password?
+            </button>
+          )}
+          <Button type="submit" size="xl" className="w-full" disabled={busy}>
+            {busy ? "One sec…" : mode === "signin" ? "Sign in" : "Create account"}
+          </Button>
+        </form>
+      )}
 
-      <button
-        onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-        className="mt-6 h-12 text-sm font-semibold text-primary"
-      >
-        {mode === "signin" ? "New here? Create an account" : "Already have an account? Sign in"}
-      </button>
-      <button onClick={() => navigate({ to: "/" })} className="h-12 text-sm text-muted-foreground">
-        Just browsing →
-      </button>
+      {!forgot && (
+        <>
+          <button
+            onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+            className="mt-6 h-12 text-sm font-semibold text-primary"
+          >
+            {mode === "signin" ? "New here? Create an account" : "Already have an account? Sign in"}
+          </button>
+          <button
+            onClick={() => navigate({ to: "/" })}
+            className="h-12 text-sm text-muted-foreground"
+          >
+            Just browsing →
+          </button>
+        </>
+      )}
     </div>
   );
 }

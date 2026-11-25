@@ -746,3 +746,8 @@
 .dark .bp.is-unclaimed .bp-name {
   color: #cfc6d9;
 }
+
+/* Photos that failed to load: hide the broken icon, keep the space and background. */
+img.img-broken {
+  visibility: hidden;
+}

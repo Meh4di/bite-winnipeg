@@ -1,4 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { EventCard } from "@/components/bite/EventCard";
+import { useEvents } from "@/lib/events";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { CalendarClock, Flame, Plus, ShieldCheck, Sparkles, Users } from "lucide-react";
@@ -151,18 +153,39 @@ function Social() {
 }
 
 function SignedOut() {
+  const events = useEvents();
+  const soon = (events.data ?? []).slice(0, 6);
   return (
-    <div className="flex min-h-[80vh] flex-col items-center justify-center px-8 text-center animate-screen">
-      <div className="text-6xl">🍽️</div>
-      <h1 className="mt-4 text-3xl font-extrabold">Eat with your people</h1>
-      <p className="mt-2 text-muted-foreground">
-        Find foodies with your taste, see where friends eat, and plan meals with friends.
-      </p>
-      <Button asChild size="xl" className="mt-6 w-full">
-        <Link to="/auth" search={{ redirect: "/social" }}>
-          Sign in to join
-        </Link>
-      </Button>
+    <div className="animate-screen px-5 pb-8 pt-[max(env(safe-area-inset-top),1.25rem)]">
+      <div className="rounded-3xl bg-primary p-6 text-center text-primary-foreground shadow-pop">
+        <div className="text-5xl">🍽️</div>
+        <h1 className="mt-3 text-3xl font-extrabold leading-tight">Eat with your people</h1>
+        <p className="mt-2 text-sm opacity-90">
+          See where your friends eat and what they're going to, start crew deals, and plan meals
+          together. Friends only, never strangers.
+        </p>
+        <Button asChild size="xl" variant="secondary" className="mt-5 w-full">
+          <Link to="/auth" search={{ redirect: "/social" }}>
+            Sign in to join
+          </Link>
+        </Button>
+      </div>
+
+      {soon.length > 0 && (
+        <section className="mt-7">
+          <div className="flex items-end justify-between">
+            <h2 className="text-xl font-extrabold">📅 What's on in Winnipeg</h2>
+            <Link to="/events" className="text-sm font-bold text-primary">
+              See all
+            </Link>
+          </div>
+          <div className="-mx-5 mt-3 flex gap-3 overflow-x-auto px-5 pb-2 no-scrollbar">
+            {soon.map((e) => (
+              <EventCard key={e.id} e={e} compact />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
