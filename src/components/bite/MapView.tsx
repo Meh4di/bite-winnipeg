@@ -3,7 +3,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import L from "leaflet";
-import { CircleMarker, MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
+import { MapContainer, Marker, useMap, useMapEvents } from "react-leaflet";
+import { MapBasemap } from "@/components/bite/MapBasemap";
+import { useWinnipegWeather } from "@/lib/weather";
 import {
   Check,
   ChevronDown,
@@ -82,6 +84,11 @@ const FILTERS = [
 
 type FriendsHere = { names: string[]; avatars: (string | null)[]; latest: string };
 const esc = (u: string) => u.replace(/["'<>]/g, (c) => encodeURIComponent(c));
+const html = (t: string) =>
+  t.replace(
+    /[&<>"']/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!,
+  );
 const ago = (iso: string) => {
   const d = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
   return d <= 0 ? "today" : d === 1 ? "yesterday" : `${d} days ago`;
@@ -130,16 +137,24 @@ function pinIcon(
         )
         .join("")}${friends.names.length > 2 ? `<b>+${friends.names.length - 2}</b>` : ""}</span>`
     : "";
-  const html = `
-    <div class="bite-pin-wrap">
-    <div class="bite-pin${selected ? " is-selected" : ""}${open === false ? " is-closed" : ""}${unclaimed ? " is-unclaimed" : ""}${glow}">
-      ${face}
-      ${label}
-      ${deal && (deal.drops || deal.rescue) ? `<span class="bite-pin-deal">${deal.rescue ? "♻️" : "🔥"}</span>` : ""}
-    </div>
-    ${pals}
+  const hot = heat >= 0.15;
+  const badge =
+    deal && (deal.drops || deal.rescue)
+      ? `<span class="bp-deal">${deal.rescue ? "♻️" : "🔥"}</span>`
+      : "";
+  const markup = `
+    <div class="bp${selected ? " is-selected" : ""}${open === false ? " is-closed" : ""}${unclaimed ? " is-unclaimed" : ""}${hot ? " is-hot" : ""}" style="--ring:${ring};--heat:${(0.35 + heat * 0.65).toFixed(2)}">
+      <div class="bp-face">${face.replace("bite-pin-photo", "bp-photo").replace("bite-pin-emoji", "bp-emoji")}</div>
+      ${unclaimed ? "" : '<span class="bp-tip"></span>'}
+      ${label.replace("bite-pin-rating", "bp-chip")}
+      ${badge}
+      ${pals.replace("bite-pin-friends", "bp-friends")}
+      <span class="bp-name">${html(spot.name)}</span>
     </div>`;
-  return L.divIcon({ html, className: "", iconSize: [48, 48], iconAnchor: [24, 44] });
+  void glow;
+  return unclaimed
+    ? L.divIcon({ html: markup, className: "", iconSize: [30, 30], iconAnchor: [15, 15] })
+    : L.divIcon({ html: markup, className: "", iconSize: [52, 60], iconAnchor: [26, 58] });
 }
 
 function eventIcon(e: BityEvent, selected: boolean) {
@@ -153,20 +168,70 @@ function eventIcon(e: BityEvent, selected: boolean) {
   return L.divIcon({ html, className: "", iconSize: [44, 44], iconAnchor: [22, 40] });
 }
 
-function CenterTracker({ onMove }: { onMove: (c: [number, number]) => void }) {
+function CenterTracker({ onMove }: { onMove: (c: [number, number], zoom: number) => void }) {
   useMapEvents({
     moveend: (e) => {
       const c = e.target.getCenter();
-      onMove([c.lat, c.lng]);
+      onMove([c.lat, c.lng], e.target.getZoom());
     },
   });
   return null;
 }
 
-function FlyTo({ to }: { to: [number, number] | null }) {
+type Cluster = { key: string; lat: number; lng: number; spots: MapSpot[] };
+
+/** Groups the quiet grey "not on Bity yet" pins into bubbles when zoomed out; Bity spots stay. */
+function clusterSpots(spots: MapSpot[], zoom: number, keep: (s: MapSpot) => boolean) {
+  if (zoom >= 15) return { singles: spots, clusters: [] as Cluster[] };
+  const cell = (360 / (256 * 2 ** zoom)) * 70; // ~70 px cells
+  const cells = new Map<string, MapSpot[]>();
+  const singles: MapSpot[] = [];
+  for (const s of spots) {
+    if (keep(s)) {
+      singles.push(s);
+      continue;
+    }
+    const k = `${Math.floor(s.lng! / cell)}:${Math.floor(s.lat! / (cell * 0.64))}`;
+    cells.set(k, [...(cells.get(k) ?? []), s]);
+  }
+  const clusters: Cluster[] = [];
+  for (const [key, list] of cells) {
+    if (list.length < 2) {
+      singles.push(...list);
+      continue;
+    }
+    clusters.push({
+      key,
+      spots: list,
+      lat: list.reduce((a, s) => a + s.lat!, 0) / list.length,
+      lng: list.reduce((a, s) => a + s.lng!, 0) / list.length,
+    });
+  }
+  return { singles, clusters };
+}
+
+function clusterIcon(c: Cluster) {
+  const emojis = [...new Set(c.spots.map((s) => emojiFor(s.category)))].slice(0, 2).join("");
+  const size = c.spots.length >= 10 ? 58 : c.spots.length >= 5 ? 52 : 46;
+  return L.divIcon({
+    html: `<div class="bp-cluster" style="width:${size}px;height:${size}px"><span>${emojis}</span><b>${c.spots.length}</b></div>`,
+    className: "",
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+  });
+}
+
+const ME_ICON = L.divIcon({
+  html: '<div class="bp-me"><span></span></div>',
+  className: "",
+  iconSize: [22, 22],
+  iconAnchor: [11, 11],
+});
+
+function FlyTo({ to }: { to: [number, number] | [number, number, number] | null }) {
   const map = useMap();
   useEffect(() => {
-    if (to) map.flyTo(to, Math.max(map.getZoom(), 15), { duration: 0.6 });
+    if (to) map.flyTo([to[0], to[1]], to[2] ?? Math.max(map.getZoom(), 15), { duration: 0.6 });
   }, [to, map]);
   return null;
 }
@@ -186,7 +251,10 @@ export default function MapView({
   const [layer, setLayer] = useState<BestKey | null>(null);
   const [voting, setVoting] = useState(false);
   const [me, setMe] = useState<[number, number] | null>(null);
-  const [flyTo, setFlyTo] = useState<[number, number] | null>(null);
+  const [flyTo, setFlyTo] = useState<[number, number] | [number, number, number] | null>(null);
+  const [zoom, setZoom] = useState(13);
+  const [raster, setRaster] = useState(false);
+  const weather = useWinnipegWeather();
   const [showEvents, setShowEvents] = useState(true);
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<string | null>(null);
@@ -282,6 +350,15 @@ export default function MapView({
       }),
     [spots, filters, extras, now, layer, rankOf, cat, friendsAt],
   );
+  const grouped = useMemo(
+    () =>
+      clusterSpots(
+        visible,
+        layer ? 20 : zoom,
+        (s) => s.verification_status !== "unclaimed" || s.id === selectedId || friendsAt.has(s.id),
+      ),
+    [visible, zoom, layer, selectedId, friendsAt],
+  );
   const selected = visible.find((s) => s.id === selectedId) ?? null;
   const missing = spots.filter((s) => s.lat === null || s.lng === null).length;
 
@@ -316,7 +393,9 @@ export default function MapView({
   };
 
   return (
-    <div className="relative isolate h-[calc(100dvh-4rem-max(env(safe-area-inset-bottom),0.5rem))] w-full">
+    <div
+      className={`relative isolate h-[calc(100dvh-4rem-max(env(safe-area-inset-bottom),0.5rem))] w-full ${raster ? "is-raster" : ""} ${zoom >= 15 ? "z-near" : ""}`}
+    >
       <MapContainer
         center={WINNIPEG}
         zoom={13}
@@ -324,21 +403,25 @@ export default function MapView({
         className="bity-map size-full"
         attributionControl
       >
-        <TileLayer
-          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          maxZoom={19}
-        />
+        <MapBasemap onRaster={setRaster} />
         <FlyTo to={flyTo} />
-        <CenterTracker onMove={setCenter} />
-        {me && (
-          <CircleMarker
-            center={me}
-            radius={8}
-            pathOptions={{ color: "#fff", weight: 3, fillColor: "#2563eb", fillOpacity: 1 }}
+        <CenterTracker
+          onMove={(c, z) => {
+            setCenter(c);
+            setZoom(z);
+          }}
+        />
+        {me && <Marker position={me} icon={ME_ICON} interactive={false} zIndexOffset={900} />}
+        {grouped.clusters.map((c) => (
+          <Marker
+            key={`cl-${c.key}-${c.spots.length}`}
+            position={[c.lat, c.lng]}
+            icon={clusterIcon(c)}
+            eventHandlers={{ click: () => setFlyTo([c.lat, c.lng, Math.min(zoom + 2, 16)]) }}
+            title={`${c.spots.length} spots`}
           />
-        )}
-        {visible.map((s) => (
+        ))}
+        {grouped.singles.map((s) => (
           <Marker
             key={`${s.id}-${layer ?? "all"}`}
             position={[s.lat as number, s.lng as number]}
@@ -376,9 +459,10 @@ export default function MapView({
           ))}
       </MapContainer>
 
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-[999] h-44 bg-gradient-to-b from-background/80 via-background/30 to-transparent" />
       <div className="pointer-events-none absolute inset-x-0 top-0 z-[1000] space-y-2 p-3 pt-[max(env(safe-area-inset-top),0.75rem)]">
         <div className="pointer-events-auto relative">
-          <label className="flex h-12 items-center gap-2 rounded-full bg-card/95 px-4 shadow-pop backdrop-blur">
+          <label className="flex h-12 items-center gap-2 rounded-full border border-white/50 bg-card/85 px-4 shadow-pop backdrop-blur-xl">
             <Search className="size-5 shrink-0 text-muted-foreground" />
             <input
               value={query}
@@ -387,10 +471,16 @@ export default function MapView({
               className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-muted-foreground"
               aria-label="Search the map"
             />
-            {query && (
+            {query ? (
               <button onClick={() => setQuery("")} aria-label="Clear search">
                 <X className="size-4 text-muted-foreground" />
               </button>
+            ) : (
+              weather.data && (
+                <span className="shrink-0 rounded-full bg-secondary px-2.5 py-1 text-xs font-extrabold">
+                  {weather.data.temp > 0 ? "☀️" : "❄️"} {weather.data.temp}°
+                </span>
+              )
             )}
           </label>
           {matches.length > 0 && (
@@ -440,7 +530,7 @@ export default function MapView({
               setShowEvents(!showEvents);
             }}
             aria-pressed={showEvents}
-            className={`h-9 shrink-0 rounded-full px-3.5 text-[13px] font-bold shadow-card ${showEvents && !layer ? "bg-violet-600 text-white" : "bg-card"}`}
+            className={`h-9 shrink-0 rounded-full px-3.5 text-[13px] font-bold shadow-card backdrop-blur-md ${showEvents && !layer ? "bg-violet-600 text-white" : "bg-card"}`}
           >
             📅 What's on{mapEvents.length ? ` · ${mapEvents.length}` : ""}
           </button>
@@ -459,7 +549,7 @@ export default function MapView({
                 key={f.key}
                 onClick={() => toggle(f.key)}
                 aria-pressed={filters.has(f.key)}
-                className={`h-9 shrink-0 rounded-full px-3.5 text-[13px] font-bold shadow-card ${filters.has(f.key) ? "bg-foreground text-background" : "bg-card/95"}`}
+                className={`h-9 shrink-0 rounded-full px-3.5 text-[13px] font-bold shadow-card ${filters.has(f.key) ? "bg-foreground text-background" : "bg-card/80 backdrop-blur-md"}`}
               >
                 {f.label}
               </button>
@@ -476,7 +566,7 @@ export default function MapView({
                 className={`h-8 shrink-0 rounded-full border px-3 text-xs font-bold shadow-card ${
                   cat === c.name
                     ? "border-primary bg-primary-soft text-primary"
-                    : "border-transparent bg-card/95"
+                    : "border-white/40 bg-card/75 backdrop-blur-md"
                 }`}
               >
                 {c.emoji} {c.name}

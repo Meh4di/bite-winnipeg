@@ -82,4 +82,5 @@
 ## Map v2 (no migration)
 - Top: search (name/category/neighbourhood; spots without pins link to their page), one chip row (📅 What's on, 🏆 Best in the Peg picker sheet, quick filters incl. 👯 Friends went), one food-type row (`CATEGORIES`). Bottom "List" sheet sorts visible spots by distance from your location or the map centre.
 - Pins: logo/cover photo when the spot has one; unclaimed spots are small grey pins; friends' faces on spots they went to in the last 7 days (from the friends-only, 1-hour-delayed `activity` feed; never live location).
-- Basemap: OSM tiles restyled with a CSS filter (`.bity-map`), inverted for dark mode.
+- Basemap (v3): OpenFreeMap vector tiles (free, no API key) via `@maplibre/maplibre-gl-leaflet`, Positron/Dark styles recoloured by `bityStyle()` in `src/lib/mapStyle.ts` (POI icons removed). `MapBasemap` falls back to OSM raster tiles (CSS-filtered, `.is-raster`) when WebGL or the style fails.
+- Pins (v3): `.bp` bubble pins (photo/emoji face, busy-coloured ring, spinning gradient ring when hot, name label at zoom ≥ 15 via `.z-near`); unclaimed spots are small dots that cluster (`clusterSpots`) below zoom 15; pulsing blue "you are here" dot; weather chip in the search bar.
